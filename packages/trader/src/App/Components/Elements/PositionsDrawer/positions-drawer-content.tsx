@@ -1,12 +1,11 @@
 import React from 'react';
+import { CSSTransition } from 'react-transition-group';
 
 import { DataList, Money, PositionsDrawerCard, Text } from '@deriv/components';
 import { getEndTime, useNewRowTransition } from '@deriv/shared';
 import { observer, useStore } from '@deriv/stores';
-import { Localize, localize } from '@deriv-com/translations';
-import { CSSTransition } from 'react-transition-group';
-
 import { useTraderStore } from '@deriv/trader/src/Stores';
+import { Localize, localize } from '@deriv-com/translations';
 
 import EmptyPortfolioMessage from './empty-portfolio-message';
 
@@ -48,6 +47,10 @@ const PositionsDrawerCardItem = ({
     ...props
 }: TPositionDrawerCardItem) => {
     const { in_prop } = useNewRowTransition(is_new_row as boolean);
+    const onClickRemoveRef = React.useRef(onClickRemove);
+    React.useEffect(() => {
+        onClickRemoveRef.current = onClickRemove;
+    }, [onClickRemove]);
 
     React.useEffect(() => {
         if (measure) {
@@ -65,12 +68,12 @@ const PositionsDrawerCardItem = ({
 
         if (has_ended) {
             const timeout = setTimeout(() => {
-                onClickRemove(portfolio_position.id);
+                onClickRemoveRef.current(portfolio_position.id);
             }, 8000);
 
             return () => clearTimeout(timeout);
         }
-    }, [portfolio_position?.contract_info, portfolio_position?.id, onClickRemove]);
+    }, [portfolio_position?.contract_info, portfolio_position?.id]);
 
     return (
         <CSSTransition

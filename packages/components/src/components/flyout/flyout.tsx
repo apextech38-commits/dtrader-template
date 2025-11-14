@@ -12,36 +12,34 @@ type TFlyout = {
     header_content?: React.ReactNode;
     footer_content?: React.ReactNode;
     children: React.ReactNode;
-    width?: string;
     className?: string;
 };
 
-const Flyout = ({
-    is_open,
-    onClose,
-    title,
-    header_content,
-    footer_content,
-    children,
-    width = '30.4rem',
-    className,
-}: TFlyout) => {
+const Flyout = ({ is_open, onClose, title, header_content, footer_content, children, className }: TFlyout) => {
     return (
         <div
             className={classNames('dc-flyout', className, {
                 'dc-flyout--open': is_open,
             })}
-            style={{ width }}
+            role='dialog'
+            aria-labelledby='flyout-title'
+            aria-hidden={!is_open}
+            aria-modal='true'
         >
             <div className='dc-flyout__header'>
                 {header_content || (
                     <React.Fragment>
-                        <Text color='primary' weight='bold' size='xs'>
+                        <Text color='primary' weight='bold' size='xs' id='flyout-title'>
                             {title}
                         </Text>
-                        <div className='dc-flyout__icon-close' onClick={onClose}>
+                        <button
+                            className='dc-flyout__icon-close'
+                            onClick={onClose}
+                            aria-label='Close flyout'
+                            type='button'
+                        >
                             <LegacyMinimize2pxIcon iconSize='xs' fill='var(--color-text-primary)' />
-                        </div>
+                        </button>
                     </React.Fragment>
                 )}
             </div>

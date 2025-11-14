@@ -136,7 +136,7 @@ const Sidebar = observer(() => {
         }
     };
 
-    const flyoutContent = getFlyoutContent();
+    const flyoutContent = React.useMemo(() => getFlyoutContent(), [active_sidebar_flyout]);
 
     return (
         <React.Fragment>
@@ -144,6 +144,7 @@ const Sidebar = observer(() => {
                 className={classNames('sidebar', {
                     sidebar__hidden: !isActiveRoute(routes.index),
                 })}
+                data-testid='dt_sidebar'
             >
                 {/* Logo Section */}
                 <div className='sidebar__header'>

@@ -1,10 +1,12 @@
 /** @define dc-flyout */
 .dc-flyout {
     $SIDEBAR_WIDTH: 7.2rem;
+    $FLYOUT_WIDTH: 30.4rem;
     $HEADER_HEIGHT: 6.4rem;
     $FOOTER_HEIGHT: 6rem;
 
     height: 100%;
+    width: $FLYOUT_WIDTH;
     position: fixed;
     z-index: 99;
     top: 0;
