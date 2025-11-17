@@ -8,7 +8,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 
 import ModulesProvider from 'Stores/Providers/modules-providers';
 import TraderProviders from '../../../../trader-providers';
-import Trade from '../trade';
+import TradeMobile from '../trade-mobile';
 
 // Mock trackAnalyticsEvent
 const mockTrackAnalyticsEvent = jest.fn();
@@ -42,16 +42,15 @@ jest.mock('Modules/Trading/Helpers/digits', () => ({
     ),
 }));
 
+// Mock useDevice
+jest.mock('@deriv-com/ui', () => ({
+    ...jest.requireActual('@deriv-com/ui'),
+    useDevice: jest.fn(() => ({ isMobile: true, isDesktop: false, isTablet: false })),
+}));
+
 // Mock all components
 jest.mock('AppV2/Components/AccumulatorStats', () =>
     jest.fn(() => <div data-testid='accumulator-stats'>AccumulatorStats</div>)
-);
-jest.mock('AppV2/Components/BottomNav', () =>
-    jest.fn(({ children, onScroll }) => (
-        <div data-testid='bottom-nav' onScroll={onScroll}>
-            {children}
-        </div>
-    ))
 );
 jest.mock('AppV2/Components/ClosedMarketMessage', () =>
     jest.fn(() => <div data-testid='closed-market-message'>ClosedMarketMessage</div>)
@@ -249,7 +248,7 @@ describe('Trade', () => {
                 <TraderProviders store={default_mock_store}>
                     <ReportsStoreProvider>
                         <ModulesProvider store={default_mock_store}>
-                            <Trade />
+                            <TradeMobile />
                         </ModulesProvider>
                     </ReportsStoreProvider>
                 </TraderProviders>
@@ -286,7 +285,6 @@ describe('Trade', () => {
         it('should render all main trading components when data is loaded', () => {
             renderTrade();
 
-            expect(screen.getByTestId('bottom-nav')).toBeInTheDocument();
             expect(screen.getByTestId('trade-types')).toBeInTheDocument();
             expect(screen.getByTestId('market-selector')).toBeInTheDocument();
             expect(screen.getAllByTestId('trade-params-container')).toHaveLength(2);
@@ -310,7 +308,7 @@ describe('Trade', () => {
             expect(mockOnMount).toHaveBeenCalled();
         });
 
-        it('should handle scroll events on BottomNav', () => {
+        it('should handle scroll events on trade container', () => {
             // Mock getBoundingClientRect
             const mockGetBoundingClientRect = jest.fn(() => ({
                 bottom: 500,
@@ -323,8 +321,8 @@ describe('Trade', () => {
 
             renderTrade();
 
-            const bottomNav = screen.getByTestId('bottom-nav');
-            fireEvent.scroll(bottomNav);
+            const tradeContainer = screen.getByTestId('dt_trade-mobile');
+            fireEvent.scroll(tradeContainer);
 
             expect(mockGetBoundingClientRect).toHaveBeenCalled();
         });

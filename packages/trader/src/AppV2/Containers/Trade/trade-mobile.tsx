@@ -8,7 +8,6 @@ import { getSymbolDisplayName, trackAnalyticsEvent } from '@deriv/shared';
 import { useStore } from '@deriv/stores';
 
 import AccumulatorStats from 'AppV2/Components/AccumulatorStats';
-import BottomNav from 'AppV2/Components/BottomNav';
 import ClosedMarketMessage from 'AppV2/Components/ClosedMarketMessage';
 import CurrentSpot from 'AppV2/Components/CurrentSpot';
 import MarketSelector from 'AppV2/Components/MarketSelector';
