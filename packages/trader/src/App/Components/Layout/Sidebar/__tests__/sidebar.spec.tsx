@@ -25,6 +25,7 @@ jest.mock('@deriv-com/translations', () => ({
 
 jest.mock('@deriv/quill-icons', () => ({
     ...jest.requireActual('@deriv/quill-icons'),
+    DerivProductBrandLightDerivTraderLogoIcon: () => 'DerivProductBrandLightDerivTraderLogoIcon',
     LegacyMinimize2pxIcon: () => 'LegacyMinimize2pxIcon',
     StandaloneClockThreeRegularIcon: () => 'StandaloneClockThreeRegularIcon',
     StandaloneFileRegularIcon: () => 'StandaloneFileRegularIcon',
@@ -39,7 +40,6 @@ jest.mock('../../../Elements/PositionsDrawer', () => ({
     PositionsDrawerContent: jest.fn(() => <div>PositionsDrawerContent</div>),
     PositionsDrawerFooter: jest.fn(() => <div>PositionsDrawerFooter</div>),
 }));
-jest.mock('../../brand-short-logo', () => jest.fn(() => <div>BrandShortLogo</div>));
 
 describe('<Sidebar />', () => {
     const history = createMemoryHistory();
@@ -79,7 +79,7 @@ describe('<Sidebar />', () => {
 
     it('should render the sidebar with logo', () => {
         renderSidebar();
-        expect(screen.getByText('BrandShortLogo')).toBeInTheDocument();
+        expect(screen.getByText('DerivProductBrandLightDerivTraderLogoIcon')).toBeInTheDocument();
     });
 
     it('should render navigation items when user is logged in', () => {
@@ -144,26 +144,27 @@ describe('<Sidebar />', () => {
         expect(store.ui.setSidebarFlyout).toHaveBeenCalledWith(null);
     });
 
-    it('should call setSidebarFlyout when theme button is clicked', () => {
+    it('should call setDarkMode when theme button is clicked', () => {
         const store = mockStore(defaultStoreConfig);
         renderSidebar(store);
         const themeButton = screen.getByTestId('dt_sidebar_theme');
         fireEvent.click(themeButton);
-        expect(store.ui.setSidebarFlyout).toHaveBeenCalledWith('theme');
+        expect(store.ui.setDarkMode).toHaveBeenCalledWith(true);
     });
 
-    it('should toggle theme flyout when clicking theme button twice', () => {
+    it('should toggle dark mode when clicking theme button twice', () => {
         const store = mockStore({
             ...defaultStoreConfig,
             ui: {
                 ...defaultStoreConfig.ui,
-                active_sidebar_flyout: 'theme',
+                is_dark_mode_on: true,
+                setDarkMode: jest.fn(),
             },
         });
         renderSidebar(store);
         const themeButton = screen.getByTestId('dt_sidebar_theme');
         fireEvent.click(themeButton);
-        expect(store.ui.setSidebarFlyout).toHaveBeenCalledWith(null);
+        expect(store.ui.setDarkMode).toHaveBeenCalledWith(false);
     });
 
     it('should call setSidebarFlyout when language button is clicked', () => {
@@ -186,18 +187,6 @@ describe('<Sidebar />', () => {
         const languageButton = screen.getByTestId('dt_sidebar_language');
         fireEvent.click(languageButton);
         expect(store.ui.setSidebarFlyout).toHaveBeenCalledWith(null);
-    });
-
-    it('should render theme selector in flyout when theme is active', () => {
-        const store = mockStore({
-            ...defaultStoreConfig,
-            ui: {
-                ...defaultStoreConfig.ui,
-                active_sidebar_flyout: 'theme',
-            },
-        });
-        renderSidebar(store);
-        expect(screen.getByText('ThemeSelector')).toBeInTheDocument();
     });
 
     it('should render language selector in flyout when language is active', () => {
@@ -225,12 +214,12 @@ describe('<Sidebar />', () => {
         expect(screen.getByText('PositionsDrawerFooter')).toBeInTheDocument();
     });
 
-    it('should display moon icon when dark mode is off', () => {
+    it('should display sun icon when dark mode is off', () => {
         renderSidebar();
-        expect(screen.getByText('StandaloneMoonRegularIcon')).toBeInTheDocument();
+        expect(screen.getByText('StandaloneSunBrightRegularIcon')).toBeInTheDocument();
     });
 
-    it('should display sun icon when dark mode is on', () => {
+    it('should display moon icon when dark mode is on', () => {
         const store = mockStore({
             ...defaultStoreConfig,
             ui: {
@@ -239,7 +228,7 @@ describe('<Sidebar />', () => {
             },
         });
         renderSidebar(store);
-        expect(screen.getByText('StandaloneSunBrightRegularIcon')).toBeInTheDocument();
+        expect(screen.getByText('StandaloneMoonRegularIcon')).toBeInTheDocument();
     });
 
     it('should mark positions button as active when positions flyout is open', () => {

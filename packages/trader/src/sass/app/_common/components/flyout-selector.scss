@@ -11,7 +11,6 @@
         justify-content: space-between;
         gap: 1.2rem;
         padding: 1.2rem;
-        border: 1px solid var(--color-surface-border);
         border-radius: 0.8rem;
         color: var(--color-text-primary);
         cursor: pointer;
@@ -26,7 +25,7 @@
         }
 
         &--active {
-            border-color: var(--color-text-primary);
+            border: 1px solid var(--color-text-primary);
             background-color: var(--color-surface-section);
         }
 

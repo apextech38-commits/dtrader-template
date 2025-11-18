@@ -1,6 +1,7 @@
 import React from 'react';
 import classNames from 'classnames';
 
+import { Button, Text } from '@deriv/components';
 import { UNSUPPORTED_LANGUAGES } from '@deriv/shared';
 import { observer, useStore } from '@deriv/stores';
 import { getAllowedLanguages, useTranslations } from '@deriv-com/translations';
@@ -21,16 +22,17 @@ const LanguageSelector = observer(() => {
             {Object.keys(allowed_languages).map(lang => {
                 const isActive = lang === currentLang;
                 return (
-                    <button
+                    <Button
                         key={lang}
                         className={classNames('flyout-selector__option', {
                             'flyout-selector__option--active': isActive,
                         })}
                         onClick={() => !isActive && handleLanguageChange(lang)}
                         disabled={isActive}
+                        type='button'
                     >
-                        <span>{allowed_languages[lang]}</span>
-                    </button>
+                        <Text>{allowed_languages[lang]}</Text>
+                    </Button>
                 );
             })}
         </div>

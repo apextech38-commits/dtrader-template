@@ -2,7 +2,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 1.6rem 1.6rem 0;
+    padding-bottom: 1.6rem;
     background-color: var(--general-section-1);
 
     &__info {
@@ -43,13 +43,12 @@
         white-space: nowrap;
     }
 
-    &__logout,
     &__login {
         all: unset;
         cursor: pointer;
         padding: 0;
         margin-left: auto;
-        color: var(--text-prominent);
+        color: var(--color-text-primary);
         font-size: 1.6rem;
         font-weight: 700;
         transition: opacity 0.2s ease;
@@ -65,8 +64,13 @@
         }
 
         &:focus-visible {
-            outline: 2px solid var(--brand-red-coral);
+            outline: 2px solid var(--color-button-primary-bg);
             outline-offset: 2px;
         }
+    }
+
+    &__transfer {
+        background: var(--color-button-primary-bg);
+        border-radius: 24px;
     }
 }

@@ -371,6 +371,12 @@ $solid-blue-700: #2c9aff;
     }
 }
 
+.smartcharts {
+    .cq-chart-title {
+        top: unset;
+    }
+}
+
 .sc-accumulators-profit-loss {
     &-text {
         width: fit-content;

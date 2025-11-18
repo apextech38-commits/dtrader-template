@@ -328,7 +328,7 @@ type TUiStore = {
     is_mobile: boolean;
     is_tablet: boolean;
     is_mobile_language_menu_open: boolean;
-    active_sidebar_flyout: 'theme' | 'language' | 'positions' | null;
+    active_sidebar_flyout: 'theme' | 'language' | 'positions' | 'account' | null;
     is_positions_drawer_on: boolean;
     is_reset_email_modal_visible: boolean;
     is_services_error_visible: boolean;
@@ -380,7 +380,7 @@ type TUiStore = {
     toggleShouldShowRealAccountsList: (value: boolean) => void;
     toggleUrlUnavailableModal: (value: boolean) => void;
     toggleLogoutSuccessModal: (value: boolean) => void;
-    setSidebarFlyout: (flyout_type: 'theme' | 'language' | 'positions' | null) => void;
+    setSidebarFlyout: (flyout_type: 'theme' | 'language' | 'positions' | 'account' | null) => void;
     closeSidebarFlyout: () => void;
     removeToast: (key: string) => void;
     reports_route_tab_index: number;

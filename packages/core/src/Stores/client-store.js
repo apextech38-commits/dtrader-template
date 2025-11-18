@@ -4,16 +4,17 @@ import moment from 'moment';
 
 import {
     filterUrlQuery,
+    getAccountType,
     getBrandDomain,
     isCryptocurrency,
     isMobile,
     LocalStore,
+    mapErrorMessage,
     redirectToLogin,
     removeCookies,
     routes,
     SessionStore,
     urlForLanguage,
-    mapErrorMessage,
 } from '@deriv/shared';
 import { Analytics } from '@deriv-com/analytics';
 import { getInitialLanguage, localize } from '@deriv-com/translations';
@@ -174,7 +175,7 @@ export default class ClientStore extends BaseStore {
     }
 
     get is_virtual() {
-        return !!this.current_account?.is_virtual;
+        return getAccountType();
     }
 
     get is_eu() {
@@ -268,7 +269,6 @@ export default class ClientStore extends BaseStore {
                 loginid: authorize.loginid,
                 balance: authorize.balance,
                 currency: authorize.currency,
-                is_virtual: authorize.is_virtual,
                 email: authorize.email || '',
                 landing_company_shortcode: authorize.landing_company_name || '',
                 residence: authorize.country || '',
@@ -505,8 +505,7 @@ export default class ClientStore extends BaseStore {
         if (this.current_account && obj_balance.loginid === this.current_account.loginid) {
             this.current_account.balance = obj_balance.balance;
 
-            // Handle virtual account notifications
-            if (this.current_account.is_virtual) {
+            if (this.is_virtual) {
                 this.root_store.notifications.resetVirtualBalanceNotification(this.current_account.loginid);
             }
 

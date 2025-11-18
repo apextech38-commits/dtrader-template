@@ -2,6 +2,7 @@
 .sidebar {
     height: 100vh;
     width: 7.2rem;
+    min-width: 7.2rem;
     z-index: 100;
     display: flex;
     flex-direction: column;
@@ -22,7 +23,7 @@
         display: flex;
         flex-direction: column;
         flex: 1;
-        padding: 1.6rem 0;
+        padding: 0 0 1.6rem;
         justify-content: space-between;
     }
 
@@ -33,7 +34,7 @@
 
     &__separator {
         height: 1px;
-        margin: 1.6rem;
+        margin: 0 0.8rem 0.8rem;
         background-color: var(--color-surface-border);
     }
 
@@ -43,6 +44,7 @@
     }
 
     &__item {
+        height: 7.2rem;
         position: relative;
         display: flex;
         flex-direction: column;
@@ -63,11 +65,16 @@
         }
 
         &--active {
-            color: var(--color-nav-item-active);
-
+            .sidebar__item-label {
+                color: var(--color-nav-item-active);
+            }
             svg {
                 fill: var(--color-nav-item-active);
             }
+        }
+
+        .dc-btn__text {
+            flex-direction: column;
         }
     }
 
@@ -81,7 +88,7 @@
     &__item-badge {
         position: absolute;
         top: 0.4rem;
-        right: 0.4rem;
+        right: 0rem;
         width: 2rem;
         height: 2rem;
         padding: 0 4px;

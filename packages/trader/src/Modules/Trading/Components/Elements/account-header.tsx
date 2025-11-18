@@ -1,9 +1,9 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 
-import { Text } from '@deriv/components';
+import { Button, Text } from '@deriv/components';
 import AccountInfoIcon from '@deriv/core/src/App/Components/Layout/Header/account-info-icon';
-import { getCurrencyDisplayCode, redirectToLogin } from '@deriv/shared';
+import { getBrandUrl, getCurrencyDisplayCode, redirectToLogin } from '@deriv/shared';
 import { useStore } from '@deriv/stores';
 import { Localize, useTranslations } from '@deriv-com/translations';
 
@@ -22,7 +22,7 @@ const AccountHeader = observer(
         is_virtual: isVirtualProp,
     }: AccountHeaderProps = {}) => {
         const { localize } = useTranslations();
-        const { client } = useStore();
+        const { client, common } = useStore();
 
         // Use props if provided, otherwise fall back to store
         const balance = balanceProp ?? client.balance;
@@ -33,6 +33,12 @@ const AccountHeader = observer(
         const currency_lower = currency?.toLowerCase();
         const accountTypeHeader = is_virtual ? localize('Demo') : localize('Real');
         const isDemoAccount = is_virtual;
+
+        const handleTransferClick = () => {
+            const brandUrl = getBrandUrl();
+            const lang_param = common.current_language ? `&lang=${common.current_language}` : '';
+            window.location.href = `${brandUrl}/transfer?acc=options&curr=${currency}&from=home&source=options${lang_param}`;
+        };
 
         return (
             <div className='account-header'>
@@ -58,27 +64,27 @@ const AccountHeader = observer(
                     </div>
                 )}
                 {is_logged_in ? (
-                    <button
-                        className='account-header__logout'
-                        onClick={client.logout}
+                    <Button
+                        className='account-header__transfer'
+                        onClick={handleTransferClick}
+                        aria-label={localize('Transfer')}
                         type='button'
-                        aria-label={localize('Log out')}
                     >
-                        <Text size='xs' weight='bold'>
-                            <Localize i18n_default_text='Log out' />
+                        <Text size='xs' weight='bold' color='white'>
+                            <Localize i18n_default_text='Transfer' />
                         </Text>
-                    </button>
+                    </Button>
                 ) : (
-                    <button
+                    <Button
                         className='account-header__login'
                         onClick={redirectToLogin}
-                        type='button'
                         aria-label={localize('Log in')}
+                        type='button'
                     >
                         <Text size='xs' weight='bold'>
                             <Localize i18n_default_text='Log in' />
                         </Text>
-                    </button>
+                    </Button>
                 )}
             </div>
         );

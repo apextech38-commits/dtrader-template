@@ -81,33 +81,13 @@ describe('AccountHeader', () => {
             expect(screen.getByText('No currency assigned')).toBeInTheDocument();
         });
 
-        it('should render logout button for logged in users', () => {
+        it('should render transfer button for logged in users', () => {
             renderComponent();
 
-            const logoutButton = screen.getByRole('button', { name: /log out/i });
-            expect(logoutButton).toBeInTheDocument();
-            expect(logoutButton).toHaveAttribute('type', 'button');
-            expect(logoutButton).toHaveClass('account-header__logout');
-        });
-
-        it('should call logout function when logout button is clicked', async () => {
-            const logout_mock = jest.fn();
-            const store_with_logout = mockStore({
-                client: {
-                    balance: '10000.00',
-                    currency: 'USD',
-                    is_logged_in: true,
-                    is_virtual: false,
-                    logout: logout_mock,
-                },
-            });
-
-            renderComponent(store_with_logout);
-
-            const logoutButton = screen.getByRole('button', { name: /log out/i });
-            await userEvent.click(logoutButton);
-
-            expect(logout_mock).toHaveBeenCalledTimes(1);
+            const transferButton = screen.getByRole('button', { name: /transfer/i });
+            expect(transferButton).toBeInTheDocument();
+            expect(transferButton).toHaveAttribute('type', 'button');
+            expect(transferButton).toHaveClass('account-header__transfer');
         });
     });
 
@@ -201,11 +181,11 @@ describe('AccountHeader', () => {
     });
 
     describe('Accessibility', () => {
-        it('should have proper aria-label for logout button with correct value', () => {
+        it('should have proper aria-label for transfer button with correct value', () => {
             renderComponent();
 
-            const logoutButton = screen.getByRole('button', { name: /log out/i });
-            expect(logoutButton).toHaveAttribute('aria-label', 'Log out');
+            const transferButton = screen.getByRole('button', { name: /transfer/i });
+            expect(transferButton).toHaveAttribute('aria-label', 'Transfer');
         });
 
         it('should have proper aria-label for login button with correct value', () => {
@@ -225,11 +205,11 @@ describe('AccountHeader', () => {
             expect(loginButton).toHaveAttribute('aria-label', 'Log in');
         });
 
-        it('should have type="button" on logout button', () => {
+        it('should have type="button" on transfer button', () => {
             renderComponent();
 
-            const logoutButton = screen.getByRole('button', { name: /log out/i });
-            expect(logoutButton).toHaveAttribute('type', 'button');
+            const transferButton = screen.getByRole('button', { name: /transfer/i });
+            expect(transferButton).toHaveAttribute('type', 'button');
         });
 
         it('should have type="button" on login button', () => {
