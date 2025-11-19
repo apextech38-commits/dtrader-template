@@ -81,7 +81,7 @@ const AccountHeader = observer(
                         aria-label={localize('Log in')}
                         type='button'
                     >
-                        <Text size='xs' weight='bold'>
+                        <Text size='xs' weight='bold' color='white'>
                             <Localize i18n_default_text='Log in' />
                         </Text>
                     </Button>

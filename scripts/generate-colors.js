@@ -270,7 +270,7 @@ function generateSemanticTokens() {
     // Interactive States
     --color-interactive-default: #{lighten($color-black, 20%)};         // Default borders, dividers
     --color-interactive-hover: #{lighten($color-black, 8%)};            // Hover states (derived from brand-black to get #242828)
-    --color-interactive-active: #{lighten($color-black, 25%)};          // Active/selected states (derived from brand-black to get #323738)
+    --color-interactive-active: #{lighten($color-black, 16%)};          // Active/selected states (derived from brand-black to get #323738)
     --color-interactive-disabled: #{lighten($color-black, 12%)};        // Disabled states
     --color-interactive-focus: var(--brand-info);                       // Focus states
 

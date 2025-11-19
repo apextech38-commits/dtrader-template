@@ -3,7 +3,6 @@
     justify-content: space-between;
     align-items: center;
     padding-bottom: 1.6rem;
-    background-color: var(--general-section-1);
 
     &__info {
         display: flex;
@@ -44,16 +43,10 @@
     }
 
     &__login {
-        all: unset;
-        cursor: pointer;
-        padding: 0;
-        margin-left: auto;
-        color: var(--color-text-primary);
-        font-size: 1.6rem;
-        font-weight: 700;
+        background-color: var(--color-button-primary-bg);
+        border-radius: 24px;
         transition: opacity 0.2s ease;
-        flex-shrink: 0;
-        white-space: nowrap;
+        margin-left: auto;
 
         &:hover {
             opacity: 0.8;
@@ -61,11 +54,6 @@
 
         &:active {
             opacity: 0.6;
-        }
-
-        &:focus-visible {
-            outline: 2px solid var(--color-button-primary-bg);
-            outline-offset: 2px;
         }
     }
 
