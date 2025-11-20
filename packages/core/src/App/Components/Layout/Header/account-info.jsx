@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import PropTypes from 'prop-types';
 
 import { Text } from '@deriv/components';
-import { getAccountType, getCurrencyDisplayCode } from '@deriv/shared';
+import { addComma, getAccountType, getCurrencyDisplayCode } from '@deriv/shared';
 import { Localize, useTranslations } from '@deriv-com/translations';
 import { useDevice } from '@deriv-com/ui';
 
@@ -56,7 +56,7 @@ const AccountInfo = ({ balance, currency, is_mobile }) => {
                                     {!currency ? (
                                         <Localize i18n_default_text='No currency assigned' />
                                     ) : (
-                                        `${balance} ${getCurrencyDisplayCode(currency)}`
+                                        `${addComma(balance, 2)} ${getCurrencyDisplayCode(currency)}`
                                     )}
                                 </p>
                             </div>

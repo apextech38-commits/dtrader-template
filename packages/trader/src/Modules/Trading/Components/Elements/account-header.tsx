@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 
 import { Button, Text } from '@deriv/components';
 import AccountInfoIcon from '@deriv/core/src/App/Components/Layout/Header/account-info-icon';
-import { getBrandUrl, getCurrencyDisplayCode, redirectToLogin } from '@deriv/shared';
+import { addComma, getBrandUrl, getCurrencyDisplayCode, redirectToLogin } from '@deriv/shared';
 import { useStore } from '@deriv/stores';
 import { Localize, useTranslations } from '@deriv-com/translations';
 
@@ -56,7 +56,7 @@ const AccountHeader = observer(
                                     {!currency ? (
                                         <Localize i18n_default_text='No currency assigned' />
                                     ) : (
-                                        `${balance} ${getCurrencyDisplayCode(currency)}`
+                                        `${addComma(balance, 2)} ${getCurrencyDisplayCode(currency)}`
                                     )}
                                 </p>
                             )}

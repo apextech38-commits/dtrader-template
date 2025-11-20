@@ -1,9 +1,9 @@
 import React from 'react';
 
+import { DerivProductBrandLightDerivTraderLogoIcon } from '@deriv/quill-icons';
 import { getBrandHomeUrl } from '@deriv/shared';
 import { observer, useStore } from '@deriv/stores';
 
-import { BrandDerivLogoCoralIcon } from '@deriv/quill-icons';
 import { useMobileBridge } from 'App/Hooks/useMobileBridge';
 
 const BrandShortLogo = observer(() => {
@@ -26,7 +26,7 @@ const BrandShortLogo = observer(() => {
     return (
         <div className='header__menu-left-logo'>
             <div onClick={handleLogoClick} style={{ cursor: 'pointer' }} data-testid='brand-logo-clickable'>
-                <BrandDerivLogoCoralIcon width={32} height={32} />
+                <DerivProductBrandLightDerivTraderLogoIcon width={32} height={32} />
             </div>
         </div>
     );

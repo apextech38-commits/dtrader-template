@@ -36,6 +36,13 @@
         &-button_wrapper {
             display: flex;
             align-items: center;
+            svg {
+                fill: var(--color-text-primary);
+            }
+
+            .ic-settings-language__text {
+                margin-left: 0.4rem;
+            }
         }
 
         &-link {
