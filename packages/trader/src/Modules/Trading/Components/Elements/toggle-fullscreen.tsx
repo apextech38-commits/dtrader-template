@@ -25,6 +25,10 @@ const ToggleFullScreen: React.FC<TToggleFullScreenProps> = ({ showPopover }) => 
     }, []);
 
     React.useEffect(() => {
+        // Check initial fullscreen state on mount to sync with browser state
+        // This ensures the button displays correctly even after component remounts
+        onFullScreen();
+
         fullscreen_map.event.forEach(event => {
             document.addEventListener(event, onFullScreen, false);
         });

@@ -19,6 +19,7 @@ import { routes } from '@deriv/shared';
 import { observer, useStore } from '@deriv/stores';
 import { Localize, localize, useTranslations } from '@deriv-com/translations';
 
+import SidebarIntroTooltip from '../../../../_common/components/SidebarIntroTooltip';
 import { PositionsDrawerContent, PositionsDrawerFooter } from '../../Elements/PositionsDrawer';
 
 import AccountSelector from './account-selector';
@@ -42,6 +43,8 @@ const Sidebar = observer(() => {
     const { active_positions_count, onMount, onUnmount } = portfolio;
     const location = useLocation();
     const history = useHistory();
+    const [is_sidebar_highlighted, setIsSidebarHighlighted] = React.useState(false);
+    const sidebar_ref = React.useRef<HTMLElement>(null);
 
     React.useEffect(() => {
         onMount();
@@ -79,6 +82,10 @@ const Sidebar = observer(() => {
     const closeFlyout = () => {
         closeSidebarFlyout();
     };
+
+    const handleSidebarHighlight = React.useCallback((is_highlighted: boolean) => {
+        setIsSidebarHighlighted(is_highlighted);
+    }, []);
 
     // Main navigation items
     const isPositionsActive = active_sidebar_flyout === 'positions';
@@ -180,9 +187,17 @@ const Sidebar = observer(() => {
 
     return (
         <React.Fragment>
+            <SidebarIntroTooltip
+                is_logged_in={is_logged_in}
+                is_dark_mode={is_dark_mode_on}
+                onSidebarHighlight={handleSidebarHighlight}
+                sidebar_ref={sidebar_ref}
+            />
             <aside
+                ref={sidebar_ref}
                 className={classNames('sidebar', {
                     sidebar__hidden: !isActiveRoute(routes.index),
+                    'sidebar--highlighted': is_sidebar_highlighted,
                 })}
                 data-testid='dt_sidebar'
             >

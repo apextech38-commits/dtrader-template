@@ -81,6 +81,8 @@ const ChartIntroGuide = ({ is_mobile = false, is_logged_in = false }: TChartIntr
         setChartIntroGuideSeen(true);
         // Ensure the flag is set in localStorage directly as well
         localStorage.setItem(CHART_INTRO_GUIDE_LOCALSTORAGE_KEY, 'true');
+        // Dispatch custom event to notify other components
+        window.dispatchEvent(new Event('localStorageUpdated'));
     }, [setChartIntroGuideSeen, stopProgressTimer]);
 
     const handleGotIt = React.useCallback(() => {
@@ -89,6 +91,8 @@ const ChartIntroGuide = ({ is_mobile = false, is_logged_in = false }: TChartIntr
         setChartIntroGuideSeen(true);
         // Ensure the flag is set in localStorage directly as well
         localStorage.setItem(CHART_INTRO_GUIDE_LOCALSTORAGE_KEY, 'true');
+        // Dispatch custom event to notify other components
+        window.dispatchEvent(new Event('localStorageUpdated'));
     }, [setChartIntroGuideSeen, stopProgressTimer]);
 
     const handleNext = React.useCallback(() => {
