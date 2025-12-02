@@ -38,18 +38,26 @@ const ServiceErrorSheet = observer(() => {
 
     const getActionButtonProps = () => {
         if (is_insufficient_balance) {
+            // Show OK button for virtual accounts, Transfer now for real accounts
+            if (is_virtual) {
+                return {
+                    primaryAction: {
+                        content: <Localize i18n_default_text='OK' />,
+                        onAction: () => {
+                            resetServicesError();
+                            onClose();
+                        },
+                    },
+                };
+            }
             return {
                 primaryAction: {
                     content: <Localize i18n_default_text='Transfer now' />,
                     onAction: () => {
                         resetServicesError();
-                        if (!is_virtual) {
-                            const brandUrl = getBrandUrl();
-                            const lang_param = current_language ? `&lang=${current_language}` : '';
-                            window.location.href = `${brandUrl}/transfer?acc=options&curr=${currency}&from=home&source=options${lang_param}`;
-                        } else {
-                            onClose();
-                        }
+                        const brandUrl = getBrandUrl();
+                        const lang_param = current_language ? `&lang=${current_language}` : '';
+                        window.location.href = `${brandUrl}/transfer?acc=options&curr=${currency}&from=home&source=options${lang_param}`;
                     },
                 },
             };

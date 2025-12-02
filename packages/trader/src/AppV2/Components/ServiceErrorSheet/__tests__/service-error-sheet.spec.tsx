@@ -102,16 +102,17 @@ describe('ServiceErrorSheet', () => {
         expect(default_mock_store.common.resetServicesError).toHaveBeenCalled();
     });
 
-    it('should not redirect for virtual accounts when "Transfer now" is clicked', async () => {
+    it('should show "OK" button for virtual accounts instead of "Transfer now"', async () => {
         default_mock_store.client.is_virtual = true;
         render(mockTrade());
 
         expect(screen.getByText('Insufficient balance')).toBeInTheDocument();
+        expect(screen.queryByText(/transfer now/i)).not.toBeInTheDocument();
 
-        const depositButton = screen.getByText(/transfer now/i);
-        await userEvent.click(depositButton);
+        const okButton = screen.getByText(/ok/i);
+        expect(okButton).toBeInTheDocument();
 
-        expect(window.location.href).toBe('');
+        await userEvent.click(okButton);
         expect(default_mock_store.common.resetServicesError).toHaveBeenCalled();
     });
 });
