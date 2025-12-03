@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { observer } from 'mobx-react-lite';
 
-import { getUnitMap, mapErrorMessage } from '@deriv/shared';
+import { getUnitMap, isMobile, mapErrorMessage } from '@deriv/shared';
 import { useStore } from '@deriv/stores';
 import { ActionSheet, TextField, useSnackbar } from '@deriv-com/quill-ui';
 import { Localize, useTranslations } from '@deriv-com/translations';
@@ -14,8 +14,10 @@ import { useTraderStore } from 'Stores/useTraderStores';
 import { TTradeParametersProps } from '../trade-parameters';
 
 import DurationActionSheetContainer from './container';
+import DurationDesktop from './duration-desktop';
 
 const Duration = observer(({ is_minimized }: TTradeParametersProps) => {
+    const is_mobile = isMobile();
     const {
         contract_type,
         duration_min_max,
@@ -205,6 +207,12 @@ const Duration = observer(({ is_minimized }: TTradeParametersProps) => {
         }
     }, [is_open, saved_expiry_date, saved_expiry_time]);
 
+    // Render desktop version for desktop devices
+    if (!is_mobile) {
+        return <DurationDesktop is_minimized={is_minimized} />;
+    }
+
+    // Render mobile version (ActionSheet) for mobile devices
     return (
         <>
             <TextField

@@ -1,0 +1,43 @@
+.duration-unit-selector {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: var(--core-spacing-1200) 0;
+
+    &__item {
+        position: relative;
+        display: flex;
+        align-items: center;
+        padding: var(--core-spacing-800);
+        background: transparent;
+        border: none;
+        color: var(--component-textIcon-normal-default);
+        font-size: 1.6rem;
+        line-height: 2.4rem;
+        font-weight: 400;
+        text-align: left;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        height: 4.8rem;
+
+        &:hover {
+            background-color: var(--component-field-bg-fill-hover);
+        }
+
+        &--selected {
+            color: var(--component-textIcon-normal-prominent);
+            font-weight: 700;
+
+            &:before {
+                content: '';
+                position: absolute;
+                right: 0;
+                top: 50%;
+                transform: translateY(-50%);
+                height: 2.4rem;
+                width: 0.4rem;
+                background-color: var(--core-color-solid-red-900);
+            }
+        }
+    }
+}

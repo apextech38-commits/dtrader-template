@@ -1,0 +1,204 @@
+@import '../../InputPopover/input-popover.scss';
+@import '../../InputPopover/value-chips.scss';
+@import './duration-unit-selector.scss';
+
+.input-popover.duration-popover {
+    width: 45rem;
+}
+
+.duration-popover {
+    &__layout {
+        display: flex;
+        width: 100%;
+        height: 100%;
+    }
+
+    &__sidebar {
+        width: 17rem;
+        flex-shrink: 0;
+        border-right: 0.1rem solid var(--component-divider-default);
+        background-color: transparent;
+        overflow-y: auto;
+    }
+
+    &__main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+
+    &__header {
+        padding: var(--core-spacing-800);
+        padding-bottom: var(--core-spacing-400);
+        border-bottom: 0.1rem solid var(--component-divider-default);
+    }
+
+    &__content {
+        flex: 1;
+        padding: var(--core-spacing-800);
+        overflow-y: auto;
+    }
+
+    &__coming-soon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: var(--component-textIcon-normal-subtle);
+    }
+}
+
+.duration-input-desktop {
+    &__wrapper {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        justify-content: space-between;
+        &__fields {
+            display: flex;
+            gap: var(--core-spacing-800);
+            margin-bottom: var(--core-spacing-400);
+        }
+
+        &__field-group {
+            flex: 1;
+        }
+
+        &__range {
+            margin-top: var(--core-spacing-400);
+            margin-bottom: var(--core-spacing-400);
+        }
+
+        &__range-text {
+            font-size: var(--core-size-1200);
+            color: var(--component-textIcon-normal-subtle);
+        }
+    }
+
+    &__footer {
+        margin-top: auto;
+        padding-top: var(--core-spacing-800);
+    }
+
+    &__save-button {
+        width: 100%;
+    }
+}
+
+.duration-end-time-desktop {
+    display: flex;
+    flex-direction: column;
+    gap: 1.6rem;
+    padding: 1.6rem;
+
+    &__field {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.6rem;
+        background: transparent;
+        border: 0.1rem solid var(--component-divider-default);
+        border-radius: 0.8rem;
+        cursor: pointer;
+        transition: border-color 0.2s ease;
+
+        &:hover {
+            border-color: var(--component-divider-prominent);
+        }
+    }
+
+    &__field-content {
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+    }
+
+    &__icon {
+        flex-shrink: 0;
+    }
+
+    &__time-display {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+
+    &__label {
+        font-size: 1.4rem;
+        color: var(--semantic-color-slate-solid-typography-prominent);
+    }
+
+    &__time {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--semantic-color-slate-solid-typography-prominent);
+    }
+
+    &__chevron {
+        flex-shrink: 0;
+    }
+
+    &__message {
+        font-size: 1.4rem;
+        color: var(--semantic-color-slate-solid-typography-default);
+        text-align: center;
+        padding: 0 1.6rem;
+    }
+
+    &__footer {
+        margin-top: auto;
+    }
+}
+
+.duration-time-picker {
+    &__dialog {
+        background: var(--semantic-color-slate-solid-surface-frame-low);
+        border-radius: 0.8rem;
+        padding: 1.6rem;
+        margin-top: 0.8rem;
+    }
+
+    &__selector {
+        display: flex;
+        gap: 1.6rem;
+
+        &--hours,
+        &--minutes {
+            flex: 1;
+        }
+    }
+
+    &__selector-list-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--semantic-color-slate-solid-typography-prominent);
+        margin-bottom: 1.2rem;
+        text-align: center;
+    }
+
+    &__selector-list-item {
+        padding: 1.2rem;
+        text-align: center;
+        font-size: 1.4rem;
+        color: var(--semantic-color-slate-solid-typography-default);
+        cursor: pointer;
+        border-radius: 0.4rem;
+        transition: all 0.2s ease;
+
+        &:hover:not(&--disabled) {
+            background: var(--semantic-color-slate-solid-surface-frame-mid);
+        }
+
+        &--selected {
+            background: var(--semantic-color-slate-solid-surface-frame-high);
+            color: var(--semantic-color-slate-solid-typography-prominent);
+            font-weight: 700;
+        }
+
+        &--disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+    }
+}
