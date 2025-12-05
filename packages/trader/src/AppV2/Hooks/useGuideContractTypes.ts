@@ -15,9 +15,10 @@ const useGuideContractTypes = () => {
     const { contract_types_list_v2, contract_types_list, is_dtrader_v2 } = useTraderStore();
     const { isBridgeAvailable } = useMobileBridge();
     const { data: remoteConfigData } = useRemoteConfig(true);
+    const is_bridge_available = isBridgeAvailable();
 
     const nativeAppAllowedTradeTypes = useMemo(() => {
-        if (!isBridgeAvailable()) return undefined;
+        if (!is_bridge_available) return undefined;
         // Defensive check for edge cases
         if (!remoteConfigData?.native_app_allowed_trade_types) {
             // eslint-disable-next-line no-console
@@ -26,7 +27,7 @@ const useGuideContractTypes = () => {
             return [];
         }
         return Object.values(remoteConfigData.native_app_allowed_trade_types);
-    }, [remoteConfigData, isBridgeAvailable]);
+    }, [remoteConfigData, is_bridge_available]);
 
     const trade_types = useMemo(() => {
         // Use the appropriate contract types list based on dtrader version

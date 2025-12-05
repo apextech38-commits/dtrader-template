@@ -1,14 +1,13 @@
-import React from 'react';
-
 import { useQuery, useRemoteConfig } from '@deriv/api';
 import { cloneObject, getContractCategoriesConfig, getContractTypesConfig } from '@deriv/shared';
 import { mockStore } from '@deriv/stores';
 import { waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 
+import { useMobileBridge } from 'App/Hooks/useMobileBridge';
+
 import TraderProviders from '../../../trader-providers';
 import useContractsFor from '../useContractsFor';
-import { useMobileBridge } from 'App/Hooks/useMobileBridge';
 
 jest.mock('@deriv/api', () => ({
     ...jest.requireActual('@deriv/api'),
