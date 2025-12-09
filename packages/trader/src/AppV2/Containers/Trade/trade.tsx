@@ -2,11 +2,12 @@ import React from 'react';
 import clsx from 'clsx';
 import { observer } from 'mobx-react-lite';
 
-import { Loading } from '@deriv/components';
 import { useLocalStorageData } from '@deriv/api';
+import { Loading } from '@deriv/components';
 import { getSymbolDisplayName, trackAnalyticsEvent } from '@deriv/shared';
 import { useStore } from '@deriv/stores';
 
+import { useMobileBridge } from 'App/Hooks/useMobileBridge';
 import AccumulatorStats from 'AppV2/Components/AccumulatorStats';
 import BottomNav from 'AppV2/Components/BottomNav';
 import ClosedMarketMessage from 'AppV2/Components/ClosedMarketMessage';
@@ -37,6 +38,7 @@ const Trade = observer(() => {
         ui: { is_dark_mode_on },
     } = useStore();
     const { is_logged_in } = client;
+    const { isBridgeAvailable } = useMobileBridge();
     const {
         active_symbols,
         contract_type,
@@ -155,7 +157,8 @@ const Trade = observer(() => {
                         </TradeParametersContainer>
                         {!is_market_closed && <PurchaseButton />}
                     </div>
-                    {!guide_dtrader_v2?.trade_page && is_logged_in && (
+                    {/* TODO: Remove isBridgeAvailable check when onboarding video with Accumulators is available*/}
+                    {!guide_dtrader_v2?.trade_page && is_logged_in && !isBridgeAvailable() && (
                         <OnboardingGuide type='trade_page' is_dark_mode_on={is_dark_mode_on} />
                     )}
                 </React.Fragment>

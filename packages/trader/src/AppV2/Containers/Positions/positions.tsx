@@ -5,9 +5,10 @@ import { observer } from 'mobx-react-lite';
 import { useLocalStorageData } from '@deriv/api';
 import { getPositionsV2TabIndexFromURL } from '@deriv/shared';
 import { useStore } from '@deriv/stores';
-import { Localize } from '@deriv-com/translations';
 import { Tab } from '@deriv-com/quill-ui';
+import { Localize } from '@deriv-com/translations';
 
+import { useMobileBridge } from 'App/Hooks/useMobileBridge';
 import BottomNav from 'AppV2/Components/BottomNav';
 import OnboardingGuide from 'AppV2/Components/OnboardingGuide/GuideForPages';
 import { setPositionURLParams, TAB_NAME } from 'AppV2/Utils/positions-utils';
@@ -29,6 +30,7 @@ const Positions = observer(() => {
         client: { is_logged_in },
         ui: { is_dark_mode_on },
     } = useStore();
+    const { isBridgeAvailable } = useMobileBridge();
     const {
         positions: { onUnmount },
     } = useModulesStore();
@@ -87,7 +89,8 @@ const Positions = observer(() => {
                     </Tab.Content>
                 </Tab.Container>
             </div>
-            {!guide_dtrader_v2?.positions_page && is_logged_in && (
+            {/* TODO: Remove isBridgeAvailable check when onboarding video with Accumulators is available*/}
+            {!guide_dtrader_v2?.positions_page && is_logged_in && !isBridgeAvailable() && (
                 <OnboardingGuide
                     type='positions_page'
                     is_dark_mode_on={is_dark_mode_on}
