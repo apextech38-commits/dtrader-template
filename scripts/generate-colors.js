@@ -78,7 +78,7 @@ function generateConstants(config) {
  *  # Color Constants (Auto-Generated)
  *------------------------------------*/
 
-/* 
+/*
  * This file is auto-generated from brand.config.json
  * Do not edit manually - run 'npm run generate:colors' instead
  */
@@ -131,10 +131,10 @@ function generateBrandTokens(config) {
 
     let content = `/**
  * Brand Tokens - Core White-Label Variables (Auto-Generated)
- * 
+ *
  * This file is auto-generated from brand.config.json
  * Do not edit manually - run 'npm run generate:colors' instead
- * 
+ *
  * Partners only need to customize colors in brand.config.json
  */
 
@@ -362,7 +362,8 @@ function generateComponentTokens() {
     --color-nav-item-hover: var(--color-interactive-hover);
 
     // Modal/Dialog Colors
-    --color-modal-bg: var(--color-surface-overlay);
+    --color-modal-bg: var(--color-surface-primary);
+    --color-modal-bg-secondary: var(--color-surface-section);
     --color-modal-backdrop: #{transparentize($color-black, 0.72)};
     --color-modal-border: var(--color-interactive-default);
 
@@ -456,7 +457,8 @@ function generateComponentTokens() {
     --color-nav-item-hover: var(--color-interactive-hover);
 
     // Modal/Dialog Colors
-    --color-modal-bg: var(--color-surface-overlay);
+    --color-modal-bg: var(--core-color-solid-slate-1100);
+    --color-modal-bg-secondary: var(--core-color-solid-slate-1000);
     --color-modal-backdrop: #{transparentize($color-black, 0.4)};
     --color-modal-border: var(--color-interactive-default);
 

@@ -7,16 +7,7 @@ import { observer, useStore } from '@deriv/stores';
 import { useMobileBridge } from 'App/Hooks/useMobileBridge';
 
 const BrandShortLogo = observer(() => {
-    const { common } = useStore();
-    const { current_language } = common;
     const { sendBridgeEvent, isBridgeAvailable } = useMobileBridge();
-
-    const handleLogoClick = () => {
-        sendBridgeEvent('trading:home', () => {
-            const brandUrl = getBrandHomeUrl(current_language);
-            window.location.href = brandUrl;
-        });
-    };
 
     // Hide logo when coming from Flutter mobile app
     if (isBridgeAvailable()) {
@@ -25,7 +16,7 @@ const BrandShortLogo = observer(() => {
 
     return (
         <div className='header__menu-left-logo'>
-            <div onClick={handleLogoClick} style={{ cursor: 'pointer' }} data-testid='brand-logo-clickable'>
+            <div data-testid='brand-logo'>
                 <DerivProductBrandLightDerivTraderLogoIcon width={32} height={32} />
             </div>
         </div>

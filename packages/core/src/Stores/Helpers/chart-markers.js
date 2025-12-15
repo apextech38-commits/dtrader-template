@@ -476,15 +476,16 @@ export function calculateMarker(
                 direction: getMarkerDirection(contract_type),
             });
         }
-    } else if (!is_accumulator_contract) {
-        if (date_start && entry_spot) {
+    } else {
+        if (!is_accumulator_contract && date_start && entry_spot) {
             markers.push({
                 epoch: date_start,
                 quote: price,
                 type: 'startTimeCollapsed',
                 direction: getMarkerDirection(contract_type),
             });
-        } else if (date_start && !entry_spot) {
+        }
+        if (date_start && is_last_contract) {
             markers.push({
                 epoch: date_start,
                 quote: price,
@@ -503,13 +504,15 @@ export function calculateMarker(
                     direction: getMarkerDirection(contract_type),
                 });
             }
-            markers.push({
-                epoch: date_start,
-                quote: price,
-                type: 'contractMarker',
-                text: `${localize('Start')}\n${localize('Time')}`,
-                direction: getMarkerDirection(contract_type),
-            });
+            if (!is_accumulator_contract) {
+                markers.push({
+                    epoch: date_start,
+                    quote: price,
+                    type: 'contractMarker',
+                    text: `${localize('Start')}\n${localize('Time')}`,
+                    direction: getMarkerDirection(contract_type),
+                });
+            }
         }
 
         if (exit_spot) {
@@ -521,18 +524,11 @@ export function calculateMarker(
             });
         }
 
-        if (end_time && entry_spot && !is_tick_contract) {
+        if (!is_accumulator_contract && end_time && entry_spot && !is_tick_contract) {
             markers.push({
                 epoch: end_time,
                 quote: price,
                 type: 'exitTimeCollapsed',
-                direction: getMarkerDirection(contract_type),
-            });
-        } else if (end_time && !entry_spot) {
-            markers.push({
-                epoch: end_time,
-                quote: price,
-                type: 'exitTime',
                 direction: getMarkerDirection(contract_type),
             });
         }

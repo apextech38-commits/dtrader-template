@@ -10,9 +10,9 @@ A comprehensive TypeScript/React-based derivatives trading platform built with M
 
 ## Project Overview
 
-**Repository:** Monorepo with 9 NPM packages using Yarn workspaces  
-**Main Tech Stack:** React 17, MobX 6, TypeScript, Webpack 5, Jest  
-**Build System:** Webpack with separate configs per package  
+**Repository:** Monorepo with 9 NPM packages using npm workspaces
+**Main Tech Stack:** React 18, MobX 6, TypeScript 5, Webpack 5, Jest 29
+**Build System:** Webpack with separate configs per package
 **Architecture Pattern:** Multi-store reactive state management + component-driven UI
 
 ## AI Code Generation Rules (CRITICAL)
@@ -42,8 +42,8 @@ function exampleFunction() {
 ### Development
 
 ```bash
-# Install dependencies (strict peer dependencies)
-npm run bootstrap:dev
+# Install dependencies
+npm run bootstrap
 
 # Start development server for core package
 npm run serve --workspace=@deriv/core
@@ -1197,8 +1197,9 @@ npm run test:stylelint   # CSS linting
 
 ```bash
 # Clone & install
-git clone ...
-npm ci
+git clone https://github.com/deriv-com/derivatives-trader.git
+cd derivatives-trader
+npm run bootstrap
 
 # Start core app
 npm run serve --workspace=@deriv/core
@@ -1498,5 +1499,5 @@ React.useEffect(() => {
 
 ---
 
-_Last updated: 2025-11-05_  
-_Monorepo with 9 packages, ~500K LOC, React 17 + MobX 6 + TypeScript 5_
+_Last updated: 2025-12-12_
+_Monorepo with 9 packages, ~210K LOC, React 18 + MobX 6 + TypeScript 5_

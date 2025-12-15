@@ -299,26 +299,30 @@ export default class ContractTradeStore extends BaseStore {
             //to show both Call and Put recent contracts on DTrader chart
             trade_types = [CONTRACT_TYPES.VANILLA.CALL, CONTRACT_TYPES.VANILLA.PUT];
         }
-        return this.contracts
-            .filter(c => {
-                const contract_underlying = c.contract_info.underlying_symbol;
-                return contract_underlying === underlying;
-            })
-            .filter(c => {
-                const info = c.contract_info;
+        return (
+            this.contracts
+                .filter(c => {
+                    const contract_underlying = c.contract_info.underlying_symbol;
+                    return contract_underlying === underlying;
+                })
+                .filter(c => {
+                    const info = c.contract_info;
 
-                const trade_type_is_supported = trade_types.indexOf(info.contract_type) !== -1;
-                // both high_low & rise_fall have the same contract_types in POC response
-                // entry_spot=barrier means it is rise_fall contract (blame the api)
-                const entry_value = info.entry_spot;
-                if (trade_type_is_supported && is_call_put && ((info.barrier && entry_value) || info.shortcode)) {
-                    if (`${+entry_value}` === `${+info.barrier}` && !isHighLow(info)) {
-                        return trade_type === TRADE_TYPES.RISE_FALL || trade_type === TRADE_TYPES.RISE_FALL_EQUAL;
+                    const trade_type_is_supported = trade_types.indexOf(info.contract_type) !== -1;
+                    // both high_low & rise_fall have the same contract_types in POC response
+                    // entry_spot=barrier means it is rise_fall contract (blame the api)
+                    const entry_value = info.entry_spot;
+                    if (trade_type_is_supported && is_call_put && ((info.barrier && entry_value) || info.shortcode)) {
+                        if (`${+entry_value}` === `${+info.barrier}` && !isHighLow(info)) {
+                            return trade_type === TRADE_TYPES.RISE_FALL || trade_type === TRADE_TYPES.RISE_FALL_EQUAL;
+                        }
+                        return trade_type === TRADE_TYPES.HIGH_LOW;
                     }
-                    return trade_type === TRADE_TYPES.HIGH_LOW;
-                }
-                return trade_type_is_supported;
-            });
+                    return trade_type_is_supported;
+                })
+                // Sort by date_start to ensure newest contract is always last
+                .sort((a, b) => (a.contract_info.date_start || 0) - (b.contract_info.date_start || 0))
+        );
     };
 
     get has_crossed_accu_barriers() {
@@ -468,6 +472,10 @@ export default class ContractTradeStore extends BaseStore {
         if (response.proposal_open_contract) {
             const contract_id = +response.proposal_open_contract.contract_id;
             const contract = this.contracts_map[contract_id];
+            if (!contract) return;
+
+            // Update contract_info before calculating is_last_contract
+            contract.contract_info = response.proposal_open_contract;
             const is_last_contract = contract_id === this.last_contract.contract_id;
             contract.populateConfig(response.proposal_open_contract, is_last_contract);
             if (response.proposal_open_contract.is_sold) {

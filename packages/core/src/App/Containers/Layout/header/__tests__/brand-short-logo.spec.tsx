@@ -68,55 +68,8 @@ describe('BrandShortLogo', () => {
         const logoContainer = screen.getByRole('img');
         expect(logoContainer).toBeInTheDocument();
 
-        const clickableDiv = screen.getByTestId('brand-logo-clickable');
-        expect(clickableDiv).toHaveStyle('cursor: pointer');
-    });
-
-    it('should redirect to brand URL with language parameter when logo is clicked', async () => {
-        // Mock desktop behavior - should execute fallback
-        mockSendBridgeEvent.mockImplementation((_event, fallback) => {
-            fallback(); // Execute fallback for desktop
-        });
-        mockIsBridgeAvailable.mockReturnValue(false);
-        mockUseMobileBridge.mockReturnValue({
-            sendBridgeEvent: mockSendBridgeEvent,
-            isBridgeAvailable: mockIsBridgeAvailable,
-            isDesktop: true,
-        });
-
-        renderComponent();
-
-        const clickableDiv = screen.getByTestId('brand-logo-clickable');
-
-        await userEvent.click(clickableDiv);
-
-        expect(mockSendBridgeEvent).toHaveBeenCalledWith('trading:home', expect.any(Function));
-        expect(getBrandHomeUrl).toHaveBeenCalledWith('EN');
-        expect(mockLocation.href).toBe('https://home.deriv.com/dashboard/home');
-    });
-
-    it('should handle different brand URLs correctly', async () => {
-        (getBrandHomeUrl as jest.Mock).mockReturnValue('https://staging-home.deriv.com/dashboard/home');
-
-        // Mock desktop behavior - should execute fallback
-        mockSendBridgeEvent.mockImplementation((_event, fallback) => {
-            fallback(); // Execute fallback for desktop
-        });
-        mockIsBridgeAvailable.mockReturnValue(false);
-        mockUseMobileBridge.mockReturnValue({
-            sendBridgeEvent: mockSendBridgeEvent,
-            isBridgeAvailable: mockIsBridgeAvailable,
-            isDesktop: true,
-        });
-
-        renderComponent();
-
-        const clickableDiv = screen.getByTestId('brand-logo-clickable');
-
-        await userEvent.click(clickableDiv);
-
-        expect(mockSendBridgeEvent).toHaveBeenCalledWith('trading:home', expect.any(Function));
-        expect(mockLocation.href).toBe('https://staging-home.deriv.com/dashboard/home');
+        const logoDiv = screen.getByTestId('brand-logo');
+        expect(logoDiv).toBeInTheDocument();
     });
 
     it('should not render when bridge is available (Flutter mobile app)', () => {
@@ -132,56 +85,7 @@ describe('BrandShortLogo', () => {
 
         // Logo should not be rendered when bridge is available
         expect(container).toBeEmptyDOMElement();
-        expect(screen.queryByTestId('brand-logo-clickable')).not.toBeInTheDocument();
-    });
-
-    it('should fallback to brand URL when bridge is not available', async () => {
-        // Reset the mock to return the default URL
-        (getBrandHomeUrl as jest.Mock).mockReturnValue('https://home.deriv.com/dashboard/home');
-
-        // Mock bridge not available
-        mockSendBridgeEvent.mockImplementation((_event, fallback) => {
-            fallback(); // Execute fallback
-        });
-        mockIsBridgeAvailable.mockReturnValue(false);
-        mockUseMobileBridge.mockReturnValue({
-            sendBridgeEvent: mockSendBridgeEvent,
-            isBridgeAvailable: mockIsBridgeAvailable,
-            isDesktop: false,
-        });
-
-        renderComponent();
-
-        const clickableDiv = screen.getByTestId('brand-logo-clickable');
-
-        await userEvent.click(clickableDiv);
-
-        expect(mockSendBridgeEvent).toHaveBeenCalledWith('trading:home', expect.any(Function));
-        expect(getBrandHomeUrl).toHaveBeenCalled();
-        expect(mockLocation.href).toBe('https://home.deriv.com/dashboard/home');
-    });
-
-    it('should handle bridge errors gracefully', async () => {
-        // Mock bridge error
-        mockSendBridgeEvent.mockImplementation((_event, fallback) => {
-            fallback(); // Execute fallback on error
-        });
-        mockIsBridgeAvailable.mockReturnValue(false); // Set to false so logo renders
-        mockUseMobileBridge.mockReturnValue({
-            sendBridgeEvent: mockSendBridgeEvent,
-            isBridgeAvailable: mockIsBridgeAvailable,
-            isDesktop: false,
-        });
-
-        renderComponent();
-
-        const clickableDiv = screen.getByTestId('brand-logo-clickable');
-
-        await userEvent.click(clickableDiv);
-
-        expect(mockSendBridgeEvent).toHaveBeenCalledWith('trading:home', expect.any(Function));
-        expect(getBrandHomeUrl).toHaveBeenCalled();
-        expect(mockLocation.href).toBe('https://home.deriv.com/dashboard/home');
+        expect(screen.queryByTestId('brand-logo')).not.toBeInTheDocument();
     });
 
     it('should hide logo when bridge is available (Flutter mobile app)', () => {
@@ -197,7 +101,7 @@ describe('BrandShortLogo', () => {
 
         // Logo should not be rendered when bridge is available
         expect(container).toBeEmptyDOMElement();
-        expect(screen.queryByTestId('brand-logo-clickable')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('brand-logo')).not.toBeInTheDocument();
         expect(screen.queryByRole('img')).not.toBeInTheDocument();
     });
 
@@ -213,7 +117,7 @@ describe('BrandShortLogo', () => {
         renderComponent();
 
         // Logo should be rendered when bridge is not available
-        expect(screen.getByTestId('brand-logo-clickable')).toBeInTheDocument();
+        expect(screen.getByTestId('brand-logo')).toBeInTheDocument();
         expect(screen.getByRole('img')).toBeInTheDocument();
     });
 
@@ -229,7 +133,7 @@ describe('BrandShortLogo', () => {
         renderComponent();
 
         // Logo should be rendered on desktop
-        expect(screen.getByTestId('brand-logo-clickable')).toBeInTheDocument();
+        expect(screen.getByTestId('brand-logo')).toBeInTheDocument();
         expect(screen.getByRole('img')).toBeInTheDocument();
     });
 });

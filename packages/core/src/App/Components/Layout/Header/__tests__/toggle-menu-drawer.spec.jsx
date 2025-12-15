@@ -40,6 +40,7 @@ jest.mock('@deriv/quill-icons', () => ({
     LegacyArrowLeft1pxIcon: () => <div data-testid='arrow-left-icon'>ArrowLeft</div>,
     LegacyChevronRight1pxIcon: () => <div data-testid='chevron-right-icon'>ChevronRight</div>,
     LegacyHelpCentreIcon: () => <div data-testid='help-centre-icon'>HelpCentre</div>,
+    LegacyHomeOldIcon: () => <div data-testid='home-icon'>Home</div>,
     LegacyLogout1pxIcon: () => <div data-testid='logout-icon'>Logout</div>,
     LegacyMenuHamburger1pxIcon: () => <div data-testid='hamburger-icon'>Hamburger</div>,
     LegacyRegulatoryInformationIcon: () => <div data-testid='regulatory-icon'>Regulatory</div>,
@@ -60,6 +61,7 @@ jest.mock('@deriv/shared', () => ({
         index: '/',
         reports: '/reports',
     },
+    getBrandUrl: jest.fn(() => 'https://deriv.com'),
     useWS: jest.fn(() => ({})),
     getAccountType: jest.fn(() => 'demo'),
     toGMTFormat: jest.fn(() => 'GMT Time'),
@@ -326,5 +328,170 @@ describe('<ToggleMenuDrawer />', () => {
         await user.click(logoutItem);
         expect(mockSendBridgeEvent).toHaveBeenCalledWith('trading:back', expect.any(Function));
         expect(mockLogout).toHaveBeenCalledTimes(1);
+    });
+
+    describe('Home button', () => {
+        it('should render Home button with correct icon and text', async () => {
+            render(mockToggleMenuDrawer());
+            const hamburgerButton = screen.getByTestId('dt_mobile_drawer_toggle');
+            await userEvent.click(hamburgerButton);
+
+            const homeItems = screen.getAllByTestId('drawer-item');
+            const homeItem = homeItems.find(item => item.textContent?.includes('Home'));
+            expect(homeItem).toBeInTheDocument();
+
+            // Verify icon is present
+            expect(screen.getByTestId('home-icon')).toBeInTheDocument();
+        });
+
+        it('should send trading:home bridge event when clicked', async () => {
+            mockSendBridgeEvent.mockImplementation(() => {
+                // Don't call fallback - bridge handles it
+            });
+
+            render(mockToggleMenuDrawer());
+            const hamburgerButton = screen.getByTestId('dt_mobile_drawer_toggle');
+            await userEvent.click(hamburgerButton);
+
+            const homeItems = screen.getAllByTestId('drawer-item');
+            const homeItem = homeItems.find(item => item.textContent?.includes('Home'));
+            await userEvent.click(homeItem);
+
+            expect(mockSendBridgeEvent).toHaveBeenCalledWith('trading:home', expect.any(Function));
+        });
+
+        it('should navigate to correct URL with currency and language when fallback is called', async () => {
+            const mockLocation = { href: '' };
+            Object.defineProperty(window, 'location', {
+                value: mockLocation,
+                writable: true,
+                configurable: true,
+            });
+
+            mockSendBridgeEvent.mockImplementation((event, fallback) => {
+                if (fallback) fallback(); // Execute fallback
+            });
+
+            render(
+                mockToggleMenuDrawer({
+                    common: { current_language: 'ES' },
+                    client: { currency: 'EUR', is_logged_in: true },
+                })
+            );
+
+            const hamburgerButton = screen.getByTestId('dt_mobile_drawer_toggle');
+            await userEvent.click(hamburgerButton);
+
+            const homeItems = screen.getAllByTestId('drawer-item');
+            const homeItem = homeItems.find(item => item.textContent?.includes('Home'));
+            await userEvent.click(homeItem);
+
+            expect(mockLocation.href).toBe(
+                'https://deriv.com/options?acc=options&curr=EUR&from=home&source=options&lang=ES'
+            );
+        });
+
+        it('should encode URL parameters correctly', async () => {
+            const mockLocation = { href: '' };
+            Object.defineProperty(window, 'location', {
+                value: mockLocation,
+                writable: true,
+                configurable: true,
+            });
+
+            mockSendBridgeEvent.mockImplementation((event, fallback) => {
+                if (fallback) fallback(); // Execute fallback
+            });
+
+            // Test with special characters that need encoding
+            render(
+                mockToggleMenuDrawer({
+                    common: { current_language: 'zh-CN' },
+                    client: { currency: 'USD', is_logged_in: true },
+                })
+            );
+
+            const hamburgerButton = screen.getByTestId('dt_mobile_drawer_toggle');
+            await userEvent.click(hamburgerButton);
+
+            const homeItems = screen.getAllByTestId('drawer-item');
+            const homeItem = homeItems.find(item => item.textContent?.includes('Home'));
+            await userEvent.click(homeItem);
+
+            // Verify that the language parameter is properly encoded
+            expect(mockLocation.href).toBe(
+                'https://deriv.com/options?acc=options&curr=USD&from=home&source=options&lang=zh-CN'
+            );
+        });
+
+        it('should handle empty currency gracefully', async () => {
+            const mockLocation = { href: '' };
+            Object.defineProperty(window, 'location', {
+                value: mockLocation,
+                writable: true,
+                configurable: true,
+            });
+
+            mockSendBridgeEvent.mockImplementation((event, fallback) => {
+                if (fallback) fallback(); // Execute fallback
+            });
+
+            render(
+                mockToggleMenuDrawer({
+                    common: { current_language: 'EN' },
+                    client: { currency: '', is_logged_in: true },
+                })
+            );
+
+            const hamburgerButton = screen.getByTestId('dt_mobile_drawer_toggle');
+            await userEvent.click(hamburgerButton);
+
+            const homeItems = screen.getAllByTestId('drawer-item');
+            const homeItem = homeItems.find(item => item.textContent?.includes('Home'));
+            await userEvent.click(homeItem);
+
+            // Should handle empty currency
+            expect(mockLocation.href).toContain('curr=');
+        });
+
+        it('should hide Home button when bridge is available', async () => {
+            // Mock bridge available
+            mockIsBridgeAvailable.mockReturnValue(true);
+            mockUseMobileBridge.mockReturnValue({
+                sendBridgeEvent: mockSendBridgeEvent,
+                isBridgeAvailable: mockIsBridgeAvailable,
+                isDesktop: false,
+            });
+
+            render(mockToggleMenuDrawer());
+            const hamburgerButton = screen.getByTestId('dt_mobile_drawer_toggle');
+            await userEvent.click(hamburgerButton);
+
+            const homeItems = screen.queryAllByTestId('drawer-item');
+            const homeItem = homeItems.find(item => item.textContent?.includes('Home'));
+
+            // Home button should not be present when bridge is available
+            expect(homeItem).toBeUndefined();
+        });
+
+        it('should show Home button when bridge is not available', async () => {
+            // Mock bridge not available
+            mockIsBridgeAvailable.mockReturnValue(false);
+            mockUseMobileBridge.mockReturnValue({
+                sendBridgeEvent: mockSendBridgeEvent,
+                isBridgeAvailable: mockIsBridgeAvailable,
+                isDesktop: false,
+            });
+
+            render(mockToggleMenuDrawer());
+            const hamburgerButton = screen.getByTestId('dt_mobile_drawer_toggle');
+            await userEvent.click(hamburgerButton);
+
+            const homeItems = screen.getAllByTestId('drawer-item');
+            const homeItem = homeItems.find(item => item.textContent?.includes('Home'));
+
+            // Home button should be present when bridge is not available
+            expect(homeItem).toBeInTheDocument();
+        });
     });
 });

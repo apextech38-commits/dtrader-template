@@ -5,17 +5,18 @@ import classNames from 'classnames';
 import { useRemoteConfig } from '@deriv/api';
 import { Div100vhContainer, MobileDrawer, ToggleSwitch } from '@deriv/components';
 import {
-    LegacyChartsIcon,
     LegacyArrowLeft1pxIcon,
+    LegacyChartsIcon,
     LegacyChevronRight1pxIcon,
     LegacyHelpCentreIcon,
+    LegacyHomeOldIcon,
     LegacyLogout1pxIcon,
     LegacyMenuHamburger1pxIcon,
     LegacyRegulatoryInformationIcon,
     LegacyResponsibleTradingIcon,
     LegacyTheme1pxIcon,
 } from '@deriv/quill-icons';
-import { routes } from '@deriv/shared';
+import { getBrandUrl, routes } from '@deriv/shared';
 import { observer, useStore } from '@deriv/stores';
 import { useTranslations } from '@deriv-com/translations';
 
@@ -34,7 +35,7 @@ import MenuLink from './menu-link';
 const ToggleMenuDrawer = observer(() => {
     const { localize } = useTranslations();
     const { sendBridgeEvent, isBridgeAvailable } = useMobileBridge();
-    const { ui, client, traders_hub } = useStore();
+    const { ui, client, traders_hub, common } = useStore();
     const {
         disableApp,
         enableApp,
@@ -43,8 +44,9 @@ const ToggleMenuDrawer = observer(() => {
         setDarkMode: toggleTheme,
         setMobileLanguageMenuOpen,
     } = ui;
-    const { is_logged_in, is_virtual, logout: logoutClient, is_eu } = client;
+    const { is_logged_in, is_virtual, logout: logoutClient, is_eu, currency } = client;
     const { show_eu_related_content } = traders_hub;
+    const { current_language } = common;
 
     const { pathname: route } = useLocation();
 
@@ -86,6 +88,16 @@ const ToggleMenuDrawer = observer(() => {
     const handleBackClick = React.useCallback(async () => {
         await sendBridgeEvent('trading:back');
     }, [sendBridgeEvent]);
+
+    const handleHomeClick = React.useCallback(() => {
+        toggleDrawer();
+        sendBridgeEvent('trading:home', () => {
+            const brandUrl = getBrandUrl();
+            const lang_param = current_language ? `&lang=${encodeURIComponent(current_language)}` : '';
+            const curr = encodeURIComponent(currency || '');
+            window.location.href = `${brandUrl}/options?acc=options&curr=${curr}&from=home&source=options${lang_param}`;
+        });
+    }, [toggleDrawer, sendBridgeEvent, current_language, currency]);
 
     // Simple logout handler that closes drawer and calls logout
     const handleLogout = React.useCallback(async () => {
@@ -222,6 +234,11 @@ const ToggleMenuDrawer = observer(() => {
                     <div className='header__menu-mobile-body-wrapper'>
                         <React.Fragment>
                             <MobileDrawer.Body>
+                                {!isBridgeAvailable() && (
+                                    <MobileDrawer.Item onClick={handleHomeClick}>
+                                        <MenuLink icon={<LegacyHomeOldIcon />} text={localize('Home')} />
+                                    </MobileDrawer.Item>
+                                )}
                                 <MobileDrawer.Item>
                                     <MenuLink
                                         link_to={routes.index}
