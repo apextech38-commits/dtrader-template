@@ -14,7 +14,8 @@ const DURATION_UNITS: VerticalTabItem[] = [
     { value: 's', label: 'Seconds' },
     { value: 'm', label: 'Minutes' },
     { value: 'h', label: 'Hours' },
-    { value: 'd', label: 'Days' },
+    { value: 'end_time', label: 'End time' },
+    { value: 'end_date', label: 'End date' },
 ];
 
 const DurationUnitSelector: React.FC<DurationUnitSelectorProps> = ({ selectedUnit, onSelectUnit, className }) => {
