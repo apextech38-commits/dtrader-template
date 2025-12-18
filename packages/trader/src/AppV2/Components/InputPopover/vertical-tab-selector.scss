@@ -1,8 +1,8 @@
-/* [AI] */
-.barrier-type-selector {
+.vertical-tab-selector {
     display: flex;
     flex-direction: column;
     width: 100%;
+    padding: var(--core-spacing-800) 0;
 
     &__item {
         position: relative;
@@ -42,4 +42,3 @@
         }
     }
 }
-/* [/AI] */
