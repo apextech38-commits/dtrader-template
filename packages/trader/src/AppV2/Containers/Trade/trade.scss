@@ -3,7 +3,7 @@
     scrollbar-width: none;
 
     @include mobile-screen {
-        height: calc(100% - 5.6rem);
+        height: calc(100% - 6.4rem);
     }
 
     &-container-v2 {
@@ -18,12 +18,6 @@
             width: unset;
             padding: 0 var(--core-spacing-400) var(--core-spacing-400);
             gap: var(--core-spacing-400);
-        }
-
-        &__logout {
-            @include mobile-screen {
-                height: calc(100vh - 5.6rem);
-            }
         }
 
         &__header {
@@ -137,10 +131,6 @@
 
             &:has(.trade-params__options__wrapper--horizontal:not(:only-child)) {
                 min-height: 10.4rem;
-            }
-
-            &--with-button {
-                min-height: 13.6rem;
             }
         }
     }

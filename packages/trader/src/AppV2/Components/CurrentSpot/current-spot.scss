@@ -5,6 +5,9 @@
     z-index: 9;
 
     @include mobile-screen {
+        bottom: unset;
+        left: unset;
+        z-index: unset;
         position: relative;
         border-radius: var(--core-borderRadius-400);
         background-color: var(--semantic-color-slate-solid-surface-frame-low);
