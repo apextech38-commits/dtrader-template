@@ -125,7 +125,7 @@ describe('<Sidebar />', () => {
         const homeButton = screen.getByTestId('dt_sidebar_home');
         fireEvent.click(homeButton);
         expect(window.location.href).toBe(
-            'https://deriv.com/options?acc=options&curr=USD&from=home&source=options&lang=en'
+            'https://deriv.com/home?acc=options&curr=USD&from=home&source=options&lang=en'
         );
         expect(store.ui.closeSidebarFlyout).toHaveBeenCalled();
     });

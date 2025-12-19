@@ -3,9 +3,11 @@ import React from 'react';
 import { Button } from '@deriv/components';
 import { formatMoney } from '@deriv/shared';
 import { useTranslations } from '@deriv-com/translations';
+import { useDevice } from '@deriv-com/ui';
+
+import { useMobileBridge } from 'App/Hooks/useMobileBridge';
 
 import { LoginButtonV2 } from './login-button-v2';
-import { useMobileBridge } from 'App/Hooks/useMobileBridge';
 
 import 'Sass/app/_common/components/account-switcher.scss';
 
@@ -31,7 +33,7 @@ const LogoutButton = ({ onClickLogout }: { onClickLogout: () => void }) => {
         sendBridgeEvent('trading:back', onClickLogout);
     };
 
-    const buttonText = isBridgeAvailable() ? localize('Back to app') : localize('Log out');
+    const buttonText = isBridgeAvailable ? localize('Back to app') : localize('Log out');
 
     return <Button className='acc-info__button' has_effect text={buttonText} onClick={handleLogoutClick} />;
 };
@@ -43,7 +45,7 @@ const LoggedOutView = () => (
 );
 
 const AccountActionsComponent = ({ balance, currency, is_logged_in, onClickLogout }: TAccountActionsProps) => {
-    const { isDesktop } = useMobileBridge();
+    const { isDesktop } = useDevice();
     const isLogoutButtonVisible = isDesktop && is_logged_in;
     const formattedBalance = balance != null ? formatMoney(currency, balance, true) : undefined;
 

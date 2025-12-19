@@ -2,6 +2,7 @@ import React from 'react';
 import { useLocation, withRouter } from 'react-router';
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
+
 import { ThemedScrollbars } from '@deriv/components';
 import { CookieStorage, redirectToLogin, TRACKING_STATUS_KEY } from '@deriv/shared';
 import { observer, useStore } from '@deriv/stores';
@@ -41,10 +42,10 @@ const AppContents = observer(({ children }) => {
 
     React.useEffect(() => {
         if (should_redirect_user_to_login && client.is_client_store_initialized) {
-            // For V2 authentication, don't redirect if we have a session token
-            const hasSessionToken = !!localStorage.getItem('session_token');
+            // Don't redirect if we have an account_id (user is authenticated)
+            const hasAccountId = !!localStorage.getItem('account_id');
 
-            if (hasSessionToken) {
+            if (hasAccountId) {
                 setShouldRedirectToLogin(false);
             } else {
                 setShouldRedirectToLogin(false);

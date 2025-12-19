@@ -52,7 +52,6 @@ const TradeTypes = ({ contract_type, onTradeTypeSelect, trade_types, is_dark_mod
     const [is_open, setIsOpen] = React.useState<boolean>(false);
     const [is_editing, setIsEditing] = React.useState<boolean>(false);
     const trade_types_ref = React.useRef<HTMLDivElement>(null);
-    const is_bridge_available = isBridgeAvailable();
 
     const createArrayFromCategories = (data: TTradeTypesProps['trade_types']): TItem[] => {
         const result: TItem[] = [];
@@ -239,7 +238,7 @@ const TradeTypes = ({ contract_type, onTradeTypeSelect, trade_types, is_dark_mod
 
     const trade_type_chips = getTradeTypeChips();
     const should_show_view_all =
-        (trade_type_chips.length >= 2 || getItems(other_trade_types).length > 0) && !is_bridge_available && !isDesktop;
+        (trade_type_chips.length >= 2 || getItems(other_trade_types).length > 0) && !isBridgeAvailable && !isDesktop;
     const show_trade_type_list_divider = !!other_trade_types[0]?.items?.length;
     const show_editing_divider = trade_types_array.length !== pinned_trade_types[0]?.items?.length;
     const trade_type_content_props = {
@@ -280,7 +279,7 @@ const TradeTypes = ({ contract_type, onTradeTypeSelect, trade_types, is_dark_mod
                     <Text size='sm'>{title}</Text>
                 </Chip.Selectable>
             ))}
-            {should_show_view_all && (
+            {should_show_view_all && !isBridgeAvailable && (
                 <Button
                     key='trade-types-all'
                     onClick={handleOpenActionSheet}

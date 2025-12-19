@@ -52,7 +52,7 @@ export default class GTMStore extends BaseStore {
      */
     async pushDataLayer(data) {
         if (this.is_gtm_applicable && this.root_store?.client?.is_logged_in) {
-            BinarySocket?.wait('authorize')?.then(() => {
+            BinarySocket?.wait('balance')?.then(() => {
                 const gtm_object = { ...this.common_variables, ...data };
                 if (!gtm_object.event) return;
 

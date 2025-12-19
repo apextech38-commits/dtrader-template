@@ -1,16 +1,9 @@
 import React from 'react';
+
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
 import { useMobileBridge } from '../useMobileBridge';
-
-// Mock useDevice hook
-const mockUseDevice = jest.fn(() => ({
-    isDesktop: false,
-}));
-
-jest.mock('@deriv-com/ui', () => ({
-    useDevice: () => mockUseDevice(),
-}));
 
 // Mock console.error to avoid noise in tests
 const mockConsoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -20,8 +13,7 @@ interface TestResult {
         event: 'trading:back' | 'trading:home',
         fallback?: () => void | Promise<void>
     ) => Promise<boolean>;
-    isBridgeAvailable?: () => boolean;
-    isDesktop?: boolean;
+    isBridgeAvailable?: boolean;
     sendResult?: boolean;
     fallbackCalled?: number;
 }
@@ -41,7 +33,7 @@ const TestComponent = ({ onResult }: { onResult: (result: TestResult) => void })
             'button',
             {
                 'data-testid': 'test-bridge-available',
-                onClick: () => onResult({ isBridgeAvailable: () => hookResult.isBridgeAvailable() }),
+                onClick: () => onResult({ isBridgeAvailable: hookResult.isBridgeAvailable }),
             },
             'Test Bridge Available'
         ),
@@ -91,11 +83,11 @@ describe('useMobileBridge', () => {
     beforeEach(() => {
         jest.clearAllMocks();
         testResult = {};
-        // Reset useDevice mock to default
-        mockUseDevice.mockReturnValue({ isDesktop: false });
-        // Clear DerivAppChannel from window
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        delete (window as any).DerivAppChannel;
+        // Clear sessionStorage
+        sessionStorage.clear();
+        // Reset location to default (no query params)
+        delete (window as any).location;
+        (window as any).location = { search: '' };
         mockConsoleError.mockClear();
     });
 
@@ -104,77 +96,70 @@ describe('useMobileBridge', () => {
     });
 
     describe('isBridgeAvailable', () => {
-        it('should return true when DerivAppChannel is available and not on desktop', async () => {
-            // Mock mobile device
-            mockUseDevice.mockReturnValue({ isDesktop: false });
-
-            // Mock DerivAppChannel
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (window as any).DerivAppChannel = {
-                postMessage: jest.fn(),
-            };
+        it('should return true when is_mobile_app query param is present', async () => {
+            // Mock query parameter
+            delete (window as any).location;
+            (window as any).location = { search: '?is_mobile_app=true' };
 
             render(React.createElement(TestComponent, { onResult }));
 
             const button = screen.getByTestId('test-bridge-available');
             await userEvent.click(button);
 
-            expect(testResult.isBridgeAvailable?.()).toBe(true);
+            expect(testResult.isBridgeAvailable).toBe(true);
         });
 
-        it('should return false when DerivAppChannel is not available', async () => {
-            // Mock mobile device
-            mockUseDevice.mockReturnValue({ isDesktop: false });
-
-            // No DerivAppChannel
+        it('should return false when query param is not present', async () => {
+            // No query param
+            delete (window as any).location;
+            (window as any).location = { search: '' };
 
             render(React.createElement(TestComponent, { onResult }));
 
             const button = screen.getByTestId('test-bridge-available');
             await userEvent.click(button);
 
-            expect(testResult.isBridgeAvailable?.()).toBe(false);
+            expect(testResult.isBridgeAvailable).toBe(false);
         });
 
-        it('should return false when on desktop even if DerivAppChannel is available', async () => {
-            // Mock desktop device
-            mockUseDevice.mockReturnValue({ isDesktop: true });
-
-            // Mock DerivAppChannel
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (window as any).DerivAppChannel = {
-                postMessage: jest.fn(),
-            };
+        it('should persist value in sessionStorage when query param is present', async () => {
+            // Mock query parameter
+            delete (window as any).location;
+            (window as any).location = { search: '?is_mobile_app=true' };
 
             render(React.createElement(TestComponent, { onResult }));
 
             const button = screen.getByTestId('test-bridge-available');
             await userEvent.click(button);
 
-            expect(testResult.isBridgeAvailable?.()).toBe(false);
+            expect(testResult.isBridgeAvailable).toBe(true);
+            // Verify it was stored in sessionStorage
+            expect(sessionStorage.getItem('is_mobile_app')).toBe('true');
         });
 
-        it('should return false when DerivAppChannel exists but postMessage is not available', async () => {
-            // Mock mobile device
-            mockUseDevice.mockReturnValue({ isDesktop: false });
+        it('should read from sessionStorage when query param is removed', async () => {
+            // Pre-populate sessionStorage (simulating previous visit with query param)
+            sessionStorage.setItem('is_mobile_app', 'true');
 
-            // Mock DerivAppChannel without postMessage
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (window as any).DerivAppChannel = {};
+            // Mock URL without query parameter (simulating param removal)
+            delete (window as any).location;
+            (window as any).location = { search: '' };
 
             render(React.createElement(TestComponent, { onResult }));
 
             const button = screen.getByTestId('test-bridge-available');
             await userEvent.click(button);
 
-            expect(testResult.isBridgeAvailable?.()).toBe(false);
+            // Should still be true because it reads from sessionStorage
+            expect(testResult.isBridgeAvailable).toBe(true);
         });
     });
 
     describe('sendBridgeEvent', () => {
         it('should send trading:back event when bridge is available', async () => {
-            // Mock mobile device
-            mockUseDevice.mockReturnValue({ isDesktop: false });
+            // Mock query parameter
+            delete (window as any).location;
+            (window as any).location = { search: '?is_mobile_app=true' };
 
             const mockPostMessage = jest.fn();
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -192,8 +177,9 @@ describe('useMobileBridge', () => {
         });
 
         it('should send trading:home event when bridge is available', async () => {
-            // Mock mobile device
-            mockUseDevice.mockReturnValue({ isDesktop: false });
+            // Mock query parameter
+            delete (window as any).location;
+            (window as any).location = { search: '?is_mobile_app=true' };
 
             const mockPostMessage = jest.fn();
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -211,9 +197,6 @@ describe('useMobileBridge', () => {
         });
 
         it('should execute fallback when bridge is not available', async () => {
-            // Mock mobile device
-            mockUseDevice.mockReturnValue({ isDesktop: false });
-
             // No DerivAppChannel
 
             render(React.createElement(TestComponent, { onResult }));
@@ -232,9 +215,6 @@ describe('useMobileBridge', () => {
         });
 
         it('should return false when no bridge and no fallback', async () => {
-            // Mock mobile device
-            mockUseDevice.mockReturnValue({ isDesktop: false });
-
             // No DerivAppChannel
 
             render(React.createElement(TestComponent, { onResult }));
@@ -246,8 +226,9 @@ describe('useMobileBridge', () => {
         });
 
         it('should handle bridge errors and execute fallback', async () => {
-            // Mock mobile device
-            mockUseDevice.mockReturnValue({ isDesktop: false });
+            // Mock query parameter
+            delete (window as any).location;
+            (window as any).location = { search: '?is_mobile_app=true' };
 
             const mockPostMessage = jest.fn(() => {
                 throw new Error('Bridge error');
@@ -275,9 +256,9 @@ describe('useMobileBridge', () => {
         });
 
         it('should handle bridge errors without fallback', async () => {
-            // Mock mobile device
-            mockUseDevice.mockReturnValue({ isDesktop: false });
-
+            // Mock query parameter
+            delete (window as any).location;
+            (window as any).location = { search: '?is_mobile_app=true' };
             const mockPostMessage = jest.fn(() => {
                 throw new Error('Bridge error');
             });
@@ -294,26 +275,6 @@ describe('useMobileBridge', () => {
             expect(testResult.sendResult).toBe(false);
             expect(mockPostMessage).toHaveBeenCalled();
             expect(mockConsoleError).toHaveBeenCalledWith('Failed to send bridge message:', expect.any(Error));
-        });
-    });
-
-    describe('isDesktop', () => {
-        it('should return desktop status from useDevice hook', () => {
-            // Mock desktop device
-            mockUseDevice.mockReturnValue({ isDesktop: true });
-
-            render(React.createElement(TestComponent, { onResult }));
-
-            expect(testResult.isDesktop).toBe(true);
-        });
-
-        it('should return mobile status from useDevice hook', () => {
-            // Mock mobile device
-            mockUseDevice.mockReturnValue({ isDesktop: false });
-
-            render(React.createElement(TestComponent, { onResult }));
-
-            expect(testResult.isDesktop).toBe(false);
         });
     });
 });

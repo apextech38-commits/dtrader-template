@@ -178,7 +178,7 @@ export default class StatementStore extends BaseStore {
         );
         this.client_loginid = this.root_store.client.loginid;
         this.onNetworkStatusChange(this.networkStatusChangeListener);
-        await WS.wait('authorize');
+        await WS.wait('balance');
         this.fetchNextBatch(true);
     }
 

@@ -5,7 +5,6 @@ import classNames from 'classnames';
 import { useRemoteConfig } from '@deriv/api';
 import { Div100vhContainer, MobileDrawer, ToggleSwitch } from '@deriv/components';
 import {
-    LegacyArrowLeft1pxIcon,
     LegacyChartsIcon,
     LegacyChevronRight1pxIcon,
     LegacyHelpCentreIcon,
@@ -85,17 +84,13 @@ const ToggleMenuDrawer = observer(() => {
         setIsSubmenuExpanded(false);
     }, [setIsSubmenuExpanded, is_open, is_mobile_language_menu_open, setMobileLanguageMenuOpen]);
 
-    const handleBackClick = React.useCallback(async () => {
-        await sendBridgeEvent('trading:back');
-    }, [sendBridgeEvent]);
-
     const handleHomeClick = React.useCallback(() => {
         toggleDrawer();
         sendBridgeEvent('trading:home', () => {
             const brandUrl = getBrandUrl();
             const lang_param = current_language ? `&lang=${encodeURIComponent(current_language)}` : '';
             const curr = encodeURIComponent(currency || '');
-            window.location.href = `${brandUrl}/options?acc=options&curr=${curr}&from=home&source=options${lang_param}`;
+            window.location.href = `${brandUrl}/home?acc=options&curr=${curr}&from=home&source=options${lang_param}`;
         });
     }, [toggleDrawer, sendBridgeEvent, current_language, currency]);
 
@@ -192,29 +187,14 @@ const ToggleMenuDrawer = observer(() => {
             <a
                 id='dt_mobile_drawer_toggle'
                 data-testid='dt_mobile_drawer_toggle'
-                onClick={
-                    isBridgeAvailable()
-                        ? async e => {
-                              e.preventDefault();
-                              await handleBackClick();
-                          }
-                        : toggleDrawer
-                }
+                onClick={toggleDrawer}
                 className='header__mobile-drawer-toggle'
             >
-                {isBridgeAvailable() ? (
-                    <LegacyArrowLeft1pxIcon
-                        iconSize='xs'
-                        className='header__mobile-drawer-icon'
-                        fill='var(--color-text-primary)'
-                    />
-                ) : (
-                    <LegacyMenuHamburger1pxIcon
-                        iconSize='xs'
-                        className='header__mobile-drawer-icon'
-                        fill='var(--color-text-primary)'
-                    />
-                )}
+                <LegacyMenuHamburger1pxIcon
+                    iconSize='xs'
+                    className='header__mobile-drawer-icon'
+                    fill='var(--color-text-primary)'
+                />
             </a>
             <MobileDrawer
                 alignment='left'
@@ -234,7 +214,7 @@ const ToggleMenuDrawer = observer(() => {
                     <div className='header__menu-mobile-body-wrapper'>
                         <React.Fragment>
                             <MobileDrawer.Body>
-                                {!isBridgeAvailable() && (
+                                {!isBridgeAvailable && (
                                     <MobileDrawer.Item onClick={handleHomeClick}>
                                         <MenuLink icon={<LegacyHomeOldIcon />} text={localize('Home')} />
                                     </MobileDrawer.Item>
@@ -291,7 +271,7 @@ const ToggleMenuDrawer = observer(() => {
                                     >
                                         <MenuLink
                                             icon={<LegacyLogout1pxIcon />}
-                                            text={isBridgeAvailable() ? localize('Back to app') : localize('Log out')}
+                                            text={isBridgeAvailable ? localize('Back to app') : localize('Log out')}
                                         />
                                     </MobileDrawer.Item>
                                 )}

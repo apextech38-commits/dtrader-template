@@ -20,7 +20,7 @@ jest.mock('@deriv/api', () => ({
 
 jest.mock('App/Hooks/useMobileBridge', () => ({
     useMobileBridge: jest.fn(() => ({
-        isBridgeAvailable: jest.fn(() => false),
+        isBridgeAvailable: false,
     })),
 }));
 
@@ -30,7 +30,7 @@ describe('useNativeAppAllowedTradeTypes', () => {
 
         // Reset to default mocks
         (useMobileBridge as jest.Mock).mockReturnValue({
-            isBridgeAvailable: jest.fn(() => false),
+            isBridgeAvailable: false,
         });
 
         (useRemoteConfig as jest.Mock).mockReturnValue({
@@ -52,7 +52,7 @@ describe('useNativeAppAllowedTradeTypes', () => {
     describe('Web App (Bridge Not Available)', () => {
         it('should return undefined when bridge is not available', () => {
             (useMobileBridge as jest.Mock).mockReturnValue({
-                isBridgeAvailable: jest.fn(() => false),
+                isBridgeAvailable: false,
             });
 
             const { result } = renderHook(() => useNativeAppAllowedTradeTypes());
@@ -64,7 +64,7 @@ describe('useNativeAppAllowedTradeTypes', () => {
     describe('Native Mobile App (Bridge Available)', () => {
         it('should return array of allowed trade types when bridge is available and config is valid', () => {
             (useMobileBridge as jest.Mock).mockReturnValue({
-                isBridgeAvailable: jest.fn(() => true),
+                isBridgeAvailable: true,
             });
 
             (useRemoteConfig as jest.Mock).mockReturnValue({
@@ -83,7 +83,7 @@ describe('useNativeAppAllowedTradeTypes', () => {
 
         it('should return all configured trade types in correct format', () => {
             (useMobileBridge as jest.Mock).mockReturnValue({
-                isBridgeAvailable: jest.fn(() => true),
+                isBridgeAvailable: true,
             });
 
             (useRemoteConfig as jest.Mock).mockReturnValue({
@@ -105,7 +105,7 @@ describe('useNativeAppAllowedTradeTypes', () => {
 
         it('should call useRemoteConfig with true parameter', () => {
             (useMobileBridge as jest.Mock).mockReturnValue({
-                isBridgeAvailable: jest.fn(() => true),
+                isBridgeAvailable: true,
             });
 
             renderHook(() => useNativeAppAllowedTradeTypes());
@@ -119,7 +119,7 @@ describe('useNativeAppAllowedTradeTypes', () => {
             const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
 
             (useMobileBridge as jest.Mock).mockReturnValue({
-                isBridgeAvailable: jest.fn(() => true),
+                isBridgeAvailable: true,
             });
 
             (useRemoteConfig as jest.Mock).mockReturnValue({
@@ -138,7 +138,7 @@ describe('useNativeAppAllowedTradeTypes', () => {
             const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
 
             (useMobileBridge as jest.Mock).mockReturnValue({
-                isBridgeAvailable: jest.fn(() => true),
+                isBridgeAvailable: true,
             });
 
             (useRemoteConfig as jest.Mock).mockReturnValue({
@@ -155,7 +155,7 @@ describe('useNativeAppAllowedTradeTypes', () => {
 
         it('should return empty array when native_app_allowed_trade_types is empty object', () => {
             (useMobileBridge as jest.Mock).mockReturnValue({
-                isBridgeAvailable: jest.fn(() => true),
+                isBridgeAvailable: true,
             });
 
             (useRemoteConfig as jest.Mock).mockReturnValue({
@@ -174,7 +174,7 @@ describe('useNativeAppAllowedTradeTypes', () => {
     describe('Memoization', () => {
         it('should memoize result when dependencies do not change', () => {
             (useMobileBridge as jest.Mock).mockReturnValue({
-                isBridgeAvailable: jest.fn(() => true),
+                isBridgeAvailable: true,
             });
 
             const mockConfig = {
@@ -200,7 +200,7 @@ describe('useNativeAppAllowedTradeTypes', () => {
 
         it('should recompute when remote config data changes', () => {
             (useMobileBridge as jest.Mock).mockReturnValue({
-                isBridgeAvailable: jest.fn(() => true),
+                isBridgeAvailable: true,
             });
 
             (useRemoteConfig as jest.Mock).mockReturnValue({
@@ -230,18 +230,18 @@ describe('useNativeAppAllowedTradeTypes', () => {
         });
 
         it('should recompute when bridge availability changes', () => {
-            let isBridgeAvailable = false;
-
-            (useMobileBridge as jest.Mock).mockImplementation(() => ({
-                isBridgeAvailable: jest.fn(() => isBridgeAvailable),
-            }));
+            (useMobileBridge as jest.Mock).mockReturnValue({
+                isBridgeAvailable: false,
+            });
 
             const { result, rerender } = renderHook(() => useNativeAppAllowedTradeTypes());
 
             expect(result.current).toBeUndefined();
 
             // Change bridge availability
-            isBridgeAvailable = true;
+            (useMobileBridge as jest.Mock).mockReturnValue({
+                isBridgeAvailable: true,
+            });
             rerender();
 
             expect(result.current).toEqual(['Accumulators', 'Vanillas', 'Turbos', 'Multipliers']);

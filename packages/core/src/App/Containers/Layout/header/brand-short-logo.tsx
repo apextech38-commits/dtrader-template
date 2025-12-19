@@ -1,16 +1,15 @@
 import React from 'react';
 
 import { DerivProductBrandLightDerivTraderLogoIcon } from '@deriv/quill-icons';
-import { getBrandHomeUrl } from '@deriv/shared';
-import { observer, useStore } from '@deriv/stores';
+import { observer } from '@deriv/stores';
 
 import { useMobileBridge } from 'App/Hooks/useMobileBridge';
 
 const BrandShortLogo = observer(() => {
-    const { sendBridgeEvent, isBridgeAvailable } = useMobileBridge();
+    const { isBridgeAvailable } = useMobileBridge();
 
     // Hide logo when coming from Flutter mobile app
-    if (isBridgeAvailable()) {
+    if (isBridgeAvailable) {
         return null;
     }
 

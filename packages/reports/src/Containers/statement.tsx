@@ -1,19 +1,17 @@
 import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
-import { Clipboard, DataList, DataTable, Text, usePrevious } from '@deriv/components';
+import { Clipboard, DataList, DataTable, Text } from '@deriv/components';
 import { TSource } from '@deriv/components/src/components/data-table/table-row';
 import { TRow } from '@deriv/components/src/components/types/common.types';
 import {
     capitalizeFirstLetter,
     extractInfoFromShortcode,
-    formatDate,
     getContractPath,
     getUnsupportedContracts,
     initMoment,
 } from '@deriv/shared';
 import { observer, useStore } from '@deriv/stores';
-import { Analytics } from '@deriv-com/analytics';
 import { Localize, useTranslations } from '@deriv-com/translations';
 import { useDevice } from '@deriv-com/ui';
 
@@ -28,7 +26,7 @@ import { ReportsMeta } from '../Components/reports-meta';
 import { getStatementTableColumnsTemplate } from '../Constants/data-table-constants';
 
 type TGetStatementTableColumnsTemplate = ReturnType<typeof getStatementTableColumnsTemplate>;
-type TColIndex = 'icon' | 'refid' | 'currency' | 'date' | 'action_type' | 'amount' | 'balance';
+type TColIndex = 'icon' | 'refid' | 'currency' | 'transaction_time' | 'action_type' | 'amount' | 'balance';
 
 type TAction =
     | {
@@ -85,8 +83,7 @@ const DetailsComponent = ({ message = '', action_type = '' }: TDetailsComponent)
 
 export const getRowAction = (row_obj: TSource | TRow): TAction => {
     let action: TAction = {};
-    const { action_type, desc, id, is_sold, longcode, purchase_time, shortcode, transaction_time, withdrawal_details } =
-        row_obj;
+    const { action_type, desc, id, longcode, shortcode, withdrawal_details } = row_obj;
     if (id && ['buy', 'sell'].includes(action_type)) {
         const contract_type = extractInfoFromShortcode(shortcode)?.category?.toUpperCase();
         const unsupportedContractConfig = getUnsupportedContracts()[contract_type as TUnsupportedContractType];
@@ -156,9 +153,6 @@ const Statement = observer(({ component_icon }: TStatement) => {
         onMount,
         onUnmount,
     } = statement;
-    const prev_action_type = usePrevious(action_type);
-    const prev_date_from = usePrevious(date_from);
-    const prev_date_to = usePrevious(date_to);
     const { isMobile } = useDevice();
 
     React.useEffect(() => {
@@ -211,7 +205,7 @@ const Statement = observer(({ component_icon }: TStatement) => {
                 />
             </div>
             <div className='data-list__row'>
-                <DataList.Cell row={row} column={columns_map.date as TDataListCell['column']} />
+                <DataList.Cell row={row} column={columns_map.transaction_time as TDataListCell['column']} />
                 <DataList.Cell
                     className='data-list__row-cell--amount'
                     row={row}

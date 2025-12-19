@@ -121,7 +121,7 @@ export default class ProfitTableStore extends BaseStore {
         this.assertHasValidCache(this.client_loginid, this.clearDateFilter, WS.forgetAll.bind(null, 'proposal'));
         this.client_loginid = this.root_store.client.loginid;
         this.onNetworkStatusChange(this.networkStatusChangeListener);
-        await WS.wait('authorize');
+        await WS.wait('balance');
 
         /* Caching won't work for profit_table because date filtering happens based on `buy_time` of a contract.
         If we already have a cache for a period and if we sell a contract that was purchased in that period

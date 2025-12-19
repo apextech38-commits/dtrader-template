@@ -16,7 +16,7 @@ jest.mock('AppV2/Components/Guide', () => jest.fn(() => <div>MockedGuide</div>))
 
 jest.mock('App/Hooks/useMobileBridge', () => ({
     useMobileBridge: jest.fn(() => ({
-        isBridgeAvailable: jest.fn(() => false),
+        isBridgeAvailable: false,
     })),
 }));
 
@@ -76,7 +76,7 @@ describe('TradeTypes', () => {
 
         // Reset useMobileBridge mock to default (bridge not available)
         (useMobileBridge as jest.Mock).mockReturnValue({
-            isBridgeAvailable: jest.fn(() => false),
+            isBridgeAvailable: false,
         });
     });
     beforeAll(() => {
@@ -123,7 +123,7 @@ describe('TradeTypes', () => {
 
     it('should show "View all" button when mobile bridge is not available (web app)', () => {
         (useMobileBridge as jest.Mock).mockReturnValue({
-            isBridgeAvailable: jest.fn(() => false),
+            isBridgeAvailable: false,
         });
 
         render(mockTradeTypes());
@@ -133,7 +133,7 @@ describe('TradeTypes', () => {
 
     it('should hide "View all" button when mobile bridge is available (native mobile app)', () => {
         (useMobileBridge as jest.Mock).mockReturnValue({
-            isBridgeAvailable: jest.fn(() => true),
+            isBridgeAvailable: true,
         });
 
         render(mockTradeTypes());

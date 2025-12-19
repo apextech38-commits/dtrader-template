@@ -181,7 +181,7 @@ export type TCurrentAccount = {
     email?: string;
     landing_company_shortcode?: string;
     residence?: string;
-    session_token: string;
+    token: string;
     session_start: number;
     first_name?: string;
     last_name?: string;
@@ -234,11 +234,6 @@ export type TClientStore = {
     setEmail: (email: string) => void;
     resetVirtualBalance: () => Promise<void>;
     logout: () => Promise<LogOutResponse>;
-    getToken: () => string;
-    authenticateV2: (oneTimeToken?: string) => Promise<any>;
-    storeSessionToken: (token: string) => void;
-    getSessionToken: () => string | null;
-    clearSessionToken: () => void;
     removeTokenFromUrl: () => void;
     is_crypto: (currency?: string) => boolean;
     responseAuthorize: (response: any) => void;

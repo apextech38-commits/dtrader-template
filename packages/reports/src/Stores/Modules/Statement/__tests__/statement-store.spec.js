@@ -195,7 +195,7 @@ describe('StatementStore', () => {
 
         expect(WS.forgetAll).toHaveBeenCalled();
         expect(statement_store.client_loginid).toBe(root_store.client.loginid);
-        expect(WS.wait).toHaveBeenCalledWith('authorize');
+        expect(WS.wait).toHaveBeenCalledWith('balance');
     });
 
     it('should forget proposal calls on Unmount', () => {

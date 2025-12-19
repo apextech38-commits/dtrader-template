@@ -1,8 +1,5 @@
 const DerivAPIBasic = require('@deriv/deriv-api/dist/DerivAPIBasic');
-const getSocketURL = require('@deriv/shared').getSocketURL;
-const cloneObject = require('@deriv/shared').cloneObject;
-const State = require('@deriv/shared').State;
-const getBrandName = require('@deriv/shared').getBrandName;
+const { getCompleteWebSocketURL, getAccountId, getAccountType, cloneObject, State } = require('@deriv/shared');
 const SocketCache = require('./socket_cache');
 const APIMiddleware = require('./api_middleware');
 
@@ -18,6 +15,7 @@ const BinarySocketBase = (() => {
     let is_disconnect_called = false;
     let is_connected_before = false;
     let is_switching_socket = false;
+    let close_handler = null;
 
     const availability = {
         is_up: true,
@@ -29,7 +27,8 @@ const BinarySocketBase = (() => {
         if (is_mock_server) {
             return 'ws://127.0.0.1:42069';
         }
-        return `wss://${getSocketURL()}/websockets/v3?brand=${getBrandName().toLowerCase()}`;
+
+        return getCompleteWebSocketURL();
     };
 
     const isReady = () => hasReadyState(1);
@@ -42,10 +41,19 @@ const BinarySocketBase = (() => {
         binary_socket.close();
     };
 
-    const closeAndOpenNewConnection = (session_id = '') => {
+    const closeAndOpenNewConnection = () => {
         close();
         is_switching_socket = true;
-        openNewConnection(session_id);
+        openNewConnection();
+    };
+
+    const handleAccountTypeChange = new_account_type => {
+        const current_account_type = getAccountType();
+
+        if (current_account_type !== new_account_type) {
+            localStorage.setItem('account_type', new_account_type);
+            closeAndOpenNewConnection();
+        }
     };
 
     const hasReadyState = (...states) => binary_socket && states.some(s => binary_socket.readyState === s);
@@ -77,19 +85,59 @@ const BinarySocketBase = (() => {
             is_disconnect_called = false;
             binary_socket = new WebSocket(getSocketUrl(session_id));
 
+            // Remove previous close handler if it exists to prevent memory leaks
+            if (close_handler && binary_socket) {
+                binary_socket.removeEventListener('close', close_handler);
+            }
+
+            // Add native WebSocket close event listener to detect abnormal closures
+            close_handler = event => {
+                // Check for abnormal closure (code 1006) which indicates connection rejected
+                if (event.code === 1006 && getAccountId()) {
+                    // Clear any credentials that might be invalid
+                    const { clearAccountId } = require('@deriv/shared');
+                    clearAccountId();
+                    localStorage.removeItem('account_type');
+                    localStorage.removeItem('active_loginid');
+                    sessionStorage.removeItem('active_loginid');
+                    localStorage.removeItem('current_account');
+
+                    // Notify via callback if configured
+                    if (typeof config.onAuthError === 'function') {
+                        config.onAuthError({
+                            code: event.code,
+                            message: 'Invalid credentials. Connection rejected by server.',
+                        });
+                    }
+
+                    // Reconnect to public endpoint after a short delay
+                    setTimeout(() => {
+                        if (isClose()) {
+                            openNewConnection();
+                        }
+                    }, 100);
+                }
+            };
+
+            binary_socket.addEventListener('close', close_handler);
+
             deriv_api = new DerivAPIBasic({
                 connection: binary_socket,
                 storage: SocketCache,
-                middleware: new APIMiddleware(config, session_id),
+                middleware: new APIMiddleware(config),
             });
         }
 
         deriv_api.onOpen().subscribe(() => {
             config.wsEvent('open');
 
-            if (client_store.is_logged_in) {
-                const authorize_token = client_store.getToken();
-                deriv_api.authorize(authorize_token);
+            // Remove automatic authorization - server handles it via account_id
+            // Balance subscription will serve as auth confirmation
+            const account_id = getAccountId();
+
+            if (account_id) {
+                // Subscribe to balance immediately - this also confirms authorization
+                subscribeBalance();
             }
 
             if (typeof config.onOpen === 'function') {
@@ -363,11 +411,6 @@ const BinarySocketBase = (() => {
         });
     };
 
-    const getSessionToken = oneTimeToken =>
-        deriv_api.send({
-            get_session_token: oneTimeToken,
-        });
-
     const changeEmail = api_request => deriv_api.send(api_request);
 
     return {
@@ -394,11 +437,17 @@ const BinarySocketBase = (() => {
         setOnReconnect: onReconnect => {
             config.onReconnect = onReconnect;
         },
+        setOnAuthError: onAuthError => {
+            config.onAuthError = onAuthError;
+        },
         removeOnReconnect: () => {
             delete config.onReconnect;
         },
         removeOnDisconnect: () => {
             delete config.onDisconnect;
+        },
+        removeOnAuthError: () => {
+            delete config.onAuthError;
         },
         cache: delegateToObject({}, () => deriv_api.cache),
         storage: delegateToObject({}, () => deriv_api.storage),
@@ -443,12 +492,12 @@ const BinarySocketBase = (() => {
         transferBetweenAccounts,
         fetchLoginHistory,
         closeAndOpenNewConnection,
+        handleAccountTypeChange,
         accountStatistics,
         tradingServers,
         tradingPlatformNewAccount,
         triggerMt5DryRun,
         getServiceToken,
-        getSessionToken,
         changeEmail,
     };
 })();
@@ -484,7 +533,16 @@ const proxyForAuthorize = obj =>
             if (target[field] && typeof target[field] !== 'function') {
                 return proxyForAuthorize(target[field]);
             }
-            return (...args) => BinarySocketBase?.wait('authorize')?.then(() => target[field](...args));
+            return (...args) => {
+                // Wait for balance response instead of authorize (balance serves as auth confirmation)
+                const account_id = getAccountId();
+                if (account_id) {
+                    // Wait for balance (which confirms authorization)
+                    return BinarySocketBase?.wait('balance')?.then(() => target[field](...args));
+                }
+                // Not logged in, execute without waiting
+                return target[field](...args);
+            };
         },
     });
 

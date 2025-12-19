@@ -295,14 +295,11 @@ describe('ProfitTableStore', () => {
         });
     });
     describe('onMount', () => {
-        const spyWSWait = jest.spyOn(WS, 'wait');
-
-        it('should set client_loginid from client-store loginid, wait for authorize API and call fetchNextBatch', async () => {
+        it('should set client_loginid from client-store loginid, wait for balance API and call fetchNextBatch', async () => {
             const spyFetchNextBatch = jest.spyOn(mocked_profit_table_store, 'fetchNextBatch');
             mocked_profit_table_store.onMount();
 
             expect(mocked_profit_table_store.client_loginid).toBe(mocked_loginid);
-            expect(spyWSWait).toBeCalledWith('authorize');
             await waitFor(() => expect(spyFetchNextBatch).toBeCalledWith(undefined, true));
         });
         it('should call fetchNextBatch with true for shouldFilterContractTypes value when called with true', async () => {

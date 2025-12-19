@@ -109,13 +109,32 @@ export const getDomainName = () => {
 };
 
 /**
- * Gets the WebSocket URL based on environment and account type
+ * Gets the WebSocket server URL with base path
  * @param isProductionEnv - Whether the current environment is production
- * @param accountType - 'real' or 'demo'
- * @returns WebSocket server URL
+ * @returns WebSocket server URL with base path (e.g., "staging-core.api.deriv.com/options/v1/ws")
  */
-export const getWebSocketURL = (isProductionEnv: boolean, accountType: 'real' | 'demo'): string => {
+export const getWebSocketURL = (isProductionEnv: boolean): string => {
+    return isProductionEnv ? config_data.platform.websocket.production : config_data.platform.websocket.staging;
+};
+
+/**
+ * Gets the whoami endpoint URL
+ * @param isProductionEnv - Whether the current environment is production
+ * @returns Whoami endpoint URL (e.g., "https://auth.deriv.com/sessions/whoami")
+ */
+export const getWhoAmIURL = (isProductionEnv: boolean): string => {
     return isProductionEnv
-        ? config_data.platform.websocket.production[accountType]
-        : config_data.platform.websocket.staging[accountType];
+        ? config_data.platform.whoami_endpoint.production
+        : config_data.platform.whoami_endpoint.staging;
+};
+
+/**
+ * Gets the logout endpoint URL
+ * @param isProductionEnv - Whether the current environment is production
+ * @returns Logout endpoint URL (e.g., "https://auth.deriv.com/self-service/logout/browser")
+ */
+export const getLogoutURL = (isProductionEnv: boolean): string => {
+    return isProductionEnv
+        ? config_data.platform.logout_endpoint.production
+        : config_data.platform.logout_endpoint.staging;
 };

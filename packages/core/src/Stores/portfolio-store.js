@@ -116,7 +116,7 @@ export default class PortfolioStore extends BaseStore {
             this.clearTable();
         }
         this.is_loading = true;
-        await WS.wait('authorize');
+        await WS.wait('balance');
         WS.portfolio().then(this.portfolioHandler);
         WS.subscribeProposalOpenContract(null, this.proposalOpenContractQueueHandler);
         WS.subscribeTransaction(this.transactionHandler);

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useIntercom, useRemoteConfig, useTrackJS } from '@deriv/api';
+import { useTrackJS } from '@deriv/api';
 import { observer, useStore } from '@deriv/stores';
 import { ThemeProvider } from '@deriv-com/quill-ui';
 import { useTranslations } from '@deriv-com/translations';
@@ -27,11 +27,12 @@ const AppContent: React.FC<{ passthrough: any }> = observer(({ passthrough }) =>
 
     const { switchLanguage } = useTranslations();
 
-    const { data } = useRemoteConfig(true);
-    const { cs_chat_intercom } = data;
+    // NOTE: Disabled Intercom until further notice
+    // const { data } = useRemoteConfig(true);
+    // const { cs_chat_intercom } = data;
 
-    const token = current_account?.session_token || null;
-    useIntercom(cs_chat_intercom, token);
+    // const token = current_account?.token || null;
+    // useIntercom(cs_chat_intercom, token);
 
     const html = document.documentElement;
 

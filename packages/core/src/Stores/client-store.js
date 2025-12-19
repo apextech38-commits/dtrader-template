@@ -3,14 +3,14 @@ import { action, computed, makeObservable, observable, reaction, runInAction, wh
 import moment from 'moment';
 
 import {
+    clearAccountId,
     filterUrlQuery,
+    getAccountId,
     getAccountType,
     getBrandDomain,
     isCryptocurrency,
     isMobile,
     LocalStore,
-    mapErrorMessage,
-    redirectToLogin,
     removeCookies,
     routes,
     SessionStore,
@@ -20,7 +20,7 @@ import { Analytics } from '@deriv-com/analytics';
 import { getInitialLanguage, localize } from '@deriv-com/translations';
 import { CountryUtils } from '@deriv-com/utils';
 
-import { requestLogout, WS } from 'Services';
+import { checkWhoAmI, requestRestLogout, WS } from 'Services';
 import BinarySocketGeneral from 'Services/socket-general';
 
 import { getClientAccountType } from './Helpers/client';
@@ -53,6 +53,7 @@ export default class ClientStore extends BaseStore {
     selected_currency = '';
 
     has_cookie_account = false;
+    tab_visibility_handler = null;
 
     constructor(root_store) {
         const local_storage_properties = [];
@@ -111,14 +112,9 @@ export default class ClientStore extends BaseStore {
             logout: action.bound,
             setLogout: action.bound,
             setShouldRedirectToLogin: action.bound,
-            getToken: action.bound,
             init: action.bound,
             resetVirtualBalance: action.bound,
-            authenticateV2: action.bound,
-            storeSessionToken: action.bound,
-            getStoredSessionToken: action.bound,
-            clearSessionToken: action.bound,
-            removeTokenFromUrl: action.bound,
+            waitForBalanceResponse: action.bound,
             is_crypto: action.bound,
         });
 
@@ -171,10 +167,10 @@ export default class ClientStore extends BaseStore {
     }
 
     get is_logged_in() {
-        const hasSessionToken = !!this.getStoredSessionToken();
+        const hasAccountId = !!getAccountId();
         const hasCurrentAccountLoginId = !!this.current_account?.loginid;
         const hasLoginId = !!this.loginid;
-        return hasSessionToken && hasCurrentAccountLoginId && hasLoginId;
+        return hasAccountId && hasCurrentAccountLoginId && hasLoginId;
     }
 
     get is_virtual() {
@@ -275,7 +271,6 @@ export default class ClientStore extends BaseStore {
                 email: authorize.email || '',
                 landing_company_shortcode: authorize.landing_company_name || '',
                 residence: authorize.country || '',
-                session_token: this.getStoredSessionToken(),
                 session_start: parseInt(moment().utc().valueOf() / 1000),
             };
 
@@ -286,6 +281,10 @@ export default class ClientStore extends BaseStore {
         if (this.user_id) {
             localStorage.setItem('active_user_id', this.user_id);
         }
+
+        // Store active_loginid for backward compatibility with notification system and multi-tab sync
+        localStorage.setItem('active_loginid', authorize.loginid);
+        sessionStorage.setItem('active_loginid', authorize.loginid);
 
         // Store current account
         localStorage.setItem(storage_key, JSON.stringify(this.current_account));
@@ -310,6 +309,18 @@ export default class ClientStore extends BaseStore {
     };
 
     async init() {
+        // Remove any legacy token parameters from URL
+        this.removeTokenFromUrl();
+
+        // Set up auth error handler for WebSocket code 1006 errors
+        BinarySocket.setOnAuthError(error => {
+            this.root_store.common.setError(true, {
+                header: localize('Authentication Failed'),
+                message: error.message || localize('Invalid credentials. Please try again.'),
+                should_show_refresh: false,
+            });
+        });
+
         let search = '';
         try {
             search = SessionStore?.get?.('signup_query_param') || window?.location?.search || '';
@@ -322,42 +333,24 @@ export default class ClientStore extends BaseStore {
         const action_param = search_params?.get('action');
         const loginid_param = search_params?.get('loginid');
 
-        if (!window.location.pathname.endsWith(routes.index) && /chart_type|interval|symbol|trade_type/.test(search)) {
-            window.history.replaceState({}, document.title, routes.index + search);
-        }
-
-        const urlParams = new URLSearchParams(search);
-        const oneTimeToken = urlParams.get('token');
-        const existingSessionToken = this.getStoredSessionToken();
-
+        const account_id = getAccountId();
         let authorize_response;
 
-        if (oneTimeToken) {
-            this.removeTokenFromUrl();
-            authorize_response = await this.authenticateV2(oneTimeToken);
-        } else if (existingSessionToken) {
-            authorize_response = await this.authenticateV2(null);
+        if (account_id) {
+            // Wait for balance response which serves as authorization
+            try {
+                authorize_response = await this.waitForBalanceResponse();
+            } catch (error) {
+                // eslint-disable-next-line no-console
+                console.error('[Auth] Balance timeout:', error);
+                // Clear invalid credentials and retry as public
+                clearAccountId();
+                localStorage.removeItem('account_type');
+                authorize_response = null;
+            }
         } else {
             // No authentication available - continue with logged-out state
             authorize_response = null;
-        }
-
-        // Handle authentication errors
-        if (authorize_response?.error) {
-            await this.logout();
-            this.root_store.common.setError(true, {
-                header: mapErrorMessage(authorize_response.error),
-                code: authorize_response.error.code,
-                message: localize('Please Log in'),
-                should_show_refresh: false,
-                redirect_label: localize('Log in'),
-                redirectOnClick: () => {
-                    redirectToLogin();
-                },
-            });
-            this.setIsLoggingIn(false);
-            this.setInitialized(false);
-            return false;
         }
 
         // Handle special action parameters and user_id for both logged-in and logged-out states
@@ -372,7 +365,7 @@ export default class ClientStore extends BaseStore {
 
         this.user_id = LocalStore.get('active_user_id');
 
-        // Load current account from localStorage if not already set by authenticateV2
+        // Load current account from localStorage if not already set
         if (!this.current_account) {
             const stored_account = LocalStore.getObject(storage_key);
             if (stored_account) {
@@ -384,6 +377,10 @@ export default class ClientStore extends BaseStore {
         if (authorize_response) {
             // Ensure loginid is set from the authorize response
             this.setLoginId(authorize_response.authorize.loginid);
+
+            // Store active_loginid for backward compatibility
+            localStorage.setItem('active_loginid', authorize_response.authorize.loginid);
+            sessionStorage.setItem('active_loginid', authorize_response.authorize.loginid);
 
             BinarySocketGeneral.authorizeAccount(authorize_response);
             Analytics.identifyEvent(this.user_id);
@@ -451,15 +448,100 @@ export default class ClientStore extends BaseStore {
             }, 200);
         }
 
+        // Set up visibility change listener to check whoami when tab becomes visible
+        // Note: Initial whoami check is now done at the start of init() before WebSocket connection
+        this.setupVisibilityListener();
+
         return true;
+    }
+
+    /**
+     * Checks session validity via whoami service and handles cleanup if needed
+     */
+    async handleWhoAmI() {
+        const result = await checkWhoAmI();
+
+        // Only trigger cleanup if we get 401 error AND have account_id (expect to be logged in)
+        // This means user logged out from Deriv home. If no account_id, we're on public - ignore 401
+        if (result.error?.code === 401 && getAccountId()) {
+            await this.cleanUp();
+        }
+    }
+
+    /**
+     * Sets up visibility change listener to check whoami when tab becomes visible
+     */
+    setupVisibilityListener() {
+        // Remove existing listener if any
+        this.removeVisibilityListener();
+
+        // Create handler function
+        this.tab_visibility_handler = () => {
+            if (document.visibilityState === 'visible') {
+                // Tab became visible - check whoami
+                this.handleWhoAmI();
+            }
+        };
+
+        // Add listener
+        document.addEventListener('visibilitychange', this.tab_visibility_handler);
+    }
+
+    /**
+     * Removes the visibility change listener
+     */
+    removeVisibilityListener() {
+        if (this.tab_visibility_handler) {
+            document.removeEventListener('visibilitychange', this.tab_visibility_handler);
+            this.tab_visibility_handler = null;
+        }
+    }
+
+    waitForBalanceResponse() {
+        return new Promise((resolve, reject) => {
+            let subscription = null;
+            let balance_received = false;
+
+            const timeout = setTimeout(() => {
+                if (subscription) subscription.unsubscribe();
+                reject(new Error('Balance response timeout'));
+            }, 10000); // 10 second timeout
+
+            // Subscribe to messages using deriv_api's onMessage
+            subscription = BinarySocket.get()
+                .onMessage()
+                .subscribe(({ data: response }) => {
+                    if (response.msg_type === 'balance' && !balance_received) {
+                        balance_received = true;
+                        clearTimeout(timeout);
+
+                        const balance_data = response.balance;
+
+                        // Transform balance response to authorize format
+                        const authorize_response = {
+                            authorize: {
+                                loginid: balance_data.loginid || getAccountId(),
+                                balance: balance_data.balance,
+                                currency: balance_data.currency || 'USD',
+                                email: balance_data.email || '',
+                                landing_company_name: balance_data.landing_company_name || 'svg',
+                                country: balance_data.country || '',
+                                user_id: balance_data.user_id || '',
+                                preferred_language: balance_data.preferred_language || 'EN',
+                            },
+                        };
+
+                        // Unsubscribe from messages
+                        subscription.unsubscribe();
+
+                        resolve(authorize_response);
+                    }
+                });
+        });
     }
 
     setLoginId(loginid) {
         this.loginid = loginid;
-    }
-
-    getToken() {
-        return this.getStoredSessionToken();
     }
 
     async getAnalyticsConfig(isLoggedOut = false) {
@@ -537,10 +619,8 @@ export default class ClientStore extends BaseStore {
     }
 
     async cleanUp() {
-        const hasSessionToken = !!this.getStoredSessionToken();
-        if (hasSessionToken) {
-            return;
-        }
+        // Remove visibility listener
+        this.removeVisibilityListener();
 
         // Clean up notifications
         const notification_messages = LocalStore.getObject('notification_messages');
@@ -566,6 +646,10 @@ export default class ClientStore extends BaseStore {
         localStorage.setItem('active_user_id', this.user_id);
         localStorage.setItem(storage_key, JSON.stringify(this.current_account));
 
+        // Clear account_id and account_type from localStorage
+        clearAccountId();
+        localStorage.removeItem('account_type');
+
         Analytics.reset();
 
         runInAction(() => {
@@ -573,6 +657,9 @@ export default class ClientStore extends BaseStore {
             this.responsePayoutCurrencies(['USD']);
         });
         this.root_store.notifications.removeAllNotificationMessages(true);
+
+        // Drop WebSocket connection and reconnect to public endpoint
+        BinarySocket.closeAndOpenNewConnection();
     }
 
     setShouldRedirectToLogin(should_redirect_user_to_login) {
@@ -580,15 +667,11 @@ export default class ClientStore extends BaseStore {
     }
 
     async logout() {
-        // TODO: [add-client-action] - Move logout functionality to client store
-        const response = await requestLogout();
+        const response = await requestRestLogout();
 
         if (response?.logout === 1) {
             await this.cleanUp();
             this.setLogout(true);
-
-            // Show success modal after successful logout
-            this.root_store.ui.toggleLogoutSuccessModal(true);
         }
 
         return response;
@@ -597,105 +680,6 @@ export default class ClientStore extends BaseStore {
     setLogout(is_logged_out) {
         this.has_logged_out = is_logged_out;
         if (this.root_store.common.has_error) this.root_store.common.setError(false, null);
-    }
-
-    // V2 Authentication Method
-    async authenticateV2(oneTimeToken) {
-        try {
-            this.setIsLoggingIn(true);
-
-            let sessionToken;
-
-            if (oneTimeToken) {
-                const sessionResponse = await WS.getSessionToken(oneTimeToken);
-
-                if (sessionResponse.error) {
-                    return {
-                        error: {
-                            code: 'TokenExchangeError',
-                            message: mapErrorMessage(sessionResponse.error),
-                        },
-                    };
-                }
-
-                sessionToken = sessionResponse.get_session_token.token;
-                this.storeSessionToken(sessionToken);
-            } else {
-                sessionToken = this.getStoredSessionToken();
-
-                if (!sessionToken) {
-                    return {
-                        error: {
-                            code: 'NoSessionToken',
-                            message: 'No valid session token available',
-                        },
-                    };
-                }
-            }
-
-            // Authorize with session token
-            const authorizeResponse = await BinarySocket.authorize(sessionToken);
-
-            if (authorizeResponse.error) {
-                this.clearSessionToken();
-                return authorizeResponse;
-            }
-
-            // Process successful authorization
-            const { authorize } = authorizeResponse;
-            const loginid = authorize.loginid;
-
-            // Store session info in localStorage
-            localStorage.setItem('active_loginid', loginid);
-            sessionStorage.setItem('active_loginid', loginid);
-
-            // Process authorization response - this will set current_account with runInAction
-            this.responseAuthorize(authorizeResponse);
-
-            this.setIsLoggingIn(false);
-            return authorizeResponse;
-        } catch (error) {
-            this.setIsLoggingIn(false);
-
-            return {
-                error: {
-                    code: 'UnexpectedAuthError',
-                    message: mapErrorMessage(error) || localize('Unexpected authentication error'),
-                },
-            };
-        }
-    }
-
-    storeSessionToken(token) {
-        if (token) {
-            localStorage.setItem('session_token', token);
-        }
-    }
-
-    getStoredSessionToken() {
-        // First check cookie for session_token
-        const cookieSessionToken = Cookies.get('session_token');
-        if (cookieSessionToken) {
-            // Store the cookie session_token in localStorage for future use
-            localStorage.setItem('session_token', cookieSessionToken);
-            return cookieSessionToken;
-        }
-
-        // Fall back to localStorage if no cookie value found
-        const localStorageSessionToken = localStorage.getItem('session_token');
-        if (localStorageSessionToken) {
-            return localStorageSessionToken;
-        }
-
-        return null;
-    }
-
-    clearSessionToken() {
-        // Clear session_token from localStorage
-        localStorage.removeItem('session_token');
-
-        // Also clear session_token cookie if it exists
-        Cookies.remove('session_token');
     }
 
     removeTokenFromUrl() {

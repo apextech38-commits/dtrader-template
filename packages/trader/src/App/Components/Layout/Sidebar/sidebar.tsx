@@ -90,7 +90,7 @@ const Sidebar = observer(() => {
             const brandUrl = getBrandUrl();
             const lang_param = current_language ? `&lang=${current_language}` : '';
             const currency = client.currency || '';
-            window.location.href = `${brandUrl}/options?acc=options&curr=${currency}&from=home&source=options${lang_param}`;
+            window.location.href = `${brandUrl}/home?acc=options&curr=${currency}&from=home&source=options${lang_param}`;
         });
     };
 

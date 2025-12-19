@@ -1,10 +1,13 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
+
+import { formatMoney } from '@deriv/shared';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
+import { useMobileBridge } from 'App/Hooks/useMobileBridge';
+
 import { AccountActions } from '../account-actions';
-import { useLocation } from 'react-router-dom';
-import { formatMoney } from '@deriv/shared';
-import { useDevice } from '@deriv-com/ui';
 
 // Mock dependencies
 jest.mock('react-router-dom', () => ({
@@ -26,8 +29,18 @@ jest.mock('@deriv/shared', () => ({
     },
 }));
 
+const mockSendBridgeEvent = jest.fn();
+const mockUseDevice = jest.fn();
+
+jest.mock('App/Hooks/useMobileBridge', () => ({
+    useMobileBridge: jest.fn(() => ({
+        sendBridgeEvent: mockSendBridgeEvent,
+        isBridgeAvailable: false,
+    })),
+}));
+
 jest.mock('@deriv-com/ui', () => ({
-    useDevice: jest.fn(),
+    useDevice: () => mockUseDevice(),
 }));
 
 jest.mock('../login-button-v2.tsx', () => ({
@@ -99,11 +112,6 @@ jest.mock(
     { virtual: true }
 );
 
-// Mock DerivAppChannel
-const mockDerivAppChannel = {
-    postMessage: jest.fn(),
-};
-
 describe('AccountActions component', () => {
     // Default props
     const default_props = {
@@ -116,10 +124,13 @@ describe('AccountActions component', () => {
     beforeEach(() => {
         jest.clearAllMocks();
         (useLocation as jest.Mock).mockReturnValue({ pathname: '/some-path' });
-        (useDevice as jest.Mock).mockReturnValue({ isDesktop: true });
+        mockUseDevice.mockReturnValue({ isDesktop: true });
+        (useMobileBridge as jest.Mock).mockReturnValue({
+            sendBridgeEvent: mockSendBridgeEvent,
+            isBridgeAvailable: false,
+        });
         (formatMoney as jest.Mock).mockImplementation((currency, balance) => `${balance} ${currency}`);
-        // Clear DerivAppChannel from window
-        delete (window as any).DerivAppChannel;
+        mockSendBridgeEvent.mockClear();
     });
 
     it('should render AccountInfo when logged in', async () => {
@@ -137,20 +148,20 @@ describe('AccountActions component', () => {
     });
 
     it('should not render logout button on mobile', () => {
-        (useDevice as jest.Mock).mockReturnValue({ isDesktop: false });
+        mockUseDevice.mockReturnValue({ isDesktop: false });
 
         render(<AccountActions {...default_props} />);
 
         expect(screen.queryByText('Log out')).not.toBeInTheDocument();
     });
 
-    it('should call onClickLogout when logout button is clicked', async () => {
+    it('should call sendBridgeEvent with fallback when logout button is clicked', async () => {
         render(<AccountActions {...default_props} />);
 
         const logout_button = screen.getByText('Log out');
         await userEvent.click(logout_button);
 
-        expect(default_props.onClickLogout).toHaveBeenCalledTimes(1);
+        expect(mockSendBridgeEvent).toHaveBeenCalledWith('trading:back', default_props.onClickLogout);
     });
 
     it('should render AccountInfo with formatted balance', () => {
@@ -159,90 +170,27 @@ describe('AccountActions component', () => {
         expect(screen.getByTestId('dt_account_info')).toHaveTextContent(/1234\.56 EUR/);
     });
 
-    it('should show "Back to app" text on mobile when DerivAppChannel is available', () => {
-        (useDevice as jest.Mock).mockReturnValue({ isDesktop: false });
-        (window as any).DerivAppChannel = mockDerivAppChannel;
+    it('should show "Back to app" text when bridge is available', () => {
+        (useMobileBridge as jest.Mock).mockReturnValue({
+            sendBridgeEvent: mockSendBridgeEvent,
+            isBridgeAvailable: true,
+        });
 
         render(<AccountActions {...default_props} />);
 
-        // Since logout button is not visible on mobile in the original logic,
-        // we need to test this through the LogoutButton component directly
-        // This test verifies the button text logic
-        expect(mockDerivAppChannel).toBeDefined();
+        // Logout button should show "Back to app" when bridge is available
+        expect(screen.getByText('Back to app')).toBeInTheDocument();
     });
 
-    it('should use Flutter channel postMessage on mobile when DerivAppChannel is available and logout is clicked', async () => {
-        // Mock mobile device
-        (useDevice as jest.Mock).mockReturnValue({ isDesktop: false });
-        
-        // Add DerivAppChannel to window
-        (window as any).DerivAppChannel = mockDerivAppChannel;
-
-        // For this test, we need to render the LogoutButton directly since it's not visible on mobile
-        // in the AccountActions component. Let's test the logic through a custom render
-        const TestLogoutButton = () => {
-            const { isDesktop } = useDevice();
-            const handleLogoutClick = () => {
-                if (!isDesktop && window.DerivAppChannel) {
-                    window.DerivAppChannel.postMessage(JSON.stringify({ event: 'trading:back' }));
-                } else {
-                    default_props.onClickLogout();
-                }
-            };
-            return <button onClick={handleLogoutClick}>Test Logout</button>;
-        };
-
-        render(<TestLogoutButton />);
-
-        const logout_button = screen.getByText('Test Logout');
-        await userEvent.click(logout_button);
-
-        expect(mockDerivAppChannel.postMessage).toHaveBeenCalledWith(
-            JSON.stringify({ event: 'trading:back' })
-        );
-        expect(default_props.onClickLogout).not.toHaveBeenCalled();
-    });
-
-    it('should fallback to regular logout on mobile when DerivAppChannel is not available', async () => {
-        // Mock mobile device
-        (useDevice as jest.Mock).mockReturnValue({ isDesktop: false });
-        
-        // Ensure DerivAppChannel is not available
-        delete (window as any).DerivAppChannel;
-
-        const TestLogoutButton = () => {
-            const { isDesktop } = useDevice();
-            const handleLogoutClick = () => {
-                if (!isDesktop && window.DerivAppChannel) {
-                    window.DerivAppChannel.postMessage(JSON.stringify({ event: 'trading:back' }));
-                } else {
-                    default_props.onClickLogout();
-                }
-            };
-            return <button onClick={handleLogoutClick}>Test Logout</button>;
-        };
-
-        render(<TestLogoutButton />);
-
-        const logout_button = screen.getByText('Test Logout');
-        await userEvent.click(logout_button);
-
-        expect(default_props.onClickLogout).toHaveBeenCalledTimes(1);
-    });
-
-    it('should use regular logout on desktop even when DerivAppChannel is available', async () => {
-        // Mock desktop device
-        (useDevice as jest.Mock).mockReturnValue({ isDesktop: true });
-        
-        // Add DerivAppChannel to window
-        (window as any).DerivAppChannel = mockDerivAppChannel;
+    it('should show "Log out" text when bridge is not available', () => {
+        (useMobileBridge as jest.Mock).mockReturnValue({
+            sendBridgeEvent: mockSendBridgeEvent,
+            isBridgeAvailable: false,
+        });
 
         render(<AccountActions {...default_props} />);
 
-        const logout_button = screen.getByText('Log out');
-        await userEvent.click(logout_button);
-
-        expect(default_props.onClickLogout).toHaveBeenCalledTimes(1);
-        expect(mockDerivAppChannel.postMessage).not.toHaveBeenCalled();
+        // Logout button should show "Log out" when bridge is not available
+        expect(screen.getByText('Log out')).toBeInTheDocument();
     });
 });

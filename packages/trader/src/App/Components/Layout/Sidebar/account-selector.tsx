@@ -3,15 +3,22 @@ import { LegacyLogout1pxIcon } from '@deriv/quill-icons';
 import { observer, useStore } from '@deriv/stores';
 import { localize } from '@deriv-com/translations';
 
+import { useMobileBridge } from 'App/Hooks/useMobileBridge';
+
 const AccountSelector = observer(() => {
     const { client, ui } = useStore();
     const { logout, is_logged_in } = client;
     const { closeSidebarFlyout } = ui;
+    const { sendBridgeEvent, isBridgeAvailable } = useMobileBridge();
 
     const handleLogout = () => {
         closeSidebarFlyout();
-        logout();
+        sendBridgeEvent('trading:back', () => {
+            logout();
+        });
     };
+
+    const buttonText = isBridgeAvailable ? localize('Back to app') : localize('Log out');
 
     return (
         <div className='flyout-selector'>
@@ -21,7 +28,7 @@ const AccountSelector = observer(() => {
                     onClick={handleLogout}
                     icon={<LegacyLogout1pxIcon iconSize='xs' fill='var(--color-text-primary)' />}
                 >
-                    <Text>{localize('Log out')}</Text>
+                    <Text>{buttonText}</Text>
                 </Button>
             )}
         </div>

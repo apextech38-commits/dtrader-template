@@ -13,10 +13,9 @@ import { useMobileBridge } from 'App/Hooks/useMobileBridge';
 const useNativeAppAllowedTradeTypes = (): string[] | undefined => {
     const { isBridgeAvailable } = useMobileBridge();
     const { data: remoteConfigData } = useRemoteConfig(true);
-    const is_bridge_available = isBridgeAvailable();
 
     const nativeAppAllowedTradeTypes = useMemo(() => {
-        if (!is_bridge_available) return undefined;
+        if (!isBridgeAvailable) return undefined;
         // Defensive check for edge cases
         if (!remoteConfigData?.native_app_allowed_trade_types) {
             // eslint-disable-next-line no-console
@@ -25,7 +24,7 @@ const useNativeAppAllowedTradeTypes = (): string[] | undefined => {
             return [];
         }
         return Object.values(remoteConfigData.native_app_allowed_trade_types);
-    }, [remoteConfigData, is_bridge_available]);
+    }, [remoteConfigData, isBridgeAvailable]);
 
     return nativeAppAllowedTradeTypes;
 };

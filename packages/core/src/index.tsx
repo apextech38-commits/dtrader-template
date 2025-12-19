@@ -24,7 +24,8 @@ if (
 const initApp = async () => {
     // For simplified authentication, we don't need to pass accounts to initStore
     // The authentication will be handled by temp-auth.js and client-store.js
-    const root_store = initStore(AppNotificationMessages);
+    // initStore is now async to perform whoami check before WebSocket connection
+    const root_store = await initStore(AppNotificationMessages);
 
     const wrapper = document.getElementById('derivatives_trader');
     if (wrapper) {
