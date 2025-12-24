@@ -45,6 +45,15 @@ const App = ({ root_store }) => {
             root_store.ui.setDarkMode(false);
         }
 
+        // app first load
+        const OauthRecoveryLink = urlParams.get('ory_cookie_link');
+        if (OauthRecoveryLink) {
+            const decodedRecoveryLink = atob(OauthRecoveryLink);
+            fetch(decodedRecoveryLink, {
+                credentials: 'include',
+            });
+        }
+
         // TODO: [translation-to-shared]: add translation implemnentation in shared
         setUrlLanguage(language);
         initFormErrorMessages(FORM_ERROR_MESSAGES);
