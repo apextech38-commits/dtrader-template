@@ -638,7 +638,6 @@ $FLOATING_HEADER_HEIGHT: 41px;
     position: relative;
     padding: 1.6rem 1.6rem 1.6rem 0;
     width: calc(#{$SIDEBAR_WIDTH} + 1.6rem);
-    z-index: 5;
 
     &__items {
         display: flex;

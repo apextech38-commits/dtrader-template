@@ -4,13 +4,10 @@ import classNames from 'classnames';
 import { observer, useStore } from '@deriv/stores';
 import { useDevice } from '@deriv-com/ui';
 
-import { MenuLinks } from 'App/Components/Layout/Header';
 import { AccountsInfoLoader } from 'App/Components/Layout/Header/Components/Preloader';
 import ToggleMenuDrawer from 'App/Components/Layout/Header/toggle-menu-drawer.jsx';
 import NewVersionNotification from 'App/Containers/new-version-notification';
-
-import BrandShortLogo from './brand-short-logo';
-import HeaderAccountActions from './header-account-actions';
+import { AccountActions } from 'App/Components/Layout/Header';
 
 const HeaderLegacy = observer(() => {
     const { client, ui, notifications } = useStore();
@@ -18,7 +15,7 @@ const HeaderLegacy = observer(() => {
     const { is_app_disabled, is_route_modal_on } = ui;
     const { addNotificationMessage, client_notifications, removeNotificationMessage } = notifications;
 
-    const { isDesktop } = useDevice();
+    const { isDesktop, isMobile } = useDevice();
 
     const addUpdateNotification = () => addNotificationMessage(client_notifications?.new_version_available);
     const removeUpdateNotification = React.useCallback(
@@ -38,39 +35,14 @@ const HeaderLegacy = observer(() => {
             })}
         >
             <div className='header__menu-items'>
-                <div className='header__menu-left'>
-                    {isDesktop ? (
-                        <React.Fragment>
-                            <BrandShortLogo />
-                            <div className='header__divider' />
-                        </React.Fragment>
-                    ) : (
-                        <React.Fragment>
-                            <ToggleMenuDrawer />
-                            <BrandShortLogo />
-                        </React.Fragment>
-                    )}
-                    <MenuLinks />
-                </div>
-
-                <div
-                    className={classNames('header__menu-right', {
-                        'header__menu-right--hidden': !isDesktop && is_logging_in,
-                    })}
-                >
-                    {is_logging_in ? (
-                        <div
-                            id='dt_core_header_acc-info-preloader'
-                            className={classNames('acc-info__preloader', {
-                                'acc-info__preloader--no-currency': !currency,
-                            })}
-                        >
-                            <AccountsInfoLoader is_logged_in={is_logged_in} is_desktop={isDesktop} speed={3} />
-                        </div>
-                    ) : (
-                        <HeaderAccountActions />
-                    )}
-                </div>
+                {isMobile && <ToggleMenuDrawer />}
+                {is_logging_in ? (
+                    <div id='dt_core_header_acc-info-preloader' className='acc-info__preloader'>
+                        <AccountsInfoLoader is_logged_in={is_logged_in} />
+                    </div>
+                ) : (
+                    <AccountActions />
+                )}
             </div>
             <NewVersionNotification onUpdate={addUpdateNotification} />
         </header>

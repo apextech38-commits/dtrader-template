@@ -8,6 +8,7 @@ export { default as usePaginatedFetch } from './usePaginatedFetch';
 export { default as useSubscription } from './useSubscription';
 export { default as useRemoteConfig } from './hooks/useRemoteConfig';
 export { default as useTrackJS } from './hooks/useTrackJS';
+export { useRestAPI } from './useRestAPI';
 export * from './hooks';
 
 export { useInfiniteQuery, useMutation, useQuery };
@@ -60,4 +61,6 @@ export type {
     TForgetResponse,
     TForgetAllRequest,
     TForgetAllResponse,
+    TDerivativesAccount,
+    TDerivativesAccountResponse,
 } from '../types';

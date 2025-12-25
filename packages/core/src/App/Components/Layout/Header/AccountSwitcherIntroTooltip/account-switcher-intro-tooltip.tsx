@@ -8,30 +8,31 @@ import { LabelPairedXmarkMdRegularIcon } from '@deriv/quill-icons';
 import { Button } from '@deriv-com/quill-ui';
 import { Localize } from '@deriv-com/translations';
 
-import { CHART_INTRO_GUIDE_LOCALSTORAGE_KEY } from '../chart-intro-guide-config';
+import './account-switcher-intro-tooltip.scss';
 
-import './sidebar-intro-tooltip.scss';
+export const ACCOUNT_SWITCHER_INTRO_TOOLTIP_LOCALSTORAGE_KEY = 'account_switcher_intro_tooltip_seen';
+const CHART_INTRO_GUIDE_LOCALSTORAGE_KEY = 'chart_intro_guide_seen';
 
-export const SIDEBAR_INTRO_TOOLTIP_LOCALSTORAGE_KEY = 'sidebar_intro_tooltip_seen';
-
-type TSidebarIntroTooltipProps = {
+type TAccountSwitcherIntroTooltipProps = {
     is_logged_in?: boolean;
     is_dark_mode?: boolean;
-    onSidebarHighlight?: (is_highlighted: boolean) => void;
-    sidebar_ref?: React.RefObject<HTMLElement>;
+    has_multiple_accounts?: boolean;
+    account_switcher_ref?: React.RefObject<HTMLElement>;
+    onAccountSwitcherHighlight?: (is_highlighted: boolean) => void;
 };
 
-const SidebarIntroTooltip = ({
+const AccountSwitcherIntroTooltip = ({
     is_logged_in = false,
     is_dark_mode = false,
-    onSidebarHighlight,
-    sidebar_ref,
-}: TSidebarIntroTooltipProps) => {
+    has_multiple_accounts = false,
+    account_switcher_ref,
+    onAccountSwitcherHighlight,
+}: TAccountSwitcherIntroTooltipProps) => {
     const [is_tooltip_open, setIsTooltipOpen] = React.useState(false);
     const [chart_guide_seen_state, setChartGuideSeenState] = React.useState(false);
 
-    const [sidebar_tooltip_seen, setSidebarTooltipSeen] = useLocalStorageData<boolean>(
-        SIDEBAR_INTRO_TOOLTIP_LOCALSTORAGE_KEY,
+    const [tooltip_seen, setTooltipSeen] = useLocalStorageData<boolean>(
+        ACCOUNT_SWITCHER_INTRO_TOOLTIP_LOCALSTORAGE_KEY,
         false
     );
 
@@ -70,20 +71,25 @@ const SidebarIntroTooltip = ({
 
     const handleClose = React.useCallback(() => {
         setIsTooltipOpen(false);
-        setSidebarTooltipSeen(true);
-        onSidebarHighlight?.(false);
-    }, [setSidebarTooltipSeen, onSidebarHighlight]);
+        setTooltipSeen(true);
+        onAccountSwitcherHighlight?.(false);
+    }, [setTooltipSeen, onAccountSwitcherHighlight]);
 
     const handleGotIt = React.useCallback(() => {
         setIsTooltipOpen(false);
-        setSidebarTooltipSeen(true);
-    }, [setSidebarTooltipSeen]);
+        setTooltipSeen(true);
+    }, [setTooltipSeen]);
 
     // Show tooltip after delay if conditions are met
     React.useEffect(() => {
         let timer: NodeJS.Timeout | undefined;
 
-        if (!sidebar_tooltip_seen && is_logged_in && (chart_intro_guide_seen || chart_guide_seen_state)) {
+        if (
+            !tooltip_seen &&
+            is_logged_in &&
+            has_multiple_accounts &&
+            (chart_intro_guide_seen || chart_guide_seen_state)
+        ) {
             // Check if user has completed onboarding guides (existing users only)
             const guide_dtrader_v2_raw = localStorage.getItem('guide_dtrader_v2');
 
@@ -106,7 +112,7 @@ const SidebarIntroTooltip = ({
             // Show tooltip after delay for existing users
             timer = setTimeout(() => {
                 setIsTooltipOpen(true);
-                onSidebarHighlight?.(true);
+                onAccountSwitcherHighlight?.(true);
             }, 800);
         }
 
@@ -114,62 +120,71 @@ const SidebarIntroTooltip = ({
             if (timer) {
                 clearTimeout(timer);
             }
-            onSidebarHighlight?.(false);
+            onAccountSwitcherHighlight?.(false);
         };
-    }, [sidebar_tooltip_seen, is_logged_in, chart_intro_guide_seen, chart_guide_seen_state, onSidebarHighlight]);
+    }, [
+        tooltip_seen,
+        is_logged_in,
+        has_multiple_accounts,
+        chart_intro_guide_seen,
+        chart_guide_seen_state,
+        onAccountSwitcherHighlight,
+    ]);
 
+    // Handle click on account switcher to dismiss tooltip
     React.useEffect(() => {
-        if (!is_tooltip_open || !sidebar_ref?.current) return;
+        if (!is_tooltip_open || !account_switcher_ref?.current) return;
 
-        const handleSidebarClick = () => {
+        const handleAccountSwitcherClick = () => {
             handleClose();
         };
 
-        const sidebar_element = sidebar_ref.current;
-        sidebar_element.addEventListener('click', handleSidebarClick);
+        const switcher_element = account_switcher_ref.current;
+        switcher_element.addEventListener('click', handleAccountSwitcherClick);
 
         return () => {
-            sidebar_element.removeEventListener('click', handleSidebarClick);
+            switcher_element.removeEventListener('click', handleAccountSwitcherClick);
         };
-    }, [is_tooltip_open, sidebar_ref, handleClose]);
+    }, [is_tooltip_open, account_switcher_ref, handleClose]);
 
     if (!is_tooltip_open) return null;
 
-    const tooltip_class = clsx('sidebar-intro-tooltip', {
-        'sidebar-intro-tooltip--dark': is_dark_mode,
+    const tooltip_class = clsx('account-switcher-intro-tooltip', {
+        'account-switcher-intro-tooltip--dark': is_dark_mode,
     });
 
     return ReactDOM.createPortal(
-        <div className={tooltip_class} data-testid='dt_sidebar_intro_tooltip'>
-            <div className='sidebar-intro-tooltip__overlay' />
-            <div className='sidebar-intro-tooltip__content'>
+        <div className={tooltip_class} data-testid='dt_account_switcher_intro_tooltip'>
+            <div className='account-switcher-intro-tooltip__overlay' />
+            <div className='account-switcher-intro-tooltip__content'>
                 <button
-                    className='sidebar-intro-tooltip__close-button'
+                    className='account-switcher-intro-tooltip__close-button'
                     onClick={handleClose}
-                    data-testid='dt_sidebar_tooltip_close_button'
+                    data-testid='dt_account_switcher_tooltip_close_button'
                     aria-label='Close'
                 >
                     <LabelPairedXmarkMdRegularIcon />
                 </button>
 
-                <div className='sidebar-intro-tooltip__pointer' />
+                <div className='account-switcher-intro-tooltip__pointer' />
 
-                <div className='sidebar-intro-tooltip__body'>
-                    <Text as='h4' weight='bold' className='sidebar-intro-tooltip__title'>
-                        <Localize i18n_default_text='New update!' />
-                    </Text>
+                <div className='account-switcher-intro-tooltip__body'>
+                    <div className='account-switcher-intro-tooltip__body--inner'>
+                        <Text as='h4' weight='bold' className='account-switcher-intro-tooltip__title'>
+                            <Localize i18n_default_text='New update!' />
+                        </Text>
 
-                    <Text size='md' className='sidebar-intro-tooltip__description'>
-                        <Localize i18n_default_text='We have moved the main navigation to the left side of your screen for easier access to your tools.' />
-                    </Text>
-
+                        <Text size='md' className='account-switcher-intro-tooltip__description'>
+                            <Localize i18n_default_text='Switch between Real and Demo accounts instantly.' />
+                        </Text>
+                    </div>
                     <Button
                         size='sm'
                         onClick={handleGotIt}
-                        className='sidebar-intro-tooltip__button'
-                        data-testid='dt_sidebar_tooltip_got_it_button'
+                        className='account-switcher-intro-tooltip__button'
+                        data-testid='dt_account_switcher_tooltip_got_it_button'
                     >
-                        <Text size='lg' weight='bold' className='sidebar-intro-tooltip__button-text'>
+                        <Text size='lg' weight='bold' className='account-switcher-intro-tooltip__button-text'>
                             <Localize i18n_default_text='Got it' />
                         </Text>
                     </Button>
@@ -180,4 +195,4 @@ const SidebarIntroTooltip = ({
     );
 };
 
-export default React.memo(SidebarIntroTooltip);
+export default React.memo(AccountSwitcherIntroTooltip);

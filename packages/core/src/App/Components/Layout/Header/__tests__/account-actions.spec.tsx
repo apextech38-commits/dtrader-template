@@ -1,196 +1,247 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
 
-import { formatMoney } from '@deriv/shared';
+import { trackAnalyticsEvent } from '@deriv/shared';
+import { mockStore, StoreProvider } from '@deriv/stores';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-
-import { useMobileBridge } from 'App/Hooks/useMobileBridge';
 
 import { AccountActions } from '../account-actions';
 
 // Mock dependencies
-jest.mock('react-router-dom', () => ({
-    ...jest.requireActual('react-router-dom'),
-    useLocation: jest.fn(),
-}));
-
-jest.mock('@deriv/stores', () => ({
-    useStore: jest.fn(),
-}));
-
 jest.mock('@deriv/shared', () => ({
     ...jest.requireActual('@deriv/shared'),
-    formatMoney: jest.fn(),
-    isTabletOs: false,
-    routes: {
-        cashier: '/cashier',
-        personal_details: '/account/personal-details',
-    },
+    getBrandUrl: jest.fn(() => 'https://deriv.com'),
+    trackAnalyticsEvent: jest.fn(),
 }));
 
-const mockSendBridgeEvent = jest.fn();
-const mockUseDevice = jest.fn();
+const mockUseDerivativesAccount = jest.fn(() => ({
+    data: {
+        data: [
+            { account_id: 'CR123', account_type: 'real', balance: '10000.00', currency: 'USD' },
+            { account_id: 'VRTC456', account_type: 'demo', balance: '5000.00', currency: 'USD' },
+        ],
+    },
+    isLoading: false,
+    error: null,
+}));
 
-jest.mock('App/Hooks/useMobileBridge', () => ({
-    useMobileBridge: jest.fn(() => ({
-        sendBridgeEvent: mockSendBridgeEvent,
-        isBridgeAvailable: false,
-    })),
+jest.mock('@deriv/api', () => ({
+    ...jest.requireActual('@deriv/api'),
+    useDerivativesAccount: () => mockUseDerivativesAccount(),
 }));
 
 jest.mock('@deriv-com/ui', () => ({
-    useDevice: () => mockUseDevice(),
+    useDevice: jest.fn(() => ({ isDesktop: true, isMobile: false })),
 }));
 
-jest.mock('../login-button-v2.tsx', () => ({
-    LoginButtonV2: () => <div data-testid='dt_login_button'>Login Button V2</div>,
-}));
-
-jest.mock('../signup-button.jsx', () => ({
-    SignupButton: () => <div data-testid='dt_signup_button'>Signup Button</div>,
-}));
-
-jest.mock('../toggle-notifications.jsx', () => ({
-    __esModule: true,
-    default: ({
-        count,
-        is_visible,
-        toggleDialog,
-    }: {
-        count?: number;
-        is_visible?: boolean;
-        toggleDialog?: () => void;
-    }) => (
-        <div data-testid='dt_toggle_notifications' onClick={toggleDialog}>
-            Toggle Notifications {count} {is_visible ? 'visible' : 'hidden'}
-        </div>
-    ),
+jest.mock('../login-button', () => ({
+    LoginButton: () => <div data-testid='dt_login_button'>Login Button</div>,
 }));
 
 // Mock the dynamic import of AccountInfo
 jest.mock('App/Components/Layout/Header/account-info.jsx', () => ({
     __esModule: true,
-    default: ({
-        balance,
-        currency,
-        is_dialog_on,
-        toggleDialog,
-    }: {
-        balance?: string | number;
-        currency?: string;
-        is_dialog_on?: boolean;
-        toggleDialog?: () => void;
-    }) => (
-        <div data-testid='dt_account_info' onClick={toggleDialog}>
-            Account Info: {balance} {currency} {is_dialog_on ? 'open' : 'closed'}
-        </div>
-    ),
+    default: () => <div data-testid='dt_account_info'>Account Info</div>,
 }));
 
-// Mock the dynamic import
-jest.mock(
-    /* webpackChunkName: "account-info", webpackPreload: true */ 'App/Components/Layout/Header/account-info.jsx',
-    () => ({
-        __esModule: true,
-        default: ({
-            balance,
-            currency,
-            is_dialog_on,
-            toggleDialog,
-        }: {
-            balance?: string | number;
-            currency?: string;
-            is_dialog_on?: boolean;
-            toggleDialog?: () => void;
-        }) => (
-            <div data-testid='dt_account_info' onClick={toggleDialog}>
-                Account Info: {balance} {currency} {is_dialog_on ? 'open' : 'closed'}
-            </div>
-        ),
-    }),
-    { virtual: true }
-);
-
 describe('AccountActions component', () => {
-    // Default props
-    const default_props = {
-        balance: 1000,
-        currency: 'USD',
-        is_logged_in: true,
-        onClickLogout: jest.fn(),
+    const default_mock_store = {
+        client: {
+            currency: 'USD',
+            is_logged_in: true,
+            is_virtual: false,
+            logout: jest.fn(),
+        },
+        common: {
+            current_language: 'en',
+        },
+    };
+
+    const renderWithStore = (store_override = {}) => {
+        const mock_store_instance = mockStore({ ...default_mock_store, ...store_override });
+        return render(
+            <StoreProvider store={mock_store_instance}>
+                <AccountActions />
+            </StoreProvider>
+        );
     };
 
     beforeEach(() => {
         jest.clearAllMocks();
-        (useLocation as jest.Mock).mockReturnValue({ pathname: '/some-path' });
-        mockUseDevice.mockReturnValue({ isDesktop: true });
-        (useMobileBridge as jest.Mock).mockReturnValue({
-            sendBridgeEvent: mockSendBridgeEvent,
-            isBridgeAvailable: false,
+        // Reset to default mock with both account types
+        mockUseDerivativesAccount.mockReturnValue({
+            data: {
+                data: [
+                    { account_id: 'CR123', account_type: 'real', balance: '10000.00', currency: 'USD' },
+                    { account_id: 'VRTC456', account_type: 'demo', balance: '5000.00', currency: 'USD' },
+                ],
+            },
+            isLoading: false,
+            error: null,
         });
-        (formatMoney as jest.Mock).mockImplementation((currency, balance) => `${balance} ${currency}`);
-        mockSendBridgeEvent.mockClear();
     });
 
     it('should render AccountInfo when logged in', async () => {
-        render(<AccountActions {...default_props} />);
+        renderWithStore();
 
         // Wait for lazy component to load
         await screen.findByTestId('dt_account_info');
         expect(screen.getByTestId('dt_account_info')).toBeInTheDocument();
     });
 
-    it('should render logout button on desktop when logged in', () => {
-        render(<AccountActions {...default_props} />);
+    it('should render transfer button when logged in (non-virtual)', async () => {
+        renderWithStore();
 
-        expect(screen.getByText('Log out')).toBeInTheDocument();
+        await screen.findByTestId('dt_account_info');
+        const transfer_button = screen.getByRole('button', { name: /transfer/i });
+        expect(transfer_button).toBeInTheDocument();
     });
 
-    it('should not render logout button on mobile', () => {
-        mockUseDevice.mockReturnValue({ isDesktop: false });
-
-        render(<AccountActions {...default_props} />);
-
-        expect(screen.queryByText('Log out')).not.toBeInTheDocument();
-    });
-
-    it('should call sendBridgeEvent with fallback when logout button is clicked', async () => {
-        render(<AccountActions {...default_props} />);
-
-        const logout_button = screen.getByText('Log out');
-        await userEvent.click(logout_button);
-
-        expect(mockSendBridgeEvent).toHaveBeenCalledWith('trading:back', default_props.onClickLogout);
-    });
-
-    it('should render AccountInfo with formatted balance', () => {
-        render(<AccountActions {...default_props} balance={1234.56} currency='EUR' />);
-
-        expect(screen.getByTestId('dt_account_info')).toHaveTextContent(/1234\.56 EUR/);
-    });
-
-    it('should show "Back to app" text when bridge is available', () => {
-        (useMobileBridge as jest.Mock).mockReturnValue({
-            sendBridgeEvent: mockSendBridgeEvent,
-            isBridgeAvailable: true,
+    it('should render transfer button when logged in with both account types (virtual)', async () => {
+        renderWithStore({
+            client: {
+                ...default_mock_store.client,
+                is_virtual: true,
+            },
         });
 
-        render(<AccountActions {...default_props} />);
-
-        // Logout button should show "Back to app" when bridge is available
-        expect(screen.getByText('Back to app')).toBeInTheDocument();
+        await screen.findByTestId('dt_account_info');
+        const transfer_button = screen.getByRole('button', { name: /transfer/i });
+        expect(transfer_button).toBeInTheDocument();
     });
 
-    it('should show "Log out" text when bridge is not available', () => {
-        (useMobileBridge as jest.Mock).mockReturnValue({
-            sendBridgeEvent: mockSendBridgeEvent,
-            isBridgeAvailable: false,
+    it('should render "Try real" button for demo-only accounts', async () => {
+        // Mock useDerivativesAccount to return only demo accounts
+        mockUseDerivativesAccount.mockReturnValue({
+            data: {
+                data: [{ account_id: 'VRTC456', account_type: 'demo', balance: '5000.00', currency: 'USD' }],
+            },
+            isLoading: false,
+            error: null,
         });
 
-        render(<AccountActions {...default_props} />);
+        renderWithStore({
+            client: {
+                ...default_mock_store.client,
+                is_virtual: true,
+            },
+        });
 
-        // Logout button should show "Log out" when bridge is not available
-        expect(screen.getByText('Log out')).toBeInTheDocument();
+        await screen.findByTestId('dt_account_info');
+        const try_real_button = screen.getByRole('button', { name: /try real/i });
+        expect(try_real_button).toBeInTheDocument();
+    });
+
+    it('should render login button when not logged in', () => {
+        renderWithStore({
+            client: {
+                ...default_mock_store.client,
+                is_logged_in: false,
+            },
+        });
+
+        expect(screen.getByTestId('dt_login_button')).toBeInTheDocument();
+    });
+
+    it('should not render account info when not logged in', () => {
+        renderWithStore({
+            client: {
+                ...default_mock_store.client,
+                is_logged_in: false,
+            },
+        });
+
+        expect(screen.queryByTestId('dt_account_info')).not.toBeInTheDocument();
+    });
+
+    it('should handle transfer button click for real accounts', async () => {
+        // Mock window.location.href
+        delete (window as any).location;
+        (window as any).location = { href: '' };
+
+        renderWithStore();
+
+        await screen.findByTestId('dt_account_info');
+        const transfer_button = screen.getByRole('button', { name: /transfer/i });
+        await userEvent.click(transfer_button);
+
+        expect(window.location.href).toContain('deriv.com/transfer');
+        expect(window.location.href).toContain('curr=USD');
+    });
+
+    it('should handle "Try real" button click for demo-only accounts and open modal', async () => {
+        // Mock useDerivativesAccount to return only demo accounts
+        mockUseDerivativesAccount.mockReturnValue({
+            data: {
+                data: [{ account_id: 'VRTC456', account_type: 'demo', balance: '5000.00', currency: 'USD' }],
+            },
+            isLoading: false,
+            error: null,
+        });
+
+        const toggleTryRealModal = jest.fn();
+
+        renderWithStore({
+            client: {
+                ...default_mock_store.client,
+                is_virtual: true,
+            },
+            ui: {
+                toggleTryRealModal,
+            },
+        });
+
+        await screen.findByTestId('dt_account_info');
+        const try_real_button = screen.getByRole('button', { name: /try real/i });
+        await userEvent.click(try_real_button);
+
+        expect(toggleTryRealModal).toHaveBeenCalledWith(true);
+    });
+
+    describe('Analytics tracking', () => {
+        it('should track analytics event with "transfer" button_type for transfer button', async () => {
+            renderWithStore();
+
+            await screen.findByTestId('dt_account_info');
+            const transfer_button = screen.getByRole('button', { name: /transfer/i });
+            await userEvent.click(transfer_button);
+
+            expect(trackAnalyticsEvent).toHaveBeenCalledWith('ce_trade_types_form_v2', {
+                action: 'click',
+                button_type: 'transfer',
+            });
+        });
+
+        it('should track analytics event with "try_real" button_type for Try real button', async () => {
+            // Mock useDerivativesAccount to return only demo accounts
+            mockUseDerivativesAccount.mockReturnValue({
+                data: {
+                    data: [{ account_id: 'VRTC456', account_type: 'demo', balance: '5000.00', currency: 'USD' }],
+                },
+                isLoading: false,
+                error: null,
+            });
+
+            const toggleTryRealModal = jest.fn();
+
+            renderWithStore({
+                client: {
+                    ...default_mock_store.client,
+                    is_virtual: true,
+                },
+                ui: {
+                    toggleTryRealModal,
+                },
+            });
+
+            await screen.findByTestId('dt_account_info');
+            const try_real_button = screen.getByRole('button', { name: /try real/i });
+            await userEvent.click(try_real_button);
+
+            expect(trackAnalyticsEvent).toHaveBeenCalledWith('ce_trade_types_form_v2', {
+                action: 'click',
+                button_type: 'try_real',
+            });
+        });
     });
 });

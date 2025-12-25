@@ -114,6 +114,7 @@ export default class ClientStore extends BaseStore {
             init: action.bound,
             resetVirtualBalance: action.bound,
             is_crypto: action.bound,
+            switchAccount: action.bound,
         });
 
         reaction(
@@ -172,6 +173,8 @@ export default class ClientStore extends BaseStore {
     }
 
     get is_virtual() {
+        // Reference loginid to make this computed reactive to account switches
+        this.loginid;
         return getAccountType() === 'demo';
     }
 
@@ -624,5 +627,29 @@ export default class ClientStore extends BaseStore {
             url.searchParams.delete('token');
             window.history.replaceState({}, document.title, url.toString());
         }
+    }
+
+    /**
+     * Switch to a different account
+     * Handles notification clearing, localStorage updates, and WebSocket reconnection
+     * @param {string} account_id - The account ID to switch to
+     * @param {'real' | 'demo'} account_type - The account type
+     */
+    async switchAccount(account_id, account_type) {
+        if (!account_id || this.loginid === account_id) return;
+
+        // Update localStorage with new account
+        localStorage.setItem('account_id', account_id);
+        localStorage.setItem('account_type', account_type);
+        localStorage.setItem('active_loginid', account_id);
+        sessionStorage.setItem('active_loginid', account_id);
+
+        // Clear notifications when switching accounts (similar to old implementation)
+        this.root_store.notifications.removeNotifications(true);
+        this.root_store.notifications.removeTradeNotifications();
+        this.root_store.notifications.removeAllNotificationMessages(true);
+
+        // Reconnect WebSocket with new account
+        BinarySocket.closeAndOpenNewConnection();
     }
 }

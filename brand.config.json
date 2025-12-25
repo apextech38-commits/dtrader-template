@@ -26,6 +26,10 @@
           "production": "https://auth.deriv.com/self-service/logout/browser"
         }
     },
+    "api_core": {
+        "staging": "staging-api-core.deriv.com",
+        "production": "api-core.deriv.com"
+    },
     "colors": {
         "primary": "#ff444f",
         "secondary": "#85acb0",

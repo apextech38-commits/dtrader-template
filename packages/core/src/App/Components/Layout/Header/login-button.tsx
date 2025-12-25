@@ -9,7 +9,7 @@ interface LoginButtonV2Props {
     className?: string;
 }
 
-const LoginButtonV2 = ({ className }: LoginButtonV2Props) => {
+const LoginButton = ({ className }: LoginButtonV2Props) => {
     const { localize } = useTranslations();
 
     return (
@@ -24,8 +24,8 @@ const LoginButtonV2 = ({ className }: LoginButtonV2Props) => {
     );
 };
 
-LoginButtonV2.propTypes = {
+LoginButton.propTypes = {
     className: PropTypes.string,
 };
 
-export { LoginButtonV2 };
+export { LoginButton };

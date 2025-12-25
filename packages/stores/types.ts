@@ -239,6 +239,7 @@ export type TClientStore = {
     responseAuthorize: (response: any) => void;
     responsePayoutCurrencies: (response: any) => void;
     init: () => Promise<boolean>;
+    switchAccount: (account_id: string, account_type: 'real' | 'demo') => Promise<void>;
 };
 
 type TCommonStoreError = {
@@ -375,6 +376,8 @@ type TUiStore = {
     toggleShouldShowRealAccountsList: (value: boolean) => void;
     toggleUrlUnavailableModal: (value: boolean) => void;
     toggleLogoutSuccessModal: (value: boolean) => void;
+    is_try_real_modal_visible: boolean;
+    toggleTryRealModal: (value: boolean) => void;
     setSidebarFlyout: (flyout_type: 'theme' | 'language' | 'positions' | 'account' | null) => void;
     closeSidebarFlyout: () => void;
     removeToast: (key: string) => void;

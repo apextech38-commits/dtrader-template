@@ -138,3 +138,20 @@ export const getLogoutURL = (isProductionEnv: boolean): string => {
         ? config_data.platform.logout_endpoint.production
         : config_data.platform.logout_endpoint.staging;
 };
+
+/**
+ * Gets the API Core URL based on environment
+ * @returns API Core base URL (without protocol)
+ */
+export const getApiCoreUrl = (): string => {
+    const isProduction = process.env.NODE_ENV === 'production';
+    return isProduction ? config_data.api_core.production : config_data.api_core.staging;
+};
+
+/**
+ * Gets the full API Core URL with protocol
+ * @returns Full API Core URL with https://
+ */
+export const getApiCoreBaseUrl = (): string => {
+    return `https://${getApiCoreUrl()}`;
+};

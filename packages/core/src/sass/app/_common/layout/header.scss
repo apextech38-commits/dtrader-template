@@ -1,7 +1,6 @@
 /** @define header; weak */
 .header {
-    position: fixed;
-    z-index: 99;
+    position: absolute;
     box-sizing: border-box;
     height: $HEADER_HEIGHT;
     width: 100%;
@@ -19,24 +18,12 @@
         display: none;
     }
 
-    &--tradershub_os {
-        &_desktop {
-            display: none;
-        }
-        &_mobile {
-            display: block;
-        }
-    }
     &__menu-mobile-whatsapp {
         &-link {
             text-decoration: none;
             color: var(--color-text-secondary);
             padding-left: 1.6rem;
         }
-    }
-
-    &__menu-mobile-traders-hub {
-        padding-top: 2rem;
     }
 
     &__menu-mobile-livechat {
@@ -136,146 +123,9 @@
         width: 100%;
         height: 100%;
     }
-    &__navbar-icons {
-        cursor: pointer;
-        padding: 0.8em 1.6em;
-        align-self: center;
-        height: 100%;
-
-        &--notify-toggle {
-            order: 2;
-            order: 2;
-            padding: 0.5em 1em;
-            width: 2em;
-        }
-    }
 
     &__menu-divider {
         margin-left: 20rem;
-    }
-
-    &__menu-left {
-        justify-content: flex-start;
-        order: -1;
-        display: inline-flex;
-        flex: 1;
-        height: #{$HEADER_HEIGHT - 1px};
-
-        @include desktop {
-            align-items: center;
-        }
-
-        &-extensions {
-            display: flex;
-            align-items: center;
-        }
-
-        &-logo {
-            align-self: center;
-            margin: 0 1.6rem;
-            cursor: pointer;
-        }
-    }
-    &__menu-right {
-        justify-content: flex-end;
-        order: 1;
-        display: inline-flex;
-        height: #{$HEADER_HEIGHT - 1px};
-        position: relative;
-
-        &--hidden {
-            display: none;
-        }
-        @include mobile-or-tablet-screen {
-            .acc-info__separator {
-                padding-left: 0.8rem;
-            }
-            .notifications-toggle {
-                margin-right: 0;
-            }
-        }
-    }
-
-    &__menu--back-to-old-ui--dtrader {
-        padding: 0 1.5rem 2.5rem;
-        width: 110%;
-    }
-
-    &__menu--back-to-ui {
-        display: flex;
-        width: 90%;
-        justify-content: space-between;
-        border-radius: 1rem;
-
-        &--dark {
-            background-color: var(--color-surface-primary);
-            display: flex;
-            width: 90%;
-            justify-content: space-between;
-            border-radius: 1rem;
-        }
-    }
-
-    &__menu--traders-hub {
-        padding: 1.5rem;
-        &-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        &-text {
-            width: 13rem;
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-        }
-        &-beta-icon {
-            margin: 0 4rem 0 1rem;
-        }
-    }
-
-    &__menu--explore-traders-hub {
-        border-radius: 1rem;
-
-        &--dark {
-            background-color: var(--color-surface-primary);
-        }
-        .dc-btn__text {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-        }
-    }
-
-    &__menu--exit-traders-hub {
-        border-radius: 1rem;
-
-        &--dark {
-            background-color: var(--color-surface-primary);
-        }
-        .dc-btn__text {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-        }
-    }
-
-    &__menu--exit-traders-hub-beta-icon {
-        margin: 0 4rem 0 1rem;
-    }
-
-    &__menu--back-to-ui-text {
-        align-items: flex-start;
-
-        &--dark {
-            color: var(--color-text-primary);
-            align-items: flex-start;
-        }
-    }
-
-    &__menu-mobile-right-arrow {
-        align-items: flex-end;
-        display: inline-flex;
     }
 
     &__menu-toggle {
@@ -349,7 +199,6 @@
         }
         &-toggle {
             padding: 0 1.2rem;
-            border-right: 1px solid var(--color-surface-border);
             display: flex;
             align-items: center;
             height: inherit;
@@ -453,9 +302,11 @@
 }
 
 .contract-details-header-v2 {
+    position: fixed;
     display: flex;
+    align-items: center;
     justify-content: center;
-    height: var(--core-spacing-2000);
+    height: $MOBILE_HEADER_DTRADER_V2_HEIGHT;
     padding: var(--core-spacing-400) var(--core-spacing-50);
     .arrow {
         position: absolute;

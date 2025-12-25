@@ -22,7 +22,6 @@ import { Localize, localize, useTranslations } from '@deriv-com/translations';
 
 import { useMobileBridge } from 'App/Hooks/useMobileBridge';
 
-import SidebarIntroTooltip from '../../../../_common/components/SidebarIntroTooltip';
 import { PositionsDrawerContent, PositionsDrawerFooter } from '../../Elements/PositionsDrawer';
 
 import AccountSelector from './account-selector';
@@ -210,12 +209,6 @@ const Sidebar = observer(() => {
 
     return (
         <React.Fragment>
-            <SidebarIntroTooltip
-                is_logged_in={is_logged_in}
-                is_dark_mode={is_dark_mode_on}
-                onSidebarHighlight={handleSidebarHighlight}
-                sidebar_ref={sidebar_ref}
-            />
             <aside
                 ref={sidebar_ref}
                 className={classNames('sidebar', {

@@ -65,6 +65,7 @@ jest.mock('@deriv/shared', () => ({
         reports: '/reports',
     },
     getBrandUrl: jest.fn(() => 'https://deriv.com'),
+    getApiCoreBaseUrl: jest.fn(() => 'https://api.deriv.com'),
     useWS: jest.fn(() => ({})),
     getAccountType: jest.fn(() => 'demo'),
     toGMTFormat: jest.fn(() => 'GMT Time'),

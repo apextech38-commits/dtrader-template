@@ -618,3 +618,25 @@ export type TForgetAllResponse = TSocketResponse<'forget_all'>;
 
 export type TLogOutRequest = TSocketRequest<'logout'>;
 export type TLogOutResponse = TSocketResponse<'logout'>;
+
+/**
+ * REST API Types for Derivatives Account Endpoint
+ */
+export type TDerivativesAccount = {
+    account_id: string;
+    balance: string;
+    currency: string;
+    group: string;
+    status: 'active' | 'inactive';
+    account_type: 'real' | 'demo';
+    timestamp: string;
+};
+
+export type TDerivativesAccountResponse = {
+    data: TDerivativesAccount[];
+    meta?: {
+        endpoint: string;
+        method: string;
+        timing: number;
+    };
+};

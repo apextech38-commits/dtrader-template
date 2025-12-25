@@ -207,6 +207,8 @@ function generateSemanticTokens() {
     // Text Colors
     --color-text-primary: var(--brand-black);                           // Primary text (headings, important text)
     --color-text-secondary: #{transparentize($color-black, 0.3)};       // Secondary text (body text)
+    --color-text-secondary-alternate: var(--brand-success-dark);        // Secondary text alternative for dark backgrounds
+    --color-text-tertiary: var(--brand-warning-dark);                   // Tertiary text alternative for light backgrounds
     --color-text-disabled: #{transparentize($color-black, 0.6)};        // Disabled text
     --color-text-inverse: var(--brand-white);                           // Inverse text
     --color-text-white: var(--brand-white);                             // White text
@@ -257,6 +259,8 @@ function generateSemanticTokens() {
     // Text Colors
     --color-text-primary: var(--brand-white);                           // Primary text (headings, important text)
     --color-text-secondary: #{transparentize($color-white, 0.2)};       // Secondary text (body text)
+    --color-text-secondary-alternate: var(--brand-success-light);       // Secondary text alternative for dark backgrounds
+    --color-text-tertiary: var(--brand-warning-light);                  // Tertiary text alternative for light backgrounds
     --color-text-disabled: #{transparentize($color-white, 0.6)};        // Disabled text
     --color-text-inverse: var(--brand-black);                           // Inverse text
     --color-text-white: var(--brand-white);                             // White text

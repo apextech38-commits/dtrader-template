@@ -16,11 +16,11 @@ jest.mock('react-router-dom', () => ({
 
 jest.mock('@deriv-com/ui', () => ({
     ...jest.requireActual('@deriv-com/ui'),
-    useDevice: jest.fn(() => ({ isDesktop: true })),
+    useDevice: jest.fn(() => ({ isDesktop: true, isMobile: false })),
 }));
 
 jest.mock('App/Components/Layout/Header', () => ({
-    MenuLinks: jest.fn(() => <div data-testid='dt_menu_links'>Menu Links</div>),
+    AccountActions: jest.fn(() => <div data-testid='dt_header_account_actions'>Header Account Actions</div>),
 }));
 
 jest.mock('App/Components/Layout/Header/Components/Preloader', () => ({
@@ -33,12 +33,6 @@ jest.mock('App/Components/Layout/Header/toggle-menu-drawer.jsx', () =>
 
 jest.mock('App/Containers/new-version-notification', () =>
     jest.fn(() => <div data-testid='dt_new_version_notification'>New Version Notification</div>)
-);
-
-jest.mock('../brand-short-logo', () => jest.fn(() => <div data-testid='dt_brand_short_logo'>Brand Short Logo</div>));
-
-jest.mock('../header-account-actions', () =>
-    jest.fn(() => <div data-testid='dt_header_account_actions'>Header Account Actions</div>)
 );
 
 describe('HeaderLegacy', () => {
@@ -81,7 +75,7 @@ describe('HeaderLegacy', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        (useDevice as jest.Mock).mockReturnValue({ isDesktop: true });
+        (useDevice as jest.Mock).mockReturnValue({ isDesktop: true, isMobile: false });
     });
 
     describe('Basic Rendering', () => {
@@ -89,8 +83,6 @@ describe('HeaderLegacy', () => {
             renderComponent();
 
             expect(screen.getByRole('banner')).toBeInTheDocument();
-            expect(screen.getByTestId('dt_brand_short_logo')).toBeInTheDocument();
-            expect(screen.getByTestId('dt_menu_links')).toBeInTheDocument();
             expect(screen.getByTestId('dt_new_version_notification')).toBeInTheDocument();
         });
 
@@ -105,7 +97,7 @@ describe('HeaderLegacy', () => {
 
     describe('Desktop Layout', () => {
         beforeEach(() => {
-            (useDevice as jest.Mock).mockReturnValue({ isDesktop: true });
+            (useDevice as jest.Mock).mockReturnValue({ isDesktop: true, isMobile: false });
         });
 
         it('should not render ToggleMenuDrawer on desktop', () => {
@@ -117,7 +109,7 @@ describe('HeaderLegacy', () => {
 
     describe('Mobile Layout', () => {
         beforeEach(() => {
-            (useDevice as jest.Mock).mockReturnValue({ isDesktop: false });
+            (useDevice as jest.Mock).mockReturnValue({ isDesktop: false, isMobile: true });
         });
 
         it('should render ToggleMenuDrawer on mobile', () => {

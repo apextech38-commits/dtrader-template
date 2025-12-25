@@ -13,7 +13,6 @@ import { observer, useStore } from '@deriv/stores';
 import { useDevice } from '@deriv-com/ui';
 
 import { filterByContractType } from 'App/Components/Elements/PositionsDrawer/helpers';
-import ChartIntroGuide from '_common/components/ChartIntroGuide';
 import useActiveSymbols from 'AppV2/Hooks/useActiveSymbols';
 import useDefaultSymbol from 'AppV2/Hooks/useDefaultSymbol';
 import { SmartChart } from 'Modules/SmartChart';
@@ -199,7 +198,6 @@ const TradeChart = observer(() => {
 
     return (
         <>
-            <ChartIntroGuide is_mobile is_logged_in={is_logged_in} />
             <SmartChart
                 drawingToolFloatingMenuPosition={
                     isMobile

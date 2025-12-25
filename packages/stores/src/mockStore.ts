@@ -72,6 +72,7 @@ const mock = (): TStores & { is_mock: boolean } => {
             responseAuthorize: jest.fn(),
             responsePayoutCurrencies: jest.fn(),
             init: jest.fn(),
+            switchAccount: jest.fn(),
         },
         common: {
             error: common_store_error,
@@ -132,6 +133,7 @@ const mock = (): TStores & { is_mock: boolean } => {
             is_route_modal_on: false,
             is_services_error_visible: false,
             is_logout_success_modal_visible: false,
+            is_try_real_modal_visible: false,
             should_show_phone_number_otp: false,
             is_trading_assessment_for_existing_user_enabled: false,
             setIsForcedToExitPnv: jest.fn(),
@@ -174,6 +176,7 @@ const mock = (): TStores & { is_mock: boolean } => {
             toggleLinkExpiredModal: jest.fn(),
             toggleServicesErrorModal: jest.fn(),
             toggleLogoutSuccessModal: jest.fn(),
+            toggleTryRealModal: jest.fn(),
             setSidebarFlyout: jest.fn(),
             closeSidebarFlyout: jest.fn(),
             addToast: jest.fn(),
