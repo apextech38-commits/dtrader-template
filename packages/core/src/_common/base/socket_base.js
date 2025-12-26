@@ -16,7 +16,7 @@ const BinarySocketBase = (() => {
     let is_connected_before = false;
     let is_switching_socket = false;
     let reconnect_handlers = []; // Array to store multiple reconnection handlers
-    let connection_start_time = 0; // Track connection start time for error detection
+    let reconnect_attempt_count = 0; // Track number of reconnect attempts
 
     const availability = {
         is_up: true,
@@ -84,18 +84,20 @@ const BinarySocketBase = (() => {
 
         if (isClose()) {
             is_disconnect_called = false;
-            connection_start_time = Date.now(); // Track connection start time
             binary_socket = new WebSocket(getSocketUrl(session_id));
 
-            // Add error event listener for immediate connection failures
+            // Add error event listener for connection failures
             binary_socket.addEventListener('error', error_event => {
                 // eslint-disable-next-line no-console
                 console.error('WebSocket error:', error_event);
 
-                // Check if connection closed immediately (within 2 seconds)
-                const connection_duration = Date.now() - connection_start_time;
-                if (connection_duration < 2000 && typeof config.onConnectionError === 'function') {
+                // Increment reconnect attempt counter
+                reconnect_attempt_count++;
+
+                // Throw error after 3 reconnect attempts
+                if (reconnect_attempt_count >= 3 && typeof config.onConnectionError === 'function') {
                     config.onConnectionError(error_event);
+                    reconnect_attempt_count = 0; // Reset counter after throwing error
                 }
             });
 
@@ -108,6 +110,9 @@ const BinarySocketBase = (() => {
 
         deriv_api.onOpen().subscribe(() => {
             config.wsEvent('open');
+
+            // Reset reconnect attempt counter on successful connection
+            reconnect_attempt_count = 0;
 
             // Remove automatic authorization - server handles it via account_id
             // Balance subscription will serve as auth confirmation
