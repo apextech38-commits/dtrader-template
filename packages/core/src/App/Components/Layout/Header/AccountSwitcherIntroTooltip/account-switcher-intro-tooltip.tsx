@@ -11,7 +11,6 @@ import { Localize } from '@deriv-com/translations';
 import './account-switcher-intro-tooltip.scss';
 
 export const ACCOUNT_SWITCHER_INTRO_TOOLTIP_LOCALSTORAGE_KEY = 'account_switcher_intro_tooltip_seen';
-const CHART_INTRO_GUIDE_LOCALSTORAGE_KEY = 'chart_intro_guide_seen';
 
 type TAccountSwitcherIntroTooltipProps = {
     is_logged_in?: boolean;
@@ -29,45 +28,11 @@ const AccountSwitcherIntroTooltip = ({
     onAccountSwitcherHighlight,
 }: TAccountSwitcherIntroTooltipProps) => {
     const [is_tooltip_open, setIsTooltipOpen] = React.useState(false);
-    const [chart_guide_seen_state, setChartGuideSeenState] = React.useState(false);
 
     const [tooltip_seen, setTooltipSeen] = useLocalStorageData<boolean>(
         ACCOUNT_SWITCHER_INTRO_TOOLTIP_LOCALSTORAGE_KEY,
         false
     );
-
-    const [chart_intro_guide_seen] = useLocalStorageData<boolean>(CHART_INTRO_GUIDE_LOCALSTORAGE_KEY, false);
-
-    // Listen for changes to chart_intro_guide_seen in localStorage
-    React.useEffect(() => {
-        const checkChartGuideSeen = () => {
-            const value = localStorage.getItem(CHART_INTRO_GUIDE_LOCALSTORAGE_KEY);
-            setChartGuideSeenState(value === 'true');
-        };
-
-        // Check initial value
-        checkChartGuideSeen();
-
-        // Listen for storage events (changes from other tabs/windows)
-        const handleStorageChange = (e: StorageEvent) => {
-            if (e.key === CHART_INTRO_GUIDE_LOCALSTORAGE_KEY) {
-                checkChartGuideSeen();
-            }
-        };
-
-        // Listen for custom event (changes from same window)
-        const handleCustomStorageChange = () => {
-            checkChartGuideSeen();
-        };
-
-        window.addEventListener('storage', handleStorageChange);
-        window.addEventListener('localStorageUpdated', handleCustomStorageChange);
-
-        return () => {
-            window.removeEventListener('storage', handleStorageChange);
-            window.removeEventListener('localStorageUpdated', handleCustomStorageChange);
-        };
-    }, []);
 
     const handleClose = React.useCallback(() => {
         setIsTooltipOpen(false);
@@ -84,12 +49,7 @@ const AccountSwitcherIntroTooltip = ({
     React.useEffect(() => {
         let timer: NodeJS.Timeout | undefined;
 
-        if (
-            !tooltip_seen &&
-            is_logged_in &&
-            has_multiple_accounts &&
-            (chart_intro_guide_seen || chart_guide_seen_state)
-        ) {
+        if (!tooltip_seen && is_logged_in && has_multiple_accounts) {
             // Check if user has completed onboarding guides (existing users only)
             const guide_dtrader_v2_raw = localStorage.getItem('guide_dtrader_v2');
 
@@ -122,14 +82,7 @@ const AccountSwitcherIntroTooltip = ({
             }
             onAccountSwitcherHighlight?.(false);
         };
-    }, [
-        tooltip_seen,
-        is_logged_in,
-        has_multiple_accounts,
-        chart_intro_guide_seen,
-        chart_guide_seen_state,
-        onAccountSwitcherHighlight,
-    ]);
+    }, [tooltip_seen, is_logged_in, has_multiple_accounts, onAccountSwitcherHighlight]);
 
     // Handle click on account switcher to dismiss tooltip
     React.useEffect(() => {

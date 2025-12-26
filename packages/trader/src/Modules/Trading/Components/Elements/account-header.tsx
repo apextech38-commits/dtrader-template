@@ -181,16 +181,18 @@ const AccountHeader = observer(
 
         if (!is_logged_in) {
             return (
-                <Button
-                    className='account-header__login'
-                    onClick={redirectToLogin}
-                    aria-label={localize('Log in')}
-                    type='button'
-                >
-                    <Text size='xs' weight='bold' color='white'>
-                        <Localize i18n_default_text='Log in' />
-                    </Text>
-                </Button>
+                <div className='account-header'>
+                    <Button
+                        className='account-header__login'
+                        onClick={redirectToLogin}
+                        aria-label={localize('Log in')}
+                        type='button'
+                    >
+                        <Text size='xs' weight='bold' color='white'>
+                            <Localize i18n_default_text='Log in' />
+                        </Text>
+                    </Button>
+                </div>
             );
         }
 

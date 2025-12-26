@@ -92,46 +92,55 @@ const AccountSwitcher = observer(
             return (
                 <div className='acc-switcher__wrapper'>
                     <div className='acc-switcher__accounts'>
-                        {accounts.map(account => {
-                            const is_selected = account.account_id === current_loginid;
-                            const formatted_balance = addComma(account.balance, 2);
-                            const currency_display = getCurrencyDisplayCode(account.currency);
-                            const account_type_label =
-                                account.account_type === 'real' ? (
-                                    <Localize i18n_default_text='Real account' />
-                                ) : (
-                                    <Localize i18n_default_text='Demo account' />
-                                );
+                        {[...accounts]
+                            .sort((a, b) => {
+                                // Sort real accounts first, then demo accounts
+                                if (a.account_type === 'real' && b.account_type === 'demo') return -1;
+                                if (a.account_type === 'demo' && b.account_type === 'real') return 1;
+                                return 0;
+                            })
+                            .map(account => {
+                                const is_selected = account.account_id === current_loginid;
+                                const formatted_balance = addComma(account.balance, 2);
+                                const currency_display = getCurrencyDisplayCode(account.currency);
+                                const account_type_label =
+                                    account.account_type === 'real' ? (
+                                        <Localize i18n_default_text='Real account' />
+                                    ) : (
+                                        <Localize i18n_default_text='Demo account' />
+                                    );
 
-                            return (
-                                <button
-                                    key={account.account_id}
-                                    className={classNames('acc-switcher__account', {
-                                        'acc-switcher__account--selected': is_selected,
-                                    })}
-                                    onClick={() => handleAccountClick(account)}
-                                    disabled={is_selected}
-                                    aria-label={`${account.account_type === 'real' ? 'Real' : 'Demo'} account ${
-                                        account.account_id
-                                    } with balance ${formatted_balance} ${currency_display}`}
-                                    aria-current={is_selected ? 'true' : undefined}
-                                    data-testid={`dt_account_item_${account.account_id}`}
-                                    type='button'
-                                >
-                                    <div className='acc-switcher__account-details'>
-                                        <Text
-                                            size='xs'
-                                            color={account.account_type === 'demo' ? 'tertiary' : 'secondary-alternate'}
-                                        >
-                                            {account_type_label}
-                                        </Text>
-                                        <Text size='s' color='primary' weight='bold'>
-                                            {formatted_balance} {currency_display}
-                                        </Text>
-                                    </div>
-                                </button>
-                            );
-                        })}
+                                return (
+                                    <button
+                                        key={account.account_id}
+                                        className={classNames('acc-switcher__account', {
+                                            'acc-switcher__account--selected': is_selected,
+                                        })}
+                                        onClick={() => handleAccountClick(account)}
+                                        disabled={is_selected}
+                                        aria-label={`${account.account_type === 'real' ? 'Real' : 'Demo'} account ${
+                                            account.account_id
+                                        } with balance ${formatted_balance} ${currency_display}`}
+                                        aria-current={is_selected ? 'true' : undefined}
+                                        data-testid={`dt_account_item_${account.account_id}`}
+                                        type='button'
+                                    >
+                                        <div className='acc-switcher__account-details'>
+                                            <Text
+                                                size='xs'
+                                                color={
+                                                    account.account_type === 'demo' ? 'tertiary' : 'secondary-alternate'
+                                                }
+                                            >
+                                                {account_type_label}
+                                            </Text>
+                                            <Text size='s' color='primary' weight='bold'>
+                                                {formatted_balance} {currency_display}
+                                            </Text>
+                                        </div>
+                                    </button>
+                                );
+                            })}
                     </div>
                 </div>
             );
