@@ -245,7 +245,7 @@ const DayInput = ({
                     <Localize i18n_default_text='Expiry' />
                 </Text>
                 <Text size='sm'>{`
-                ${formatted_date} ${
+                ${formatted_date}, ${
                     formatted_date === formatted_current_date ? browsing_expiry_time : '23:59:59'
                 } GMT`}</Text>
             </div>
