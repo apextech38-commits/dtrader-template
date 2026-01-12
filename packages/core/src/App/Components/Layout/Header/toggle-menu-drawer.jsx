@@ -2,7 +2,7 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import classNames from 'classnames';
 
-import { useRemoteConfig, useMobileBridge } from '@deriv/api';
+import { useMobileBridge, useRemoteConfig } from '@deriv/api';
 import { Div100vhContainer, MobileDrawer, ToggleSwitch } from '@deriv/components';
 import {
     LegacyChartsIcon,
@@ -213,11 +213,9 @@ const ToggleMenuDrawer = observer(() => {
                     <div className='header__menu-mobile-body-wrapper'>
                         <React.Fragment>
                             <MobileDrawer.Body>
-                                {!isBridgeAvailable && (
-                                    <MobileDrawer.Item onClick={handleHomeClick}>
-                                        <MenuLink icon={<LegacyHomeOldIcon />} text={localize('Home')} />
-                                    </MobileDrawer.Item>
-                                )}
+                                <MobileDrawer.Item onClick={handleHomeClick}>
+                                    <MenuLink icon={<LegacyHomeOldIcon />} text={localize('Home')} />
+                                </MobileDrawer.Item>
                                 <MobileDrawer.Item>
                                     <MenuLink
                                         link_to={routes.index}
@@ -261,17 +259,14 @@ const ToggleMenuDrawer = observer(() => {
                                         <LiveChat />
                                     </MobileDrawer.Item>
                                 )}
-                                {is_logged_in && (
+                                {is_logged_in && !isBridgeAvailable && (
                                     <MobileDrawer.Item
                                         onClick={async e => {
                                             e.preventDefault();
                                             await handleLogout();
                                         }}
                                     >
-                                        <MenuLink
-                                            icon={<LegacyLogout1pxIcon />}
-                                            text={isBridgeAvailable ? localize('Back to app') : localize('Log out')}
-                                        />
+                                        <MenuLink icon={<LegacyLogout1pxIcon />} text={localize('Log out')} />
                                     </MobileDrawer.Item>
                                 )}
                             </MobileDrawer.Body>

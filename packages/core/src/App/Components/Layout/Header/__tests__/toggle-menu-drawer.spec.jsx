@@ -219,7 +219,7 @@ describe('<ToggleMenuDrawer />', () => {
         expect(clearTimeout).toBeCalled();
     });
 
-    it('should use Flutter channel when bridge is available and logout is clicked', async () => {
+    it('should not show logout button when bridge is available', async () => {
         const user = userEvent.setup({ delay: null });
         // Mock bridge available
         mockSendBridgeEvent.mockResolvedValue(true);
@@ -234,15 +234,11 @@ describe('<ToggleMenuDrawer />', () => {
         const hamburgerButton = screen.getByTestId('dt_mobile_drawer_toggle');
         await user.click(hamburgerButton);
 
-        // Find logout menu item and click it
+        // Logout button should not be present when bridge is available
         const logoutItems = screen.getAllByTestId('drawer-item');
-        const logoutItem = logoutItems.find(item => item.textContent && item.textContent.includes('Back to app'));
+        const logoutItem = logoutItems.find(item => item.textContent && item.textContent.includes('Log out'));
 
-        if (logoutItem) {
-            await user.click(logoutItem);
-
-            expect(mockSendBridgeEvent).toHaveBeenCalledWith('trading:back', expect.any(Function));
-        }
+        expect(logoutItem).toBeUndefined();
     });
 
     it('should fallback to regular logout when bridge is not available', async () => {
@@ -276,7 +272,8 @@ describe('<ToggleMenuDrawer />', () => {
         }
     });
 
-    it('should show "Back to app" text when bridge is available', () => {
+    it('should show "Home" text when bridge is available', async () => {
+        const user = userEvent.setup({ delay: null });
         // Mock bridge available
         useMobileBridge.mockReturnValue({
             sendBridgeEvent: mockSendBridgeEvent,
@@ -286,9 +283,14 @@ describe('<ToggleMenuDrawer />', () => {
 
         render(mockToggleMenuDrawer());
 
-        // The component should use "Back to app" text when bridge is available
-        const { isBridgeAvailable } = useMobileBridge();
-        expect(isBridgeAvailable).toBe(true);
+        // Open drawer
+        const hamburgerButton = screen.getByTestId('dt_mobile_drawer_toggle');
+        await user.click(hamburgerButton);
+
+        // The component should use "Home" text when bridge is available
+        const homeItems = screen.getAllByTestId('drawer-item');
+        const homeItem = homeItems.find(item => item.textContent?.includes('Home'));
+        expect(homeItem).toBeInTheDocument();
     });
 
     it('should show "Log out" text when bridge is not available', () => {
@@ -487,7 +489,7 @@ describe('<ToggleMenuDrawer />', () => {
             expect(mockLocation.href).toContain('curr=');
         });
 
-        it('should hide Home button when bridge is available', async () => {
+        it('should show Home button when bridge is available', async () => {
             const user = userEvent.setup({ delay: null });
             // Mock bridge available
             useMobileBridge.mockReturnValue({
@@ -499,8 +501,10 @@ describe('<ToggleMenuDrawer />', () => {
             const hamburgerButton = screen.getByTestId('dt_mobile_drawer_toggle');
             await user.click(hamburgerButton);
 
-            // Home button should not be present when bridge is available
-            expect(screen.queryByText('Home')).not.toBeInTheDocument();
+            // Home button should be visible when bridge is available
+            const homeItems = screen.getAllByTestId('drawer-item');
+            const homeItem = homeItems.find(item => item.textContent?.includes('Home'));
+            expect(homeItem).toBeInTheDocument();
         });
 
         it('should show Home button when bridge is not available', async () => {
