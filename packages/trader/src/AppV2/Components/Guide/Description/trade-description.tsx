@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
+import { useMobileBridge } from '@deriv/api';
 import { Loading } from '@deriv/components';
 import { makeLazyLoader, moduleLoader } from '@deriv/shared';
-import { Localize } from '@deriv-com/translations';
 import { Text } from '@deriv-com/quill-ui';
+import { Localize } from '@deriv-com/translations';
 
 import { CONTRACT_LIST } from 'AppV2/Utils/trade-types-utils';
 
@@ -128,6 +129,19 @@ const TradeDescription = ({
     contract_type: string;
     onTermClick: (term: string) => void;
 }) => {
+    const { isBridgeAvailable } = useMobileBridge();
+
+    useEffect(() => {
+        if (isBridgeAvailable) {
+            Promise.all([
+                import('./ContractDescription/accumulators-trade-description'),
+                import('./ContractDescription/multipliers-trade-description'),
+                import('./ContractDescription/vanillas-trade-description'),
+                import('./ContractDescription/turbos-trade-description'),
+            ]);
+        }
+    }, [isBridgeAvailable]);
+
     let trade_type_template;
     switch (contract_type) {
         case CONTRACT_LIST.ACCUMULATORS:
