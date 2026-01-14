@@ -18,8 +18,6 @@ import { TTradeParametersProps } from '../trade-parameters';
 import PayoutPerPointDesktop from './payout-per-point-desktop';
 import PayoutPerPointWheel from './payout-per-point-wheel';
 
-import './payout-per-point-desktop.scss';
-
 const PayoutPerPoint = observer(({ is_minimized }: TTradeParametersProps) => {
     const [is_open, setIsOpen] = React.useState(false);
     const { barrier_1, currency, is_market_closed, payout_choices, payout_per_point, setPayoutPerPoint } =

@@ -17,8 +17,6 @@ import { TTradeParametersProps } from '../trade-parameters';
 import MultiplierDesktop from './multiplier-desktop';
 import MultiplierWheelPicker from './multiplier-wheel-picker';
 
-import './multiplier-desktop.scss';
-
 const Multiplier = observer(({ is_minimized }: TTradeParametersProps) => {
     const { multiplier, multiplier_range_list, commission, is_market_closed, onChange, currency } = useTraderStore();
 

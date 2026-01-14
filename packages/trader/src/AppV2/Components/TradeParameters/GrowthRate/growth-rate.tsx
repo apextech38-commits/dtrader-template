@@ -18,8 +18,6 @@ import { TTradeParametersProps } from '../trade-parameters';
 import GrowthRateDesktop from './growth-rate-desktop';
 import GrowthRatePicker from './growth-rate-picker';
 
-import './growth-rate-desktop.scss';
-
 const GrowthRate = observer(({ is_minimized }: TTradeParametersProps) => {
     const {
         accumulator_range_list,
