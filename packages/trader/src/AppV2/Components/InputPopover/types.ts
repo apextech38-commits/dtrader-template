@@ -1,3 +1,5 @@
+export type PopoverPlacement = 'left' | 'bottom';
+
 export interface InputPopoverProps {
     isOpen: boolean;
     onClose: () => void;
@@ -6,6 +8,7 @@ export interface InputPopoverProps {
     className?: string;
     popoverWidth?: number;
     spacing?: number;
+    placement?: PopoverPlacement;
 }
 
 export interface ValueChipsProps {
@@ -22,6 +25,7 @@ export interface UsePopoverPositionProps {
     isOpen: boolean;
     popoverWidth?: number;
     spacing?: number;
+    placement?: PopoverPlacement;
 }
 
 export interface PopoverPosition {
