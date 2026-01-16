@@ -297,7 +297,7 @@ export default class ContractStore extends BaseStore {
             if (isBarrierSupported(contract_type) && !isSmartTraderContract(contract_type)) {
                 // Barrier color will depend on pnl (except old SmartTrader contracts)
                 main_barrier?.updateColor({
-                    barrier_color: contract_info.profit >= 0 ? BARRIER_COLORS.GREEN : BARRIER_COLORS.RED,
+                    barrier_color: is_dark_mode ? BARRIER_COLORS.GRAY : BARRIER_COLORS.BLACK,
                 });
             }
             if (

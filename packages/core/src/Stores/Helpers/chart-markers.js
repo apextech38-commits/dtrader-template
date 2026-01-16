@@ -122,9 +122,9 @@ export const createTickMarkers = (contract_info, is_delayed_markers_update) => {
             is_accumulator && (is_accu_contract_closed ? idx === exit_spot_index - 1 : idx === tick_stream.length - 2);
 
         let marker_config;
-        if (is_entry_spot) {
+        if (is_entry_spot && !isDigitContract(contract_info.contract_type)) {
             marker_config = createMarkerSpotEntry(contract_info);
-        } else if (is_middle_spot) {
+        } else if (is_middle_spot || (is_entry_spot && isDigitContract(contract_info.contract_type))) {
             marker_config = createMarkerSpotMiddle(contract_info, tick, idx);
         } else if (is_exit_spot && !is_accu_current_last_spot) {
             tick.align_label = 'top'; // force exit spot label to be 'top' to avoid overlapping

@@ -4,16 +4,16 @@ import classNames from 'classnames';
 import { Button, MobileDialog, Money, Text, ThemedScrollbars } from '@deriv/components';
 import {
     IllustrativePayoutIcon,
+    LabelPairedCircleMdBoldIcon,
+    LabelPairedCircleMdFillIcon,
+    LabelPairedFlagCheckeredMdFillIcon,
+    LabelPairedStopwatchMdRegularIcon,
     LegacyBarrierIcon,
     LegacyBarrierResetIcon,
     LegacyCommissionIcon,
     LegacyDealCancellationIcon,
-    LegacyEntrySpotIcon,
-    LegacyExitSpotIcon,
-    LegacyExitTimeIcon,
     LegacyIdIcon,
     LegacyResetIcon,
-    LegacyStartTimeIcon,
     LegacyTargetIcon,
     LegacyTimeIcon,
 } from '@deriv/quill-icons';
@@ -51,6 +51,8 @@ import { getBarrierLabel, getBarrierValue, isDigitType } from 'App/Components/El
 import { isCancellationExpired } from 'Stores/Modules/Trading/Helpers/logic';
 
 import ContractAuditItem from './contract-audit-item';
+
+import { getEntrySpotTooltipText } from '_common/utils/contract-entry-spot-helper';
 
 type TContractDetails = {
     contract_end_time?: number;
@@ -311,7 +313,7 @@ const ContractDetails = ({
                 )}
                 <ContractAuditItem
                     id='dt_start_time_label'
-                    icon={<LegacyStartTimeIcon iconSize='xs' fill='var(--color-text-primary)' />}
+                    icon={<LabelPairedStopwatchMdRegularIcon fill='var(--color-text-primary)' />}
                     label={localize('Start time')}
                     value={toGMTFormat(epochToMoment(Number(date_start))) || ' - '}
                 />
@@ -349,7 +351,7 @@ const ContractDetails = ({
                     <React.Fragment>
                         <ContractAuditItem
                             id='dt_entry_spot_label'
-                            icon={<LegacyEntrySpotIcon iconSize='xs' fill='var(--color-text-primary)' />}
+                            icon={<LabelPairedCircleMdBoldIcon fill='var(--color-text-primary)' />}
                             label={localize('Entry spot')}
                             value={entry_spot ? addComma(entry_spot.toString()) : ' - '}
                             value2={entry_spot_time ? toGMTFormat(epochToMoment(entry_spot_time)) : ' - '}
@@ -388,7 +390,7 @@ const ContractDetails = ({
                 {(!isNaN(Number(exit_spot)) || exit_spot_value) && (
                     <ContractAuditItem
                         id='dt_exit_spot_label'
-                        icon={<LegacyExitSpotIcon iconSize='xs' fill='var(--color-text-primary)' />}
+                        icon={<LabelPairedCircleMdFillIcon fill='var(--color-text-primary)' />}
                         label={localize('Exit spot')}
                         value={
                             exit_spot
@@ -404,13 +406,13 @@ const ContractDetails = ({
                     <ContractAuditItem
                         id='dt_exit_time_label'
                         icon={
-                            <LegacyExitTimeIcon
+                            <LabelPairedFlagCheckeredMdFillIcon
+                                fill='var(--color-text-primary)'
                                 className={
                                     is_profit
                                         ? 'contract-audit__exit-time--success'
                                         : 'contract-audit__exit-time--danger'
                                 }
-                                iconSize='xs'
                             />
                         }
                         label={localize('Exit time')}

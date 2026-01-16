@@ -976,7 +976,7 @@
         import { BrandDerivLogoCoralIcon } from '@deriv/quill-icons';
 
         // packages/core/src/Components/markers/marker-line.jsx:5
-        import { LegacyExitTimeIcon, LegacyStartTimeIcon, LegacyResetIcon } from '@deriv/quill-icons';
+        import { LegacyExitTimeIcon, LabelPairedStopwatchMdRegularIcon, LegacyResetIcon } from '@deriv/quill-icons';
         ```
 
 - [x] **Webpack tree-shaking already configured**
