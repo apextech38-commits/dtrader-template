@@ -359,6 +359,13 @@ $solid-blue-700: #2c9aff;
 
 /** @define smartcharts-mobile; weak */
 .smartcharts-mobile {
+    .ciq-chart {
+        padding: unset;
+
+        .barrier-area {
+            right: -16px;
+        }
+    }
     .cq-modal-dropdown {
         left: 0px;
         top: 0px;

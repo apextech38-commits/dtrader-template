@@ -20,20 +20,6 @@
         }
 
         animation: slide-in-tooltip var(--core-motion-duration-100) linear;
-
-        &-scroll {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            padding-top: calc(100vh - 224px);
-
-            &-text {
-                color: var(--component-textIcon-static-prominentDark);
-            }
-        }
     }
 
     &__button {
@@ -58,22 +44,5 @@
         position: relative;
         inset-inline-start: var(--core-spacing-500);
         inset-block-end: var(--core-spacing-500);
-    }
-
-    @keyframes bounce {
-        0%,
-        100% {
-            transform: translateY(0);
-        }
-        50% {
-            transform: translateY(-10px);
-        }
-    }
-
-    &--bounce {
-        height: var(--core-spacing-3200);
-        width: var(--core-spacing-2400);
-        fill: var(--component-textIcon-static-prominentDark);
-        animation: bounce var(--core-motion-duration-400) ease-in-out var(--core-motion-duration-100) infinite;
     }
 }

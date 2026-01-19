@@ -1,7 +1,6 @@
 import React from 'react';
 import { useHistory, useLocation } from 'react-router';
 import classNames from 'classnames';
-import clsx from 'clsx';
 import { observer } from 'mobx-react-lite';
 
 import {
@@ -12,16 +11,15 @@ import {
 } from '@deriv/quill-icons';
 import { routes } from '@deriv/shared';
 import { useStore } from '@deriv/stores';
-import { Localize } from '@deriv-com/translations';
 import { Badge, Navigation } from '@deriv-com/quill-ui';
+import { Localize } from '@deriv-com/translations';
 
 type BottomNavProps = {
     children: React.ReactNode;
     className?: string;
-    onScroll?: (e: React.UIEvent<HTMLDivElement>) => void;
 };
 
-const BottomNav = observer(({ children, className, onScroll }: BottomNavProps) => {
+const BottomNav = observer(({ children, className }: BottomNavProps) => {
     const history = useHistory();
     const location = useLocation();
     const { client, portfolio } = useStore();
@@ -88,9 +86,7 @@ const BottomNav = observer(({ children, className, onScroll }: BottomNavProps) =
 
     return (
         <div className={classNames('bottom-nav', className)}>
-            <div className='bottom-nav-selection' onScroll={onScroll}>
-                {children}
-            </div>
+            <div className='bottom-nav-selection'>{children}</div>
             {is_logged_in ? (
                 <Navigation.Bottom className='bottom-nav-container' onChange={(_, index) => handleSelect(index)}>
                     {bottomNavItems.map((item, index) => (
@@ -102,7 +98,7 @@ const BottomNav = observer(({ children, className, onScroll }: BottomNavProps) =
                             label={item.label}
                             selected={index === selectedIndex}
                             showLabel
-                            className={clsx(
+                            className={classNames(
                                 'bottom-nav-item',
                                 index === selectedIndex && 'bottom-nav-item--active',
                                 item.path === routes.trader_positions && 'bottom-nav-item--positions'
@@ -110,9 +106,7 @@ const BottomNav = observer(({ children, className, onScroll }: BottomNavProps) =
                         />
                     ))}
                 </Navigation.Bottom>
-            ) : (
-                <></>
-            )}
+            ) : null}
         </div>
     );
 });

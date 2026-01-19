@@ -3,8 +3,9 @@
     flex-direction: column;
     gap: var(--core-spacing-400);
     padding: var(--core-spacing-400) var(--core-spacing-800);
+    border: 1px solid var(--color-surface-border);
     border-radius: var(--core-spacing-400);
-    background: var(--semantic-color-monochrome-surface-normal-lowest);
+    background: var(--semantic-color-slate-solid-surface-frame-low);
     width: 100%;
 
     &__title {
@@ -22,11 +23,11 @@
             width: 100%;
         }
         .digit {
-            height: var(--core-size-3300);
             display: flex;
             flex-direction: column;
             align-items: center;
             flex: 1;
+            gap: var(--core-spacing-400);
 
             button {
                 display: flex;

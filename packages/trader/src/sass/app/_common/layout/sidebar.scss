@@ -11,6 +11,10 @@
     transition: opacity 0.3s;
     backface-visibility: hidden;
 
+    @include mobile-screen {
+        display: none; // Hide sidebar on mobile
+    }
+
     &--highlighted {
         z-index: 10001;
         position: relative;

@@ -10,21 +10,14 @@ const TradeLoader = () => {
                 ))}
             </div>
             <div className='skeleton-box__market'>
-                <Skeleton width={200} height={42} />
-            </div>
-            <div className='skeleton-box__trade-params'>
-                <div className='skeleton-box__trade-params-row'>
-                    <Skeleton width={96} height={24} />
-                    <Skeleton width={96} height={32} />
-                </div>
-                <div className='skeleton-box__trade-params-column'>
-                    {[...new Array(3)].map((_, idx) => (
-                        <Skeleton key={idx} height={56} />
-                    ))}
-                </div>
+                <Skeleton height={42} />
             </div>
             <div className='skeleton-box__chart'>
                 <Skeleton />
+            </div>
+            <div className='skeleton-box__trade-params'>
+                <Skeleton height={164} />
+                <Skeleton height={56} />
             </div>
         </div>
     );

@@ -68,41 +68,34 @@
         height: 100%;
     }
     &__trade {
-        background-color: var(--semantic-color-slate-solid-surface-frame-mid);
-        padding: 0 var(--core-spacing-400);
+        padding: var(--core-spacing-400);
         gap: var(--semantic-spacing-general-sm);
         position: relative;
         overflow-x: hidden;
 
         .skeleton-box,
         .skeleton-box__trade-types,
+        .skeleton-box__market,
         .skeleton-box__trade-params,
-        .skeleton-box__chart {
+        .skeleton-box__chart,
+        .skeleton-box__bottom-nav {
             display: flex;
             flex-direction: column;
             border-radius: var(--semantic-borderRadius-md);
-            background-color: var(--component-modal-bg);
 
             &__trade-types {
                 position: relative;
-                inset-inline-start: calc(-1 * var(--semantic-spacing-general-sm));
-                width: 100vw;
                 flex-direction: row;
                 flex-wrap: nowrap;
                 border-radius: unset;
-                padding: var(--semantic-spacing-general-sm) var(--semantic-spacing-general-md);
                 gap: var(--semantic-spacing-general-sm);
 
                 .skeleton {
                     flex-shrink: 0;
                 }
             }
-            &__market {
-                padding: 0 var(--semantic-spacing-general-sm);
-            }
             &__trade-params {
-                padding: var(--semantic-spacing-general-md);
-                gap: var(--semantic-spacing-general-md);
+                gap: var(--core-spacing-400);
 
                 &-row {
                     display: flex;
@@ -116,8 +109,7 @@
                 }
             }
             &__chart {
-                min-height: 400px;
-                padding: var(--semantic-spacing-general-sm);
+                height: 100%;
             }
         }
     }

@@ -1,9 +1,7 @@
 import React from 'react';
-import { CSSTransition } from 'react-transition-group';
 import clsx from 'clsx';
 import { observer } from 'mobx-react-lite';
 
-import { usePrevious } from '@deriv/components';
 import { StandaloneStopwatchRegularIcon } from '@deriv/quill-icons';
 import {
     getCardLabelsV2,
@@ -33,7 +31,11 @@ const BASIS_STAKE = 'stake';
 const BASIS_PAYOUT = 'payout';
 const BASIS_NAME = 'basis';
 
-const PurchaseButton = observer(() => {
+type TPurchaseButtonProps = {
+    onPurchaseSuccess?: () => void;
+};
+
+const PurchaseButton = observer(({ onPurchaseSuccess }: TPurchaseButtonProps = {}) => {
     const [loading_button_index, setLoadingButtonIndex] = React.useState<number | null>(null);
     const [error_info, setErrorInfo] = React.useState<{ has_error: boolean; message: string | null }>({
         has_error: false,
@@ -43,7 +45,7 @@ const PurchaseButton = observer(() => {
     const { addBanner } = useNotifications();
     const { addSnackbar } = useSnackbar();
     const {
-        portfolio: { all_positions, onClickSell, open_accu_contract, active_positions },
+        portfolio: { all_positions, onClickSell },
         client,
         common: { services_error },
     } = useStore();
@@ -54,7 +56,6 @@ const PurchaseButton = observer(() => {
         basis_list,
         contract_type,
         currency,
-        has_open_accu_contract,
         is_accumulator,
         is_multiplier,
         is_purchase_enabled,
@@ -72,15 +73,14 @@ const PurchaseButton = observer(() => {
         trade_types,
     } = useTraderStore();
 
-    const [is_sell_button_visible, setIsSellButtonVisibile] = React.useState(is_accumulator && has_open_accu_contract);
-    const [animation_duration, setAnimationDuration] = React.useState(450);
-    const prev_has_open_accu_contract = usePrevious(
-        !!open_accu_contract &&
-            !!active_positions.find(({ contract_info, type }) => {
-                const contract_underlying = contract_info.underlying_symbol;
-                return isAccumulatorContract(type) && contract_underlying === symbol;
-            })
-    );
+    const active_accu_contract = is_accumulator
+        ? all_positions.find(({ contract_info, type }) => {
+              const contract_underlying = contract_info.underlying_symbol;
+              return isAccumulatorContract(type) && contract_underlying === symbol && !contract_info.is_sold;
+          })
+        : undefined;
+
+    const has_open_accu_contract = !!active_accu_contract;
     const basis_options = React.useMemo(
         () => (basis_list.length ? basis_list.map(item => item.value) : []),
         [basis_list]
@@ -102,12 +102,6 @@ const PurchaseButton = observer(() => {
         is_touch ||
         (is_accumulator && !has_open_accu_contract);
     const contract_types = getDisplayedContractTypes(trade_types, contract_type, trade_type_tab);
-    const active_accu_contract = is_accumulator
-        ? all_positions.find(({ contract_info, type }) => {
-              const contract_underlying = contract_info.underlying_symbol;
-              return isAccumulatorContract(type) && contract_underlying === symbol && !contract_info.is_sold;
-          })
-        : undefined;
     const is_valid_to_sell = active_accu_contract?.contract_info
         ? hasContractEntered(active_accu_contract.contract_info) &&
           isOpen(active_accu_contract.contract_info) &&
@@ -170,16 +164,6 @@ const PurchaseButton = observer(() => {
     }, [basis, basis_options]);
 
     React.useEffect(() => {
-        const is_animated =
-            (!prev_has_open_accu_contract && has_open_accu_contract) ||
-            (prev_has_open_accu_contract && !has_open_accu_contract && is_accumulator);
-        setAnimationDuration(is_animated ? 450 : 0);
-
-        setIsSellButtonVisibile(is_accumulator ? has_open_accu_contract : false);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [is_accumulator, has_open_accu_contract]);
-
-    React.useEffect(() => {
         // Check each proposal info object directly for errors
         if (proposal_info && contract_types.length === Object.keys(proposal_info).length) {
             let message = '';
@@ -204,7 +188,7 @@ const PurchaseButton = observer(() => {
                 hasFixedHeight: false,
                 style: {
                     marginBottom: is_logged_in ? '48px' : '-8px',
-                    width: 'calc(100% - var(--core-spacing-800)',
+                    width: 'calc(100% - var(--core-spacing-800))',
                 },
             });
 
@@ -215,14 +199,25 @@ const PurchaseButton = observer(() => {
 
     return (
         <React.Fragment>
-            <CSSTransition
-                in={!is_sell_button_visible}
-                timeout={animation_duration}
-                classNames='slide'
-                key='purchase-button'
-                unmountOnExit
-                mountOnEnter
-            >
+            {has_open_accu_contract ? (
+                <div className='purchase-button__wrapper'>
+                    <Button
+                        color='black-white'
+                        size='lg'
+                        label={
+                            is_accu_sell_disabled
+                                ? `${cardLabels.CLOSE}`
+                                : `${cardLabels.CLOSE} ${current_stake} ${currency}`
+                        }
+                        fullWidth
+                        isOpaque
+                        isLoading={active_accu_contract?.is_sell_requested}
+                        className='purchase-button purchase-button--single'
+                        disabled={!is_valid_to_sell}
+                        onClick={() => onClickSell(active_accu_contract?.contract_info.contract_id)}
+                    />
+                </div>
+            ) : (
                 <div
                     className={clsx('purchase-button__wrapper', {
                         'purchase-button__wrapper__un-auth': !is_logged_in,
@@ -255,9 +250,10 @@ const PurchaseButton = observer(() => {
                                     disabled={is_disabled && !is_loading}
                                     onClick={() => {
                                         setLoadingButtonIndex(index);
-                                        onPurchaseV2(trade_type, isMobile, (params, contract_id) =>
-                                            addNotificationBannerCallback(params, contract_id, trade_type)
-                                        );
+                                        onPurchaseV2(trade_type, isMobile, (params, contract_id) => {
+                                            addNotificationBannerCallback(params, contract_id, trade_type);
+                                            onPurchaseSuccess?.();
+                                        });
                                     }}
                                 >
                                     {!is_loading && (
@@ -273,33 +269,7 @@ const PurchaseButton = observer(() => {
                         );
                     })}
                 </div>
-            </CSSTransition>
-            <CSSTransition
-                in={is_sell_button_visible}
-                timeout={animation_duration}
-                classNames='slide'
-                key='sell-button'
-                unmountOnExit
-                mountOnEnter
-            >
-                <div className='purchase-button__wrapper'>
-                    <Button
-                        color='black-white'
-                        size='lg'
-                        label={
-                            is_accu_sell_disabled
-                                ? `${cardLabels.CLOSE}`
-                                : `${cardLabels.CLOSE} ${current_stake} ${currency}`
-                        }
-                        fullWidth
-                        isOpaque
-                        isLoading={active_accu_contract?.is_sell_requested}
-                        className='purchase-button purchase-button--single'
-                        disabled={!is_valid_to_sell}
-                        onClick={() => onClickSell(active_accu_contract?.contract_info.contract_id)}
-                    />
-                </div>
-            </CSSTransition>
+            )}
         </React.Fragment>
     );
 });

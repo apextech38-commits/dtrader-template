@@ -198,4 +198,97 @@ describe('TradeParameters', () => {
         expect(screen.getByText(TRADE_PARAMS.STAKE)).toBeInTheDocument();
         expect(screen.getAllByTestId(data_test)).toHaveLength(3);
     });
+
+    it('should reset scroll position to start when contract type changes in minimized mode', () => {
+        // Mock scrollTo function
+        const mockScrollTo = jest.fn();
+        HTMLDivElement.prototype.scrollTo = mockScrollTo;
+
+        // Create initial store with Turbos
+        const store1 = mockStore({});
+        store1.modules.trade.contract_type = TRADE_TYPES.TURBOS.LONG;
+
+        const { unmount } = render(
+            <TraderProviders store={store1}>
+                <ReportsStoreProvider>
+                    <ModulesProvider store={store1}>
+                        <TradeParameters is_minimized />
+                    </ModulesProvider>
+                </ReportsStoreProvider>
+            </TraderProviders>
+        );
+
+        // Clear initial render calls
+        mockScrollTo.mockClear();
+
+        // Unmount and render with new store and different contract type
+        unmount();
+
+        const store2 = mockStore({});
+        store2.modules.trade.contract_type = TRADE_TYPES.MULTIPLIER;
+
+        render(
+            <TraderProviders store={store2}>
+                <ReportsStoreProvider>
+                    <ModulesProvider store={store2}>
+                        <TradeParameters is_minimized />
+                    </ModulesProvider>
+                </ReportsStoreProvider>
+            </TraderProviders>
+        );
+
+        // Verify scrollTo was called with smooth behavior
+        expect(mockScrollTo).toHaveBeenCalledWith({
+            left: 0,
+            behavior: 'smooth',
+        });
+
+        // Cleanup
+        delete (HTMLDivElement.prototype as any).scrollTo;
+    });
+
+    it('should not reset scroll position when contract type changes in expanded mode', () => {
+        // Mock scrollTo function
+        const mockScrollTo = jest.fn();
+        HTMLDivElement.prototype.scrollTo = mockScrollTo;
+
+        // Create initial store with Turbos
+        const store1 = mockStore({});
+        store1.modules.trade.contract_type = TRADE_TYPES.TURBOS.LONG;
+
+        const { unmount } = render(
+            <TraderProviders store={store1}>
+                <ReportsStoreProvider>
+                    <ModulesProvider store={store1}>
+                        <TradeParameters is_minimized={false} />
+                    </ModulesProvider>
+                </ReportsStoreProvider>
+            </TraderProviders>
+        );
+
+        // Clear initial render calls
+        mockScrollTo.mockClear();
+
+        // Unmount and render with new store and different contract type
+        unmount();
+
+        const store2 = mockStore({});
+        store2.modules.trade.contract_type = TRADE_TYPES.MULTIPLIER;
+
+        render(
+            <TraderProviders store={store2}>
+                <ReportsStoreProvider>
+                    <ModulesProvider store={store2}>
+                        <TradeParameters is_minimized={false} />
+                    </ModulesProvider>
+                </ReportsStoreProvider>
+            </TraderProviders>
+        );
+
+        // Verify scrollTo was NOT called in expanded mode
+        expect(mockScrollTo).not.toHaveBeenCalled();
+
+        // Cleanup
+        delete (HTMLDivElement.prototype as any).scrollTo;
+    });
 });

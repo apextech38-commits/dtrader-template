@@ -2,7 +2,7 @@ import React from 'react';
 import clsx from 'clsx';
 import { observer } from 'mobx-react-lite';
 
-import { useLocalStorageData, useMobileBridge } from '@deriv/api';
+import { useLocalStorageData } from '@deriv/api';
 import { Loading } from '@deriv/components';
 import { getSymbolDisplayName, trackAnalyticsEvent } from '@deriv/shared';
 import { useStore } from '@deriv/stores';
@@ -11,15 +11,15 @@ import AccumulatorStats from 'AppV2/Components/AccumulatorStats';
 import BottomNav from 'AppV2/Components/BottomNav';
 import ClosedMarketMessage from 'AppV2/Components/ClosedMarketMessage';
 import CurrentSpot from 'AppV2/Components/CurrentSpot';
+import Guide from 'AppV2/Components/Guide';
 import MarketSelector from 'AppV2/Components/MarketSelector';
 import OnboardingGuide from 'AppV2/Components/OnboardingGuide/GuideForPages';
-import PurchaseButton from 'AppV2/Components/PurchaseButton';
 import ServiceErrorSheet from 'AppV2/Components/ServiceErrorSheet';
 import TradeErrorSnackbar from 'AppV2/Components/TradeErrorSnackbar';
-import { TradeParameters, TradeParametersContainer } from 'AppV2/Components/TradeParameters';
+import { TradeParametersContainer } from 'AppV2/Components/TradeParameters';
 import useContractsFor from 'AppV2/Hooks/useContractsFor';
 import useDefaultSymbol from 'AppV2/Hooks/useDefaultSymbol';
-import { getChartHeight, HEIGHT } from 'AppV2/Utils/layout-utils';
+import { getChartHeight } from 'AppV2/Utils/layout-utils';
 import { getDisplayedContractTypes } from 'AppV2/Utils/trade-types-utils';
 import { isDigitTradeType } from 'Modules/Trading/Helpers/digits';
 import { useTraderStore } from 'Stores/useTraderStores';
@@ -29,7 +29,6 @@ import { TradeChart } from '../Chart';
 import TradeTypes from './trade-types';
 
 const Trade = observer(() => {
-    const [is_minimized_params_visible, setIsMinimizedParamsVisible] = React.useState(false);
     const chart_ref = React.useRef<HTMLDivElement>(null);
     const {
         client,
@@ -38,7 +37,6 @@ const Trade = observer(() => {
         contract_trade,
     } = useStore();
     const { is_logged_in } = client;
-    const { isBridgeAvailable } = useMobileBridge();
     const {
         active_symbols,
         contract_type,
@@ -104,15 +102,6 @@ const Trade = observer(() => {
         [trade_types, onChange, symbol]
     );
 
-    const onScroll = React.useCallback(() => {
-        const current_chart_ref = chart_ref?.current;
-        if (current_chart_ref) {
-            const chart_bottom_Y = current_chart_ref.getBoundingClientRect().bottom;
-            const container_bottom_Y = window.innerHeight - HEIGHT.BOTTOM_NAV;
-            setIsMinimizedParamsVisible(chart_bottom_Y <= container_bottom_Y);
-        }
-    }, []);
-
     React.useEffect(() => {
         onMount();
         return onUnmount;
@@ -129,7 +118,7 @@ const Trade = observer(() => {
     }, []);
 
     return (
-        <BottomNav onScroll={onScroll}>
+        <BottomNav>
             {symbols.length && trade_types.length ? (
                 <React.Fragment>
                     <div className='trade'>
@@ -139,16 +128,22 @@ const Trade = observer(() => {
                             trade_types={trade_types}
                             is_dark_mode_on={is_dark_mode_on}
                         />
-                        <MarketSelector />
+                        <div className='trade__market-selector-guide'>
+                            <MarketSelector />
+                            <Guide has_label show_guide_for_selected_contract />
+                        </div>
                         {isDigitTradeType(contract_type) && <CurrentSpot />}
-                        <TradeParametersContainer>
-                            <TradeParameters />
-                        </TradeParametersContainer>
                         <div className='trade__chart-tooltip'>
                             <section
                                 className={clsx('trade__chart', { 'trade__chart--with-borderRadius': !is_accumulator })}
                                 style={{
-                                    height: getChartHeight({ is_accumulator, symbol, has_cancellation, contract_type }),
+                                    height: getChartHeight({
+                                        is_accumulator,
+                                        symbol,
+                                        has_cancellation,
+                                        contract_type,
+                                        is_logged_in,
+                                    }),
                                 }}
                                 ref={chart_ref}
                             >
@@ -157,16 +152,8 @@ const Trade = observer(() => {
                         </div>
                         {is_accumulator && <AccumulatorStats />}
                     </div>
-                    <div className={clsx('trade__parameter', { 'trade__parameter--with-button': !is_market_closed })}>
-                        <TradeParametersContainer is_minimized_visible={is_minimized_params_visible} is_minimized>
-                            <TradeParameters is_minimized />
-                        </TradeParametersContainer>
-                        {!is_market_closed && <PurchaseButton />}
-                    </div>
-                    {/* TODO: Remove isBridgeAvailable check when onboarding video with Accumulators is available*/}
-                    {!guide_dtrader_v2?.trade_page && is_logged_in && !isBridgeAvailable && (
-                        <OnboardingGuide type='trade_page' is_dark_mode_on={is_dark_mode_on} />
-                    )}
+                    <TradeParametersContainer is_market_closed={is_market_closed} is_logged_in={is_logged_in} />
+                    {is_logged_in && <OnboardingGuide type='trade_page' is_dark_mode_on={is_dark_mode_on} />}
                 </React.Fragment>
             ) : (
                 <Loading.DTraderV2 />

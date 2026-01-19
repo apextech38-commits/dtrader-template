@@ -4,9 +4,10 @@ import { createMemoryHistory } from 'history';
 
 import { ReportsStoreProvider } from '@deriv/reports/src/Stores/useReportsStores';
 import { mockStore } from '@deriv/stores';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 
 import ModulesProvider from 'Stores/Providers/modules-providers';
+
 import TraderProviders from '../../../../trader-providers';
 import Trade from '../trade';
 
@@ -14,7 +15,7 @@ import Trade from '../trade';
 const mockTrackAnalyticsEvent = jest.fn();
 jest.mock('@deriv/shared', () => ({
     ...jest.requireActual('@deriv/shared'),
-    getSymbolDisplayName: jest.fn((symbols, symbol) => `${symbol} Display Name`),
+    getSymbolDisplayName: jest.fn(symbol => `${symbol} Display Name`),
     redirectToLogin: jest.fn(),
     redirectToSignUp: jest.fn(),
     getBrandUrl: jest.fn(() => 'https://deriv.com'),
@@ -47,11 +48,7 @@ jest.mock('AppV2/Components/AccumulatorStats', () =>
     jest.fn(() => <div data-testid='accumulator-stats'>AccumulatorStats</div>)
 );
 jest.mock('AppV2/Components/BottomNav', () =>
-    jest.fn(({ children, onScroll }) => (
-        <div data-testid='bottom-nav' onScroll={onScroll}>
-            {children}
-        </div>
-    ))
+    jest.fn(({ children }) => <div data-testid='bottom-nav'>{children}</div>)
 );
 jest.mock('AppV2/Components/ClosedMarketMessage', () =>
     jest.fn(() => <div data-testid='closed-market-message'>ClosedMarketMessage</div>)
@@ -73,7 +70,12 @@ jest.mock('AppV2/Components/TradeErrorSnackbar', () =>
     jest.fn(() => <div data-testid='trade-error-snackbar'>TradeErrorSnackbar</div>)
 );
 jest.mock('AppV2/Components/TradeParameters', () => ({
-    TradeParametersContainer: jest.fn(({ children }) => <div data-testid='trade-params-container'>{children}</div>),
+    TradeParametersContainer: jest.fn(({ is_market_closed, is_logged_in }) => (
+        <div data-testid='trade-params-container' data-logged-in={is_logged_in}>
+            <div data-testid='trade-parameters'>TradeParameters</div>
+            {!is_market_closed && <div data-testid='purchase-button'>PurchaseButton</div>}
+        </div>
+    )),
     TradeParameters: jest.fn(() => <div data-testid='trade-parameters'>TradeParameters</div>),
 }));
 jest.mock('../../Chart', () => ({
@@ -289,8 +291,8 @@ describe('Trade', () => {
             expect(screen.getByTestId('bottom-nav')).toBeInTheDocument();
             expect(screen.getByTestId('trade-types')).toBeInTheDocument();
             expect(screen.getByTestId('market-selector')).toBeInTheDocument();
-            expect(screen.getAllByTestId('trade-params-container')).toHaveLength(2);
-            expect(screen.getAllByTestId('trade-parameters')).toHaveLength(2);
+            expect(screen.getByTestId('trade-params-container')).toBeInTheDocument();
+            expect(screen.getByTestId('trade-parameters')).toBeInTheDocument();
             expect(screen.getByTestId('trade-chart')).toBeInTheDocument();
             expect(screen.getByTestId('purchase-button')).toBeInTheDocument();
             expect(screen.getByTestId('service-error-sheet')).toBeInTheDocument();
@@ -308,25 +310,6 @@ describe('Trade', () => {
             renderTrade();
 
             expect(mockOnMount).toHaveBeenCalled();
-        });
-
-        it('should handle scroll events on BottomNav', () => {
-            // Mock getBoundingClientRect
-            const mockGetBoundingClientRect = jest.fn(() => ({
-                bottom: 500,
-            }));
-
-            Object.defineProperty(HTMLElement.prototype, 'getBoundingClientRect', {
-                value: mockGetBoundingClientRect,
-                writable: true,
-            });
-
-            renderTrade();
-
-            const bottomNav = screen.getByTestId('bottom-nav');
-            fireEvent.scroll(bottomNav);
-
-            expect(mockGetBoundingClientRect).toHaveBeenCalled();
         });
     });
 
@@ -397,26 +380,14 @@ describe('Trade', () => {
 
             expect(screen.queryByTestId('onboarding-guide')).not.toBeInTheDocument();
         });
-
-        it('should not render OnboardingGuide when guide is completed', () => {
-            const { useLocalStorageData } = jest.requireMock('@deriv/api');
-            useLocalStorageData.mockReturnValue([{ trade_page: true }]);
-
-            renderTrade();
-
-            expect(screen.queryByTestId('onboarding-guide')).not.toBeInTheDocument();
-        });
     });
 
     describe('Component Behavior', () => {
-        it('should render trade parameters in both normal and minimized containers', () => {
+        it('should render trade parameters inside a single container', () => {
             renderTrade();
 
-            const tradeParamsContainers = screen.getAllByTestId('trade-params-container');
-            const tradeParameters = screen.getAllByTestId('trade-parameters');
-
-            expect(tradeParamsContainers).toHaveLength(2);
-            expect(tradeParameters).toHaveLength(2);
+            expect(screen.getByTestId('trade-params-container')).toBeInTheDocument();
+            expect(screen.getByTestId('trade-parameters')).toBeInTheDocument();
         });
     });
 });

@@ -1,11 +1,67 @@
 .trade-params {
     border-radius: var(--core-borderRadius-400);
-    background-color: var(--semantic-color-slate-solid-surface-frame-low);
-    padding: var(--core-spacing-800);
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: var(--core-spacing-800);
+
+    &__container {
+        position: fixed;
+        width: 100%;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--semantic-color-slate-solid-surface-frame-mid);
+        transition: all 0.3s ease-in-out;
+        padding: 0 var(--core-spacing-400);
+        border-radius: var(--core-spacing-800) var(--core-spacing-800) 0 0;
+        box-shadow: 0 -2px 4px 0 rgba(0, 0, 0, 0.08);
+        border-top: 1px solid var(--color-surface-border);
+        z-index: 20;
+        touch-action: manipulation; // Prevents double-tap zoom and hover states on touch
+
+        &-handle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 3.2rem; // HEIGHT.TRADE_PARAM_HANDLER
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            z-index: 2;
+            touch-action: manipulation; // Extra specificity for handle
+
+            &-bar {
+                transition: transform 0.3s ease-in-out;
+                pointer-events: none; // Make icon click-through
+
+                svg {
+                    pointer-events: none; // Ensure SVG doesn't capture events
+                }
+            }
+        }
+
+        &-content {
+            transition: all 0.3s ease-in-out;
+            position: relative;
+            z-index: 1;
+        }
+
+        &--logged-in {
+            bottom: 56px; // HEIGHT.BOTTOM_NAVIGATION
+        }
+
+        &--collapsed {
+            .trade-params__container-handle-bar {
+                transform: rotate(0deg);
+            }
+        }
+
+        &--expanded {
+            .trade-params__container-handle-bar {
+                transform: rotate(180deg);
+            }
+        }
+    }
 
     &__title {
         display: flex;
@@ -13,7 +69,7 @@
         justify-content: space-between;
     }
     &__options {
-        &__wrapper {
+        &-wrapper {
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -42,7 +98,6 @@
 
             &--minimized {
                 max-height: 104px;
-                padding: var(--core-spacing-400) var(--core-spacing-400) var(--core-spacing-200) var(--core-spacing-400);
 
                 .quill-input__container {
                     width: unset;
@@ -51,6 +106,11 @@
         }
     }
     &__option {
+        padding: var(--core-spacing-400);
+        background-color: var(--semantic-color-slate-solid-surface-frame-low);
+        border: 1px solid var(--color-surface-border);
+        touch-action: manipulation; // Prevent hover states on touch devices
+
         &--minimized {
             width: 16rem;
             flex-shrink: 0;
@@ -64,13 +124,21 @@
             padding-inline-end: 2px;
             height: unset;
         }
+        &.segmented-control-single--md {
+            background-color: var(--semantic-color-monochrome-surface-normal-lowest);
+        }
+
+        @include mobile-or-tablet-screen {
+            &.quill-input__wrapper__variant--fill--neutral:hover {
+                background-color: var(--semantic-color-slate-solid-surface-frame-low);
+            }
+        }
     }
     &--minimized {
         min-height: var(--core-size-3600);
         width: 100%;
-        padding-bottom: 6.4rem;
 
-        &:has(.trade-params__options__wrapper--horizontal:only-child) {
+        &:has(.trade-params__options-wrapper--horizontal:only-child) {
             padding-bottom: 0;
         }
     }

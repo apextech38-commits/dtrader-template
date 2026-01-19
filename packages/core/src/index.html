@@ -47,17 +47,28 @@
         <!-- End GTM Script -->
         <!-- Start theme styles -->
         <script type="text/javascript">
-            var ui_store = localStorage.getItem('ui_store');
             var l = window.location;
-            if (ui_store && ui_store.length > 0) {
-                var is_dark_theme = false;
-                is_dark_theme = JSON.parse(ui_store).is_dark_mode_on || false;
 
-                if (is_dark_theme) {
-                    // if dark theme, change the property colors for dark theme
-                    document.documentElement.style.setProperty('--color-surface-primary', '#0e0e0e');
-                    document.documentElement.style.setProperty('--color-text-primary', '#fff');
-                }
+            // Check URL parameter first (takes priority)
+            var urlParams = new URLSearchParams(l.search);
+            var themeParam = urlParams.get('theme');
+
+            var ui_store = localStorage.getItem('ui_store');
+            var is_dark_theme = false;
+
+            if (themeParam === 'dark') {
+                is_dark_theme = true;
+            } else if (themeParam === 'light') {
+                is_dark_theme = false;
+            } else if (ui_store && ui_store.length > 0) {
+                // Fallback to localStorage if no URL parameter
+                is_dark_theme = JSON.parse(ui_store).is_dark_mode_on || false;
+            }
+
+            if (is_dark_theme) {
+                // if dark theme, change the property colors for dark theme
+                document.documentElement.style.setProperty('--color-surface-primary', '#181c25');
+                document.documentElement.style.setProperty('--color-text-primary', '#fff');
             }
         </script>
         <!-- End theme styles -->
@@ -216,6 +227,7 @@
 
         <div id="derivatives_trader" class="derivatives-trader">
             <div class="sidebar"></div>
+            <div class="header"></div>
             <div class="app-contents">
                 <div class="initial-loader initial-loader__loading">
                     <div class="initial-loader__barspinner barspinner barspinner-light">

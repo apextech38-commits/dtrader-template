@@ -81,7 +81,6 @@ const Guide = observer(
                 {show_trigger_button && (
                     <Button
                         color={is_dark_mode_on ? 'white' : 'black'}
-                        icon={<LabelPairedPresentationScreenSmRegularIcon key='guide-button-icon' />}
                         onClick={() => {
                             trackAnalyticsEvent('ce_trade_types_form_v2', {
                                 action: 'info_open',
@@ -89,7 +88,7 @@ const Guide = observer(
                             });
                             setIsDescriptionOpened(true);
                         }}
-                        variant={has_label ? 'secondary' : 'tertiary'}
+                        variant='tertiary'
                         key={current_language}
                     >
                         {has_label && (

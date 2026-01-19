@@ -171,3 +171,20 @@ export const sortCategoriesInTradeTypeOrder = (trade_types: TContractType[], cat
         })
         .filter(item => item) as TCategories[];
 };
+
+/**
+ * Checks if two contract types belong to the same trade type category.
+ * For example, vanillalongcall and vanillalongput belong to the same "Vanillas" category,
+ * turboslong and turbosshort belong to the same "Turbos" category.
+ *
+ * @param contract_type_1 - First contract type to compare
+ * @param contract_type_2 - Second contract type to compare
+ * @returns true if both contract types belong to the same category, false otherwise
+ */
+export const isSameTradeTypeCategory = (contract_type_1: string, contract_type_2: string): boolean => {
+    // Find the category that contains the first contract type
+    const category = AVAILABLE_CONTRACTS.find(contract => contract.for.includes(contract_type_1));
+
+    // Check if the second contract type is also in the same category
+    return category ? category.for.includes(contract_type_2) : contract_type_1 === contract_type_2;
+};

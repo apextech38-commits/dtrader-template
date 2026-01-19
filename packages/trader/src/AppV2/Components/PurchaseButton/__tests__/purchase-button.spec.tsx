@@ -249,7 +249,25 @@ describe('PositionsContent', () => {
     });
 
     it('should render sell button for Accumulators contract if there is an open Accumulators contract; if user clicks on it - onClickSell should be called', async () => {
-        default_mock_store.modules.trade.has_open_accu_contract = true;
+        default_mock_store.portfolio.open_accu_contract = {
+            contract_info: {
+                ...mockContractInfo({
+                    contract_id: 249545026128,
+                    contract_type: 'ACCU',
+                    underlying_symbol: '1HZ100V',
+                    bid_price: '19.32',
+                    entry_spot: '364.15',
+                    is_sold: 0,
+                    is_valid_to_sell: 1,
+                    status: 'open',
+                    is_expired: 0,
+                }),
+            },
+            display_name: 'Volatility 100 (1s) Index',
+            indicative: 19.32,
+            reference: 486015531488,
+            profit_loss: 9.32,
+        };
         default_mock_store.modules.trade.is_accumulator = true;
         mockPurchaseButton();
 
