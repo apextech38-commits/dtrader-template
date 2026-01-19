@@ -4,10 +4,15 @@
     flex-direction: column;
     gap: var(--core-spacing-800);
     padding: var(--core-spacing-800);
+    height: 100%;
+    position: relative;
+    padding-bottom: 0;
 
     @include mobile-screen {
         justify-content: center;
         padding: var(--core-spacing-800);
+        height: auto;
+        padding-bottom: var(--core-spacing-800);
     }
 
     @include mobile-screen {

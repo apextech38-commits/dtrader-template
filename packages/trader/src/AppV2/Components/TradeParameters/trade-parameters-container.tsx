@@ -1,11 +1,12 @@
 import React from 'react';
 import clsx from 'clsx';
 
+import { isMobile } from '@deriv/shared';
 import { Text } from '@deriv-com/quill-ui';
 import { Localize } from '@deriv-com/translations';
-import { isMobile } from '@deriv/shared';
 
 import Guide from '../Guide';
+import TradeParamsFooter from '../TradeParamsFooter';
 
 type TTradeParametersContainer = {
     is_minimized?: boolean;
@@ -18,6 +19,7 @@ const TradeParametersContainer = ({
     is_minimized_visible,
 }: React.PropsWithChildren<TTradeParametersContainer>) => {
     const is_minimized_and_visible = is_minimized && is_minimized_visible;
+    const is_mobile = isMobile();
     return (
         <section
             className={clsx('', {
@@ -27,7 +29,7 @@ const TradeParametersContainer = ({
         >
             {!is_minimized_and_visible && (
                 <div className='trade-params__title'>
-                    {isMobile() && (
+                    {is_mobile && (
                         <Text>
                             <Localize i18n_default_text='Set your trade' />
                         </Text>
@@ -36,6 +38,7 @@ const TradeParametersContainer = ({
                 </div>
             )}
             {children}
+            {!is_mobile && !is_minimized_and_visible && <TradeParamsFooter />}
         </section>
     );
 };
