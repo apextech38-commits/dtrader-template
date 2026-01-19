@@ -166,6 +166,9 @@ const DurationPopoverContent: React.FC<{
 
     const hasOnlyOneUnit = availableUnits.length === 1;
 
+    // Check if presets are disabled for the current unit
+    const presetsDisabled = TRADE_PARAMETER_PRESETS.durationConfig.disabledPresets.includes(selectedUnit);
+
     return (
         <div className={`duration-popover__layout ${hasOnlyOneUnit ? 'duration-popover__layout--single-unit' : ''}`}>
             {!hasOnlyOneUnit && (
@@ -178,21 +181,25 @@ const DurationPopoverContent: React.FC<{
                 </div>
             )}
             <div className='duration-popover__main'>
-                {config && (
+                {config && !presetsDisabled && (
                     <div className='duration-popover__header'>
                         <TabSelector activeTab={activeTab} onTabChange={onTabChange} />
                     </div>
                 )}
                 <div className='duration-popover__content'>
                     {config ? (
-                        <ChipsWithInputToggle
-                            activeTab={activeTab}
-                            chipValues={config.chipValues}
-                            selectedValue={config.selectedValue}
-                            onSelect={config.onSelect}
-                            formatValue={config.formatValue}
-                            inputComponent={config.inputComponent}
-                        />
+                        presetsDisabled ? (
+                            config.inputComponent
+                        ) : (
+                            <ChipsWithInputToggle
+                                activeTab={activeTab}
+                                chipValues={config.chipValues}
+                                selectedValue={config.selectedValue}
+                                onSelect={config.onSelect}
+                                formatValue={config.formatValue}
+                                inputComponent={config.inputComponent}
+                            />
+                        )
                     ) : (
                         <div className='duration-popover__coming-soon'>
                             <Text size='md' color='quill-typography-default'>

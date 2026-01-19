@@ -43,6 +43,15 @@ export interface StakePresets {
 }
 
 /**
+ * Configuration for which duration units should have presets disabled
+ * When a unit is in this list, only the manual input will be shown (no chips, no tab selector)
+ */
+export interface DurationPresetsConfig {
+    /** Array of duration unit codes that should have presets disabled (e.g., ['t', 's']) */
+    disabledPresets: string[];
+}
+
+/**
  * Complete trade parameter presets configuration
  */
 export interface TradeParameterPresets {
@@ -50,6 +59,8 @@ export interface TradeParameterPresets {
     duration: DurationPresets;
     /** Stake-related presets */
     stake: StakePresets;
+    /** Configuration for duration presets behavior */
+    durationConfig: DurationPresetsConfig;
 }
 
 /**
@@ -97,5 +108,10 @@ export const TRADE_PARAMETER_PRESETS: TradeParameterPresets = {
         // For: Multipliers (higher maximum stake)
         // Key levels: $1 (minimum/accessibility), $10 (standard entry), $50 (mid-range), $100 (confident), $250 (high-conviction)
         multipliers: [1, 10, 25, 50, 100, 250],
+    },
+    durationConfig: {
+        // Disable presets for End time and End date as they are not finalized yet
+        // When disabled, only the manual input will be shown (no chips, no tab selector)
+        disabledPresets: ['end_time', 'end_date'],
     },
 };
