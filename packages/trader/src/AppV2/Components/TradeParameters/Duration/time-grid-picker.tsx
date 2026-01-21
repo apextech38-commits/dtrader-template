@@ -26,7 +26,14 @@ const TimeGridPicker: React.FC<TimeGridPickerProps> = ({ selectedTime, onTimeCha
                 return true;
             }
 
-            const timeToCheck = moment().hour(parseInt(hour)).minute(parseInt(minute));
+            const hourNum = parseInt(hour);
+            const minuteNum = parseInt(minute);
+
+            if (isNaN(hourNum) || isNaN(minuteNum)) {
+                return false;
+            }
+
+            const timeToCheck = moment().hour(hourNum).minute(minuteNum);
 
             for (let i = 0; i < startTimes.length; i++) {
                 if (timeToCheck.isBetween(startTimes[i], endTimes[i], 'minute', '[]')) {
@@ -58,7 +65,14 @@ const TimeGridPicker: React.FC<TimeGridPickerProps> = ({ selectedTime, onTimeCha
                 <div className='time-grid-picker__label'>
                     <Localize i18n_default_text='Hour' />
                 </div>
-                <div className='time-grid-picker__grid time-grid-picker__grid--hours'>
+                <div
+                    className='time-grid-picker__grid time-grid-picker__grid--hours'
+                    role='grid'
+                    aria-labelledby='hours-label'
+                >
+                    <span id='hours-label' className='sr-only'>
+                        Hours
+                    </span>
                     {hours.map(hour => {
                         const isValid = isTimeValid(hour, selectedMinute);
                         const isSelected = hour === selectedHour;
@@ -84,7 +98,14 @@ const TimeGridPicker: React.FC<TimeGridPickerProps> = ({ selectedTime, onTimeCha
                 <div className='time-grid-picker__label'>
                     <Localize i18n_default_text='Minute' />
                 </div>
-                <div className='time-grid-picker__grid time-grid-picker__grid--minutes'>
+                <div
+                    className='time-grid-picker__grid time-grid-picker__grid--minutes'
+                    role='grid'
+                    aria-labelledby='minutes-label'
+                >
+                    <span id='minutes-label' className='sr-only'>
+                        Minutes
+                    </span>
                     {minutes.map(minute => {
                         const isValid = isTimeValid(selectedHour, minute);
                         const isSelected = minute === selectedMinute;

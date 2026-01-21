@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import moment from 'moment';
 
@@ -100,7 +100,7 @@ const DurationPopoverContent: React.FC<{
         [onEndDateSelect, closePopover]
     );
 
-    const getDurationConfig = useCallback(() => {
+    const config = useMemo(() => {
         const configs: Record<string, DurationConfig | null> = {
             t: {
                 chipValues: TRADE_PARAMETER_PRESETS.duration.ticks,
@@ -161,8 +161,6 @@ const DurationPopoverContent: React.FC<{
         formatEndDateValue,
         closePopover,
     ]);
-
-    const config = getDurationConfig();
 
     const hasOnlyOneUnit = availableUnits.length === 1;
 

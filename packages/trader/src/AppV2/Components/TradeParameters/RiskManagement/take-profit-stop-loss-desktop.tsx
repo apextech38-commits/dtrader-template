@@ -108,7 +108,12 @@ const TakeProfitStopLossDesktop = observer(({ onClose, is_open }: TTakeProfitSto
     const { is_key_board_visible: sl_should_scroll } = useIsVirtualKeyboardOpen(sl_input_id);
 
     React.useEffect(() => {
-        if (tp_should_scroll || sl_should_scroll) window?.scrollTo({ top: 225, behavior: 'smooth' });
+        if (tp_should_scroll || sl_should_scroll) {
+            // Wait for next frame to ensure layout is complete
+            requestAnimationFrame(() => {
+                window?.scrollTo({ top: 225, behavior: 'smooth' });
+            });
+        }
     }, [tp_should_scroll, sl_should_scroll]);
 
     // Proposal for TP validation
@@ -241,13 +246,7 @@ const TakeProfitStopLossDesktop = observer(({ onClose, is_open }: TTakeProfitSto
     };
 
     const onSave = () => {
-        const is_loading = tp_is_loading || sl_is_loading;
-        const has_tp_error = tp_state.error_text && tp_state.is_enabled;
-        const has_sl_error = sl_state.error_text && sl_state.is_enabled;
-        const has_fe_error = tp_state.fe_error_text || sl_state.fe_error_text;
-
-        if (is_loading || has_tp_error || has_sl_error || has_fe_error) return;
-
+        // Validate required fields first
         if (tp_state.is_enabled && tp_state.input_value === '') {
             setTpState(prev => ({
                 ...prev,
@@ -263,6 +262,14 @@ const TakeProfitStopLossDesktop = observer(({ onClose, is_open }: TTakeProfitSto
             }));
             return;
         }
+
+        // Then check for other errors
+        const is_loading = tp_is_loading || sl_is_loading;
+        const has_tp_error = tp_state.error_text && tp_state.is_enabled;
+        const has_sl_error = sl_state.error_text && sl_state.is_enabled;
+        const has_fe_error = tp_state.fe_error_text || sl_state.fe_error_text;
+
+        if (is_loading || has_tp_error || has_sl_error || has_fe_error) return;
 
         // Show notification if DC will be disabled
         if ((tp_state.is_enabled || sl_state.is_enabled) && has_cancellation) {
@@ -291,21 +298,24 @@ const TakeProfitStopLossDesktop = observer(({ onClose, is_open }: TTakeProfitSto
         onClose();
     };
 
-    const getInputMessage = (state: TFieldState) => {
-        if (state.min_value && state.max_value) {
-            return (
-                <Localize
-                    i18n_default_text='Acceptable range: {{min_value}} to {{max_value}} {{currency}}'
-                    values={{
-                        currency: getCurrencyDisplayCode(currency),
-                        min_value: formatMoney(currency, +state.min_value, true),
-                        max_value: formatMoney(currency, +state.max_value, true),
-                    }}
-                />
-            );
-        }
-        return '';
-    };
+    const getInputMessage = React.useCallback(
+        (state: TFieldState) => {
+            if (state.min_value && state.max_value) {
+                return (
+                    <Localize
+                        i18n_default_text='Acceptable range: {{min_value}} to {{max_value}} {{currency}}'
+                        values={{
+                            currency: getCurrencyDisplayCode(currency),
+                            min_value: formatMoney(currency, +state.min_value, true),
+                            max_value: formatMoney(currency, +state.max_value, true),
+                        }}
+                    />
+                );
+            }
+            return '';
+        },
+        [currency]
+    );
 
     return (
         <div className='risk-management-desktop__tp-sl-wrapper'>
