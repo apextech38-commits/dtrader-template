@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { trackAnalyticsEvent } from '@deriv/shared';
 import type { TCoreStores } from '@deriv/stores/types';
 
 import Routes from 'App/Containers/Routes/routes';
@@ -33,10 +34,25 @@ const TradeModals = () => (
 
 const App = ({ passthrough }: Apptypes) => {
     const root_store = initStore(passthrough.root_store, passthrough.WS);
+    const analyticsCalledRef = React.useRef(false);
 
     React.useEffect(() => {
         return () => root_store.ui.setPromptHandler(false);
     }, [root_store]);
+
+    React.useEffect(() => {
+        // Prevent duplicate analytics calls if component remounts
+        if (analyticsCalledRef.current) {
+            return;
+        }
+
+        analyticsCalledRef.current = true;
+
+        trackAnalyticsEvent('ce_dtrader_app_v2', {
+            action: 'open',
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return (
         <TraderProviders store={root_store}>
