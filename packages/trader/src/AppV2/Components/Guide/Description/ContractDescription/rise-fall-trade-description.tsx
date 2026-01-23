@@ -5,7 +5,15 @@ import { Localize } from '@deriv-com/translations';
 import { getContractDescription, getTerm } from 'AppV2/Utils/contract-description-utils';
 import { CONTRACT_LIST } from 'AppV2/Utils/trade-types-utils';
 
-const RiseFallTradeDescription = ({ onTermClick }: { onTermClick: (term: string) => void }) => {
+import TermButton from '../term-button';
+
+const RiseFallTradeDescription = ({
+    contract_type,
+    onTermClick,
+}: {
+    contract_type: string;
+    onTermClick: (term: string) => void;
+}) => {
     const { ENTRY_SPOT, EXPIRY, PAYOUT, EXIT_SPOT } = getTerm();
     const [rise, fall] = CONTRACT_LIST.RISE_FALL.split('/');
     const content = [
@@ -15,16 +23,12 @@ const RiseFallTradeDescription = ({ onTermClick }: { onTermClick: (term: string)
                 <Localize
                     i18n_default_text='Rise/Fall lets you predict if the market price will end higher or lower than the <0>entry spot</0> at contract <1>expiry</1>.'
                     components={[
-                        <button
-                            className='description__content--definition'
-                            key={0}
-                            onClick={() => onTermClick(ENTRY_SPOT)}
-                        />,
-                        <button
-                            className='description__content--definition'
-                            key={1}
-                            onClick={() => onTermClick(EXPIRY)}
-                        />,
+                        <TermButton key={0} term={ENTRY_SPOT} contract_type={contract_type} onTermClick={onTermClick}>
+                            {ENTRY_SPOT}
+                        </TermButton>,
+                        <TermButton key={1} term={EXPIRY} contract_type={contract_type} onTermClick={onTermClick}>
+                            {EXPIRY}
+                        </TermButton>,
                     ]}
                 />
             ),
@@ -36,16 +40,12 @@ const RiseFallTradeDescription = ({ onTermClick }: { onTermClick: (term: string)
                 <Localize
                     i18n_default_text='Earn a <0>payout</0> if the <1>exit spot</1> is strictly higher than the entry spot.'
                     components={[
-                        <button
-                            className='description__content--definition'
-                            key={0}
-                            onClick={() => onTermClick(PAYOUT)}
-                        />,
-                        <button
-                            className='description__content--definition'
-                            key={1}
-                            onClick={() => onTermClick(EXIT_SPOT)}
-                        />,
+                        <TermButton key={0} term={PAYOUT} contract_type={contract_type} onTermClick={onTermClick}>
+                            {PAYOUT}
+                        </TermButton>,
+                        <TermButton key={1} term={EXIT_SPOT} contract_type={contract_type} onTermClick={onTermClick}>
+                            {EXIT_SPOT}
+                        </TermButton>,
                     ]}
                 />
             ),
@@ -58,10 +58,7 @@ const RiseFallTradeDescription = ({ onTermClick }: { onTermClick: (term: string)
         {
             type: 'paragraph',
             text: (
-                <Localize
-                    i18n_default_text='Earn a payout if the exit spot is strictly lower than the entry spot.'
-                    components={[]}
-                />
+                <Localize i18n_default_text='Earn a payout if the exit spot is strictly lower than the entry spot.' />
             ),
         },
         {
@@ -82,7 +79,7 @@ const RiseFallTradeDescription = ({ onTermClick }: { onTermClick: (term: string)
             ),
         },
     ];
-    return <React.Fragment>{getContractDescription(content)}</React.Fragment>;
+    return <>{getContractDescription(content)}</>;
 };
 
 export default RiseFallTradeDescription;

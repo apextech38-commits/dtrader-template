@@ -4,7 +4,15 @@ import { Localize } from '@deriv-com/translations';
 
 import { getContractDescription, getTerm } from 'AppV2/Utils/contract-description-utils';
 
-const MultipliersTradeDescription = ({ onTermClick }: { onTermClick: (term: string) => void }) => {
+import TermButton from '../term-button';
+
+const MultipliersTradeDescription = ({
+    contract_type,
+    onTermClick,
+}: {
+    contract_type: string;
+    onTermClick: (term: string) => void;
+}) => {
     const { STOP_OUT_LEVEL, TAKE_PROFIT, STOP_LOSS, DEAL_CANCELLATION, SLIPPAGE_RISK } = getTerm();
     const content = [
         {
@@ -59,11 +67,14 @@ const MultipliersTradeDescription = ({ onTermClick }: { onTermClick: (term: stri
                 <Localize
                     i18n_default_text='Your trade closes automatically if the <0>stop out level</0> is hit.'
                     components={[
-                        <button
-                            className='description__content--definition'
+                        <TermButton
                             key={0}
-                            onClick={() => onTermClick(STOP_OUT_LEVEL)}
-                        />,
+                            term={STOP_OUT_LEVEL}
+                            contract_type={contract_type}
+                            onTermClick={onTermClick}
+                        >
+                            {STOP_OUT_LEVEL}
+                        </TermButton>,
                     ]}
                 />
             ),
@@ -74,21 +85,20 @@ const MultipliersTradeDescription = ({ onTermClick }: { onTermClick: (term: stri
                 <Localize
                     i18n_default_text='You can manage risk with features like <0>take profit</0>, <1>stop loss</1>, and <2>deal cancellation</2> (when available).'
                     components={[
-                        <button
-                            className='description__content--definition'
-                            key={0}
-                            onClick={() => onTermClick(TAKE_PROFIT)}
-                        />,
-                        <button
-                            className='description__content--definition'
-                            key={1}
-                            onClick={() => onTermClick(STOP_LOSS)}
-                        />,
-                        <button
-                            className='description__content--definition'
+                        <TermButton key={0} term={TAKE_PROFIT} contract_type={contract_type} onTermClick={onTermClick}>
+                            {TAKE_PROFIT}
+                        </TermButton>,
+                        <TermButton key={1} term={STOP_LOSS} contract_type={contract_type} onTermClick={onTermClick}>
+                            {STOP_LOSS}
+                        </TermButton>,
+                        <TermButton
                             key={2}
-                            onClick={() => onTermClick(DEAL_CANCELLATION)}
-                        />,
+                            term={DEAL_CANCELLATION}
+                            contract_type={contract_type}
+                            onTermClick={onTermClick}
+                        >
+                            {DEAL_CANCELLATION}
+                        </TermButton>,
                     ]}
                 />
             ),
@@ -99,18 +109,21 @@ const MultipliersTradeDescription = ({ onTermClick }: { onTermClick: (term: stri
                 <Localize
                     i18n_default_text='You can close your trade anytime. However, be aware that <0>slippage risk</0> may affect your final return.'
                     components={[
-                        <button
-                            className='description__content--definition'
+                        <TermButton
                             key={0}
-                            onClick={() => onTermClick(SLIPPAGE_RISK)}
-                        />,
+                            term={SLIPPAGE_RISK}
+                            contract_type={contract_type}
+                            onTermClick={onTermClick}
+                        >
+                            {SLIPPAGE_RISK}
+                        </TermButton>,
                     ]}
                 />
             ),
         },
     ];
 
-    return <React.Fragment>{getContractDescription(content)}</React.Fragment>;
+    return <>{getContractDescription(content)}</>;
 };
 
 export default MultipliersTradeDescription;

@@ -84,21 +84,21 @@ const getDefinition = () => {
         ),
         [EXPIRY]: (
             <React.Fragment>
-                <Text className='definition__paragraph'>
-                    <Localize i18n_default_text='This is when your contract will expire based on the duration or end time you’ve selected. If the duration is more than 24 hours, the cut-off time and expiry date will apply instead.' />
-                </Text>
-                <Text>
+                <div className='definition__paragraph'>
+                    <Localize i18n_default_text="This is when your contract will expire based on the duration or end time you've selected. If the duration is more than 24 hours, the cut-off time and expiry date will apply instead." />
+                </div>
+                <div>
                     <Localize i18n_default_text='Cut off time:' />
-                </Text>
-                <Text className='definition__paragraph'>
+                </div>
+                <div className='definition__paragraph'>
                     <Localize i18n_default_text='Contracts will expire at exactly 23:59:59 GMT on your selected expiry date.' />
-                </Text>
-                <Text>
+                </div>
+                <div>
                     <Localize i18n_default_text='Expiry date:' />
-                </Text>
-                <Text>
-                    <Localize i18n_default_text='Your contract will expire on this date (in GMT), based on the end time you’ve selected.' />
-                </Text>
+                </div>
+                <div>
+                    <Localize i18n_default_text="Your contract will expire on this date (in GMT), based on the end time you've selected." />
+                </div>
             </React.Fragment>
         ),
         [FINAL_PRICE]: <Localize i18n_default_text='This is the spot price of the last tick at expiry.' />,
@@ -147,15 +147,15 @@ const getDefinition = () => {
         ),
         [STRIKE_PRICE]: (
             <React.Fragment>
-                <Text className='definition__paragraph'>
+                <div className='definition__paragraph'>
                     <Localize i18n_default_text='You must select the strike price before entering the contract.' />
-                </Text>
-                <Text className='definition__paragraph'>
-                    <Localize i18n_default_text='If you select “Call”, you’ll earn a payout if the final price is above the strike price at expiry. Otherwise, you won’t receive a payout.' />
-                </Text>
-                <Text>
-                    <Localize i18n_default_text='If you select ‘Put”, you’ll earn a payout if the final price is below the strike price at expiry. Otherwise, you won’t receive a payout.' />
-                </Text>
+                </div>
+                <div className='definition__paragraph'>
+                    <Localize i18n_default_text="If you select 'Call', you'll earn a payout if the final price is above the strike price at expiry. Otherwise, you won't receive a payout." />
+                </div>
+                <div>
+                    <Localize i18n_default_text="If you select 'Put', you'll earn a payout if the final price is below the strike price at expiry. Otherwise, you won't receive a payout." />
+                </div>
             </React.Fragment>
         ),
         [TAKE_PROFIT]: (

@@ -137,11 +137,13 @@ const Guide = observer(
                     show_guide_for_selected_contract={show_guide_for_selected_contract}
                     show_description_in_a_modal={show_description_in_a_modal}
                 />
-                <GuideDefinitionModal
-                    contract_type={selected_contract_type}
-                    term={selected_term}
-                    onClose={() => setSelectedTerm('')}
-                />
+                {isMobile && (
+                    <GuideDefinitionModal
+                        contract_type={selected_contract_type}
+                        term={selected_term}
+                        onClose={() => setSelectedTerm('')}
+                    />
+                )}
             </React.Fragment>
         );
     }

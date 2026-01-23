@@ -5,7 +5,15 @@ import { Localize } from '@deriv-com/translations';
 import { getContractDescription, getTerm } from 'AppV2/Utils/contract-description-utils';
 import { CONTRACT_LIST } from 'AppV2/Utils/trade-types-utils';
 
-const OverUnderTradeDescription = ({ onTermClick }: { onTermClick: (term: string) => void }) => {
+import TermButton from '../term-button';
+
+const OverUnderTradeDescription = ({
+    contract_type,
+    onTermClick,
+}: {
+    contract_type: string;
+    onTermClick: (term: string) => void;
+}) => {
     const { EXIT_SPOT, EXPIRY, PAYOUT } = getTerm();
     const [over, under] = CONTRACT_LIST.OVER_UNDER.split('/');
     const content = [
@@ -15,16 +23,12 @@ const OverUnderTradeDescription = ({ onTermClick }: { onTermClick: (term: string
                 <Localize
                     i18n_default_text='Over/Under lets you predict if the last digit of the <0>exit spot</0> at contract <1>expiry</1> will be over or under your chosen number.'
                     components={[
-                        <button
-                            className='description__content--definition'
-                            key={0}
-                            onClick={() => onTermClick(EXIT_SPOT)}
-                        />,
-                        <button
-                            className='description__content--definition'
-                            key={1}
-                            onClick={() => onTermClick(EXPIRY)}
-                        />,
+                        <TermButton key={0} term={EXIT_SPOT} contract_type={contract_type} onTermClick={onTermClick}>
+                            {EXIT_SPOT}
+                        </TermButton>,
+                        <TermButton key={1} term={EXPIRY} contract_type={contract_type} onTermClick={onTermClick}>
+                            {EXPIRY}
+                        </TermButton>,
                     ]}
                 />
             ),
@@ -36,11 +40,9 @@ const OverUnderTradeDescription = ({ onTermClick }: { onTermClick: (term: string
                 <Localize
                     i18n_default_text='Earn a <0>payout</0> if the last digit of the exit spot is greater than your chosen number.'
                     components={[
-                        <button
-                            className='description__content--definition'
-                            key={0}
-                            onClick={() => onTermClick(PAYOUT)}
-                        />,
+                        <TermButton key={0} term={PAYOUT} contract_type={contract_type} onTermClick={onTermClick}>
+                            {PAYOUT}
+                        </TermButton>,
                     ]}
                 />
             ),
@@ -61,7 +63,7 @@ const OverUnderTradeDescription = ({ onTermClick }: { onTermClick: (term: string
             text: under,
         },
     ];
-    return <React.Fragment>{getContractDescription(content)}</React.Fragment>;
+    return <>{getContractDescription(content)}</>;
 };
 
 export default OverUnderTradeDescription;

@@ -4,7 +4,15 @@ import { Localize } from '@deriv-com/translations';
 
 import { getContractDescription, getTerm } from 'AppV2/Utils/contract-description-utils';
 
-const TouchNoTouchTradeDescription = ({ onTermClick }: { onTermClick: (term: string) => void }) => {
+import TermButton from '../term-button';
+
+const TouchNoTouchTradeDescription = ({
+    contract_type,
+    onTermClick,
+}: {
+    contract_type: string;
+    onTermClick: (term: string) => void;
+}) => {
     const { BARRIER, PAYOUT, EXPIRY } = getTerm();
     const content = [
         {
@@ -13,11 +21,9 @@ const TouchNoTouchTradeDescription = ({ onTermClick }: { onTermClick: (term: str
                 <Localize
                     i18n_default_text='Touch/No Touch lets you predict if the market price will reach a set <0>barrier</0> at any time during the contract period.'
                     components={[
-                        <button
-                            className='description__content--definition'
-                            key={0}
-                            onClick={() => onTermClick(BARRIER)}
-                        />,
+                        <TermButton key={0} term={BARRIER} contract_type={contract_type} onTermClick={onTermClick}>
+                            {BARRIER}
+                        </TermButton>,
                     ]}
                 />
             ),
@@ -29,16 +35,12 @@ const TouchNoTouchTradeDescription = ({ onTermClick }: { onTermClick: (term: str
                 <Localize
                     i18n_default_text='Earn a <0>payout</0> if the market touches the barrier at any time before <1>expiry</1>.'
                     components={[
-                        <button
-                            className='description__content--definition'
-                            key={0}
-                            onClick={() => onTermClick(PAYOUT)}
-                        />,
-                        <button
-                            className='description__content--definition'
-                            key={1}
-                            onClick={() => onTermClick(EXPIRY)}
-                        />,
+                        <TermButton key={0} term={PAYOUT} contract_type={contract_type} onTermClick={onTermClick}>
+                            {PAYOUT}
+                        </TermButton>,
+                        <TermButton key={1} term={EXPIRY} contract_type={contract_type} onTermClick={onTermClick}>
+                            {EXPIRY}
+                        </TermButton>,
                     ]}
                 />
             ),
@@ -57,7 +59,7 @@ const TouchNoTouchTradeDescription = ({ onTermClick }: { onTermClick: (term: str
             text: 'no_touch',
         },
     ];
-    return <React.Fragment>{getContractDescription(content)}</React.Fragment>;
+    return <>{getContractDescription(content)}</>;
 };
 
 export default TouchNoTouchTradeDescription;
