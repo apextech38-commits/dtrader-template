@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState, useRef } from 'react';
 
 import { Text } from '@deriv-com/quill-ui';
 import { Localize } from '@deriv-com/translations';
@@ -19,6 +19,15 @@ type TTradeTypesSelectorProps = {
     onGuideClick: () => void;
 };
 
+/**
+ * TradeTypesSelector Component
+ *
+ * Pure presentational component that receives all data via props.
+ * Does NOT need MobX observer() wrapper because it doesn't access MobX stores directly.
+ *
+ * Data Flow: MobX Store → TradeTypes (observer) → TradeTypesSelector (props)
+ * The parent TradeTypes component handles all MobX integration.
+ */
 const TradeTypesSelector = ({
     available_contracts,
     selected_trade_type,
@@ -27,7 +36,7 @@ const TradeTypesSelector = ({
 }: TTradeTypesSelectorProps) => {
     const [is_open, setIsOpen] = useState(false);
     const [active_tab, setActiveTab] = useState<'all' | 'most_traded'>('all');
-    const button_ref = React.useRef<HTMLButtonElement>(null);
+    const button_ref = useRef<HTMLButtonElement>(null);
 
     const handleOpen = useCallback(() => {
         setIsOpen(true);
@@ -57,6 +66,9 @@ const TradeTypesSelector = ({
                 ref={button_ref}
                 className={`trade-types-selector__button ${is_open ? 'trade-types-selector__button--active' : ''}`}
                 onClick={handleOpen}
+                aria-label='View all trade types'
+                aria-expanded={is_open}
+                aria-haspopup='dialog'
             >
                 <GridIcon />
             </button>
@@ -68,7 +80,7 @@ const TradeTypesSelector = ({
                 popoverWidth={320}
                 placement='bottom'
             >
-                <div className='trade-types-selector__modal'>
+                <div className='trade-types-selector__modal' role='dialog' aria-label='Trade types selection'>
                     <div className='trade-types-selector__header'>
                         <Text size='lg' bold>
                             <Localize i18n_default_text='Trade types' />
@@ -79,10 +91,13 @@ const TradeTypesSelector = ({
                             </Text>
                         </button>
                     </div>
-                    <div className='trade-types-selector__tabs'>
+                    <div className='trade-types-selector__tabs' role='tablist'>
                         <button
                             className={`trade-types-selector__tab ${active_tab === 'all' ? 'trade-types-selector__tab--active' : ''}`}
                             onClick={() => setActiveTab('all')}
+                            role='tab'
+                            aria-selected={active_tab === 'all'}
+                            aria-controls='trade-types-content'
                         >
                             <Text size='md'>
                                 <Localize i18n_default_text='All' />
@@ -91,8 +106,11 @@ const TradeTypesSelector = ({
                         <button
                             className={`trade-types-selector__tab ${active_tab === 'most_traded' ? 'trade-types-selector__tab--active' : ''}`}
                             onClick={() => setActiveTab('most_traded')}
+                            role='tab'
+                            aria-selected={active_tab === 'most_traded'}
+                            aria-controls='trade-types-content'
                         >
-                            <Text size='sm'>
+                            <Text size='md'>
                                 <Localize i18n_default_text='Most traded' />
                             </Text>
                         </button>

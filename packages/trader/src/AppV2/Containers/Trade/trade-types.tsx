@@ -124,13 +124,36 @@ const TradeTypes = ({ contract_type, onTradeTypeSelect, trade_types, is_dark_mod
         setOtherTradeTypes(default_other_trade_types);
     }, [getPinnedItems, trade_types_array]);
 
+    const scrollToSelectedTradeType = useCallback(() => {
+        const timeoutId = setTimeout(() => {
+            let position_x = 0;
+            if (trade_types_ref.current) {
+                const selected_chip = trade_types_ref.current.querySelector(
+                    'button[data-state="selected"]'
+                ) as HTMLButtonElement;
+                if (selected_chip) {
+                    position_x =
+                        selected_chip.getBoundingClientRect().x -
+                            (window.innerWidth - selected_chip.getBoundingClientRect().width) / 2 || 0;
+                }
+                trade_types_ref.current.scrollBy({
+                    left: position_x,
+                    top: 0,
+                });
+            }
+        }, 0);
+
+        return () => clearTimeout(timeoutId);
+    }, []);
+
     useEffect(() => {
         setTradeTypes();
     }, [setTradeTypes]);
 
     useEffect(() => {
-        scrollToSelectedTradeType();
-    }, []);
+        const cleanup = scrollToSelectedTradeType();
+        return cleanup;
+    }, [scrollToSelectedTradeType]);
 
     const handleCloseTradeTypes = () => {
         setIsOpen(false);
@@ -182,26 +205,6 @@ const TradeTypes = ({ contract_type, onTradeTypeSelect, trade_types, is_dark_mod
             }
             return category;
         });
-    };
-
-    const scrollToSelectedTradeType = () => {
-        setTimeout(() => {
-            let position_x = 0;
-            if (trade_types_ref.current) {
-                const selected_chip = trade_types_ref.current.querySelector(
-                    'button[data-state="selected"]'
-                ) as HTMLButtonElement;
-                if (selected_chip) {
-                    position_x =
-                        selected_chip.getBoundingClientRect().x -
-                            (window.innerWidth - selected_chip.getBoundingClientRect().width) / 2 || 0;
-                }
-                trade_types_ref.current.scrollBy({
-                    left: position_x,
-                    top: 0,
-                });
-            }
-        }, 0);
     };
 
     const savePinnedToLocalStorage = () => {

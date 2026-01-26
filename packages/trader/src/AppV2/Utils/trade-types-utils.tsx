@@ -6,6 +6,7 @@ import {
     TRADE_TYPES,
     unsupported_contract_types_list,
 } from '@deriv/shared';
+import { Localize } from '@deriv-com/translations';
 
 import { getAvailableContractTypes, getCategoriesSortedByKey } from 'Modules/Trading/Helpers/contract-type';
 import { useTraderStore } from 'Stores/useTraderStores';
@@ -146,6 +147,24 @@ export const groupTradeTypesByCategory = (contracts: TAvailableContract[]) => {
         },
         {} as Record<string, TAvailableContract[]>
     );
+};
+
+/**
+ * Returns the localized label for a trade type category
+ * @param category - Category key ('growth_based', 'directional', or 'digit_based')
+ * @returns JSX element with localized label or null if category is unknown
+ */
+export const getCategoryLabel = (category: string): React.ReactNode => {
+    switch (category) {
+        case 'growth_based':
+            return <Localize i18n_default_text='Growth based' />;
+        case 'directional':
+            return <Localize i18n_default_text='Directional' />;
+        case 'digit_based':
+            return <Localize i18n_default_text='Digit based' />;
+        default:
+            return null;
+    }
 };
 
 /**

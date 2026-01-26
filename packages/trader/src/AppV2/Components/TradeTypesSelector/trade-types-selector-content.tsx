@@ -1,9 +1,13 @@
-import React from 'react';
+import { useMemo } from 'react';
 
 import { Text } from '@deriv-com/quill-ui';
-import { Localize } from '@deriv-com/translations';
 
-import { groupTradeTypesByCategory, isSameTradeTypeCategory, TAvailableContract } from '../../Utils/trade-types-utils';
+import {
+    getCategoryLabel,
+    groupTradeTypesByCategory,
+    isSameTradeTypeCategory,
+    TAvailableContract,
+} from '../../Utils/trade-types-utils';
 
 type TTradeTypesSelectorContentProps = {
     available_contracts: TAvailableContract[];
@@ -12,31 +16,29 @@ type TTradeTypesSelectorContentProps = {
     onTradeTypeSelect: (type: string) => void;
 };
 
+/**
+ * TradeTypesSelectorContent Component
+ *
+ * Pure presentational component that receives all data via props.
+ * Does NOT need MobX observer() wrapper because it doesn't access MobX stores directly.
+ *
+ * Data Flow: MobX Store → TradeTypes (observer) → TradeTypesSelector → TradeTypesSelectorContent (props)
+ */
 const TradeTypesSelectorContent = ({
     available_contracts,
     selected_trade_type,
     active_tab,
     onTradeTypeSelect,
 }: TTradeTypesSelectorContentProps) => {
-    const filtered_contracts =
-        active_tab === 'most_traded'
-            ? available_contracts.filter(contract => contract.is_popular)
-            : available_contracts;
+    const filtered_contracts = useMemo(
+        () =>
+            active_tab === 'most_traded'
+                ? available_contracts.filter(contract => contract.is_popular)
+                : available_contracts,
+        [active_tab, available_contracts]
+    );
 
-    const grouped_contracts = groupTradeTypesByCategory(filtered_contracts);
-
-    const getCategoryLabel = (category: string) => {
-        switch (category) {
-            case 'growth_based':
-                return <Localize i18n_default_text='Growth based' />;
-            case 'directional':
-                return <Localize i18n_default_text='Directional' />;
-            case 'digit_based':
-                return <Localize i18n_default_text='Digit based' />;
-            default:
-                return null;
-        }
-    };
+    const grouped_contracts = useMemo(() => groupTradeTypesByCategory(filtered_contracts), [filtered_contracts]);
 
     const category_order = ['growth_based', 'directional', 'digit_based'];
 
@@ -61,6 +63,8 @@ const TradeTypesSelectorContent = ({
                                         key={contract.id}
                                         className={`trade-types-selector__item ${is_selected ? 'trade-types-selector__item--selected' : ''}`}
                                         onClick={() => onTradeTypeSelect(contract.for[0])}
+                                        aria-label={`Select ${contract.tradeType} trade type${is_selected ? ', currently selected' : ''}`}
+                                        aria-pressed={is_selected}
                                     >
                                         <Text size='md'>
                                             {contract.tradeType}
