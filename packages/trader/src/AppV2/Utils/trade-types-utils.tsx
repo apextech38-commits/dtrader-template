@@ -23,6 +23,15 @@ type TCategories = {
     icon?: React.ReactNode;
 };
 
+export type TAvailableContract = {
+    tradeType: string;
+    id: string;
+    for: string[];
+    is_popular?: boolean;
+    show_fire_icon?: boolean;
+    category: 'growth_based' | 'directional' | 'digit_based';
+};
+
 const getSortedIndex = (type: string) =>
     getContractTypePosition(type as keyof ReturnType<typeof getSupportedContracts>) === 'bottom' ? 1 : 0;
 
@@ -39,54 +48,105 @@ export const CONTRACT_LIST = {
     OVER_UNDER: 'Over/Under',
 };
 
-export const AVAILABLE_CONTRACTS = [
+export const AVAILABLE_CONTRACTS: TAvailableContract[] = [
     {
         tradeType: 'Accumulators',
         id: CONTRACT_LIST.ACCUMULATORS,
         for: [TRADE_TYPES.ACCUMULATOR],
-    },
-    {
-        tradeType: 'Vanillas',
-        id: CONTRACT_LIST.VANILLAS,
-        for: [TRADE_TYPES.VANILLA.CALL, TRADE_TYPES.VANILLA.PUT],
-    },
-    {
-        tradeType: 'Turbos',
-        id: CONTRACT_LIST.TURBOS,
-        for: [TRADE_TYPES.TURBOS.LONG, TRADE_TYPES.TURBOS.SHORT],
-    },
-    {
-        tradeType: 'Multipliers',
-        id: CONTRACT_LIST.MULTIPLIERS,
-        for: [TRADE_TYPES.MULTIPLIER],
+        is_popular: true,
+        show_fire_icon: true,
+        category: 'growth_based',
     },
     {
         tradeType: 'Rise/Fall',
         id: CONTRACT_LIST.RISE_FALL,
         for: [TRADE_TYPES.RISE_FALL, TRADE_TYPES.RISE_FALL_EQUAL],
+        is_popular: true,
+        show_fire_icon: true,
+        category: 'directional',
+    },
+    {
+        tradeType: 'Multipliers',
+        id: CONTRACT_LIST.MULTIPLIERS,
+        for: [TRADE_TYPES.MULTIPLIER],
+        is_popular: true,
+        category: 'directional',
+    },
+    {
+        tradeType: 'Turbos',
+        id: CONTRACT_LIST.TURBOS,
+        for: [TRADE_TYPES.TURBOS.LONG, TRADE_TYPES.TURBOS.SHORT],
+        category: 'directional',
+    },
+    {
+        tradeType: 'Vanillas',
+        id: CONTRACT_LIST.VANILLAS,
+        for: [TRADE_TYPES.VANILLA.CALL, TRADE_TYPES.VANILLA.PUT],
+        category: 'directional',
     },
     {
         tradeType: 'Higher/Lower',
         id: CONTRACT_LIST.HIGHER_LOWER,
         for: [TRADE_TYPES.HIGH_LOW],
+        category: 'directional',
     },
     {
         tradeType: 'Touch/No Touch',
         id: CONTRACT_LIST.TOUCH_NO_TOUCH,
         for: [TRADE_TYPES.TOUCH],
+        category: 'directional',
     },
     {
         tradeType: 'Matches/Differs',
         id: CONTRACT_LIST.MATCHES_DIFFERS,
         for: [TRADE_TYPES.MATCH_DIFF],
+        is_popular: true,
+        category: 'digit_based',
     },
-    { tradeType: 'Even/Odd', id: CONTRACT_LIST.EVEN_ODD, for: [TRADE_TYPES.EVEN_ODD] },
     {
         tradeType: 'Over/Under',
         id: CONTRACT_LIST.OVER_UNDER,
         for: [TRADE_TYPES.OVER_UNDER],
+        is_popular: true,
+        category: 'digit_based',
+    },
+    {
+        tradeType: 'Even/Odd',
+        id: CONTRACT_LIST.EVEN_ODD,
+        for: [TRADE_TYPES.EVEN_ODD],
+        category: 'digit_based',
     },
 ];
+
+/**
+ * Gets the priority order for a trade type value based on AVAILABLE_CONTRACTS array order.
+ * Lower numbers = higher priority (appear first).
+ * @param value - The trade type value to look up
+ * @returns The priority index, or 999 if not found (will appear last)
+ */
+const getTradeTypePriority = (value: string): number => {
+    const index = AVAILABLE_CONTRACTS.findIndex(contract => contract.for.includes(value));
+    return index === -1 ? 999 : index;
+};
+
+/**
+ * Groups trade types by their category
+ * @param contracts - Array of available contracts to group
+ * @returns Object with categories as keys and arrays of contracts as values
+ */
+export const groupTradeTypesByCategory = (contracts: TAvailableContract[]) => {
+    return contracts.reduce(
+        (acc, contract) => {
+            const category = contract.category;
+            if (!acc[category]) {
+                acc[category] = [];
+            }
+            acc[category].push(contract);
+            return acc;
+        },
+        {} as Record<string, TAvailableContract[]>
+    );
+};
 
 /**
  * Returns the available contracts list, filtered by native app allowed trade types if provided.
@@ -124,7 +184,8 @@ export const getTradeTypesList = (
         filtered_types = filtered_types.filter(({ text }) => text && nativeAppAllowedTradeTypes.includes(text));
     }
 
-    return filtered_types;
+    // Sort by manual order defined in AVAILABLE_CONTRACTS
+    return filtered_types.sort((a, b) => getTradeTypePriority(a.value) - getTradeTypePriority(b.value));
 };
 
 /* Gets the array of sorted contract types that are used to display purchased buttons and other info based on a selected trade type tab if applicable. */
@@ -164,11 +225,9 @@ export const getDisplayedContractTypes = (
 };
 
 export const sortCategoriesInTradeTypeOrder = (trade_types: TContractType[], categories: TCategories[]) => {
-    return trade_types
-        .map((item: { value: string }) => {
-            return categories.find(category => category.id === item.value);
-        })
-        .filter(item => item) as TCategories[];
+    return categories
+        .filter(category => trade_types.some(type => type.value === category.id))
+        .sort((a, b) => getTradeTypePriority(a.id) - getTradeTypePriority(b.id));
 };
 
 /**

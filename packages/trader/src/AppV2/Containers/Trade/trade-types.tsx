@@ -1,21 +1,27 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import clsx from 'clsx';
 
+import { useMobileBridge } from '@deriv/api';
 import { LabelPairedPresentationScreenSmRegularIcon } from '@deriv/quill-icons';
+import { trackAnalyticsEvent } from '@deriv/shared';
 import { safeParse } from '@deriv/utils';
-import { useDevice } from '@deriv-com/ui';
 import { ActionSheet, Button, Chip, Text } from '@deriv-com/quill-ui';
 import { Localize, useTranslations } from '@deriv-com/translations';
+import { useDevice } from '@deriv-com/ui';
 
-import { useMobileBridge } from '@deriv/api';
 import Carousel from 'AppV2/Components/Carousel';
 import CarouselHeader from 'AppV2/Components/Carousel/carousel-header';
 import TradeTypesSelectionGuide from 'AppV2/Components/OnboardingGuide/TradeTypesSelectionGuide';
+import TradeTypesSelector from 'AppV2/Components/TradeTypesSelector';
 import { checkContractTypePrefix } from 'AppV2/Utils/contract-type';
-import { getTradeTypesList, sortCategoriesInTradeTypeOrder } from 'AppV2/Utils/trade-types-utils';
+import {
+    AVAILABLE_CONTRACTS,
+    getAvailableContracts,
+    getTradeTypesList,
+    sortCategoriesInTradeTypeOrder,
+} from 'AppV2/Utils/trade-types-utils';
 import { useTraderStore } from 'Stores/useTraderStores';
 
-import { trackAnalyticsEvent } from '@deriv/shared';
 import Guide from '../../Components/Guide';
 
 import TradeTypesContent from './trade-types-content';
@@ -35,6 +41,8 @@ export type TItem = {
     id: string;
     title: string;
     icon?: React.ReactNode;
+    is_popular?: boolean;
+    show_fire_icon?: boolean;
 };
 
 export type TResultItem = {
@@ -51,15 +59,21 @@ const TradeTypes = ({ contract_type, onTradeTypeSelect, trade_types, is_dark_mod
     const { isDesktop } = useDevice();
     const [is_open, setIsOpen] = React.useState<boolean>(false);
     const [is_editing, setIsEditing] = React.useState<boolean>(false);
+    const [is_guide_open, setIsGuideOpen] = React.useState<boolean>(false);
+    const [guide_key, setGuideKey] = React.useState<number>(0);
     const trade_types_ref = React.useRef<HTMLDivElement>(null);
 
     const createArrayFromCategories = (data: TTradeTypesProps['trade_types']): TItem[] => {
         const result: TItem[] = [];
 
         data.forEach(category => {
+            const matchingContract = AVAILABLE_CONTRACTS.find(contract => contract.for.includes(category.value));
+
             result.push({
                 id: category.value,
                 title: category.text ?? '',
+                is_popular: matchingContract?.is_popular,
+                show_fire_icon: matchingContract?.show_fire_icon,
             });
         });
 
@@ -270,13 +284,40 @@ const TradeTypes = ({ contract_type, onTradeTypeSelect, trade_types, is_dark_mod
 
     return (
         <div className='trade-container-v2__trade-types' ref={trade_types_ref}>
-            {trade_type_chips.map(({ title, id }: TItem) => (
+            <TradeTypesSelector
+                available_contracts={AVAILABLE_CONTRACTS.filter(contract =>
+                    trade_types.some(tt => contract.for.includes(tt.value))
+                )}
+                selected_trade_type={contract_type}
+                onTradeTypeSelect={(type: string) => {
+                    const trade_type_text = trade_types.find(tt => tt.value === type)?.text || type;
+                    const synthetic_event = {
+                        target: { textContent: trade_type_text },
+                        currentTarget: { textContent: trade_type_text },
+                    } as unknown as React.MouseEvent<HTMLElement>;
+                    onTradeTypeSelect(synthetic_event, 'trade_types_selector', getPinnedItems().length);
+                }}
+                onGuideClick={() => {
+                    setIsGuideOpen(true);
+                    setGuideKey(prev => prev + 1);
+                }}
+            />
+            {trade_type_chips.map(({ title, id, show_fire_icon }: TItem) => (
                 <Chip.Selectable
                     key={id}
-                    onChipSelect={e => onTradeTypeSelect(e, 'main_trade_page', getPinnedItems().length)}
+                    onChipSelect={e => {
+                        const synthetic_event = {
+                            ...e,
+                            target: { ...e.target, textContent: title },
+                            currentTarget: { ...e.currentTarget, textContent: title },
+                        } as React.MouseEvent<HTMLElement>;
+                        onTradeTypeSelect(synthetic_event, 'main_trade_page', getPinnedItems().length);
+                    }}
                     selected={isTradeTypeSelected(id)}
                 >
-                    <Text size='sm'>{title}</Text>
+                    <Text size='sm'>
+                        {title} {show_fire_icon && '🔥'}
+                    </Text>
                 </Chip.Selectable>
             ))}
             {should_show_view_all && !isBridgeAvailable && (
@@ -330,6 +371,15 @@ const TradeTypes = ({ contract_type, onTradeTypeSelect, trade_types, is_dark_mod
                 </ActionSheet.Portal>
             </ActionSheet.Root>
             {is_open && <TradeTypesSelectionGuide is_dark_mode_on={is_dark_mode_on} />}
+            {is_guide_open && (
+                <Guide
+                    key={guide_key}
+                    show_trigger_button={false}
+                    is_open_by_default={true}
+                    show_description_in_a_modal={true}
+                    show_guide_for_selected_contract={true}
+                />
+            )}
         </div>
     );
 };

@@ -57,7 +57,6 @@
             background-color: var(--semantic-color-slate-solid-surface-frame-low);
             display: flex;
             align-items: center;
-            padding: 0 var(--core-spacing-800);
             gap: var(--core-spacing-400);
             overflow-x: auto;
             min-height: var(--core-spacing-1600);
@@ -76,7 +75,9 @@
                 display: none;
             }
 
-            button {
+            button:not(.trade-types-selector__button):not(.trade-types-selector__guide-button):not(
+                    .trade-types-selector__item
+                ) {
                 background-color: transparent !important;
 
                 &.quill-chip[data-state='selected'] {
