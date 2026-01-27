@@ -5,6 +5,7 @@ import classNames from 'classnames';
 import { useMobileBridge, useRemoteConfig } from '@deriv/api';
 import { Div100vhContainer, MobileDrawer, ToggleSwitch } from '@deriv/components';
 import {
+    LabelPairedLifeRingMdRegularIcon,
     LegacyChartsIcon,
     LegacyChevronRight1pxIcon,
     LegacyHelpCentreIcon,
@@ -15,7 +16,7 @@ import {
     LegacyResponsibleTradingIcon,
     LegacyTheme1pxIcon,
 } from '@deriv/quill-icons';
-import { getBrandUrl, routes } from '@deriv/shared';
+import { getBrandUrl, getHelpCentreUrl, routes } from '@deriv/shared';
 import { observer, useStore } from '@deriv/stores';
 import { useTranslations } from '@deriv-com/translations';
 
@@ -100,6 +101,11 @@ const ToggleMenuDrawer = observer(() => {
             await logoutClient();
         });
     }, [logoutClient, toggleDrawer, sendBridgeEvent]);
+
+    const handleHelpCentreClick = React.useCallback(() => {
+        toggleDrawer();
+        window.open(getHelpCentreUrl(), '_blank', 'noopener,noreferrer');
+    }, [toggleDrawer]);
 
     const renderSubMenuFromConfig = routePath => {
         const routes_config = getRoutesConfig();
@@ -226,7 +232,6 @@ const ToggleMenuDrawer = observer(() => {
                                 </MobileDrawer.Item>
                                 {renderSubMenuFromConfig(routes.reports)}
                                 <MobileDrawer.Item
-                                    className='header__menu-mobile-theme'
                                     onClick={e => {
                                         e.preventDefault();
                                         toggleTheme(!is_dark_mode);
@@ -244,6 +249,18 @@ const ToggleMenuDrawer = observer(() => {
                                             handleToggle={() => toggleTheme(!is_dark_mode)}
                                             is_enabled={is_dark_mode}
                                         />
+                                    </div>
+                                </MobileDrawer.Item>
+                                <MobileDrawer.Item
+                                    className='header__menu-mobile-theme'
+                                    onClick={handleHelpCentreClick}
+                                >
+                                    <div className={classNames('header__menu-mobile-link')}>
+                                        <LabelPairedLifeRingMdRegularIcon
+                                            fill='var(--color-text-primary)'
+                                            style={{ marginRight: '16px' }}
+                                        />
+                                        <span className='header__menu-mobile-link-text'>{localize('Help centre')}</span>
                                     </div>
                                 </MobileDrawer.Item>
                                 {/* {showHelpCentre()} */}

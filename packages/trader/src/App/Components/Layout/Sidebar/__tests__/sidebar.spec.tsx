@@ -12,6 +12,7 @@ jest.mock('@deriv/shared', () => ({
         send: jest.fn(),
     }),
     getBrandUrl: jest.fn(() => 'https://deriv.com'),
+    getHelpCentreUrl: jest.fn(() => 'https://trade.deriv.com/help-centre'),
 }));
 
 jest.mock('@deriv/api', () => ({
@@ -37,6 +38,7 @@ jest.mock('@deriv-com/translations', () => ({
 jest.mock('@deriv/quill-icons', () => ({
     ...jest.requireActual('@deriv/quill-icons'),
     DerivProductBrandLightDerivTraderLogoIcon: () => 'DerivProductBrandLightDerivTraderLogoIcon',
+    LabelPairedLifeRingSmRegularIcon: () => 'LabelPairedLifeRingSmRegularIcon',
     LegacyHomeNewIcon: () => 'LegacyHomeNewIcon',
     LegacyMinimize2pxIcon: () => 'LegacyMinimize2pxIcon',
     StandaloneCircleUserRegularIcon: () => 'StandaloneCircleUserRegularIcon',
@@ -140,6 +142,7 @@ describe('<Sidebar />', () => {
         expect(screen.getByTestId('dt_sidebar_home')).toBeInTheDocument();
         expect(screen.getByTestId('dt_sidebar_positions')).toBeInTheDocument();
         expect(screen.getByTestId('dt_sidebar_reports')).toBeInTheDocument();
+        expect(screen.getByTestId('dt_sidebar_help')).toBeInTheDocument();
     });
 
     it('should not render Positions and Reports when user is not logged in', () => {
@@ -152,6 +155,39 @@ describe('<Sidebar />', () => {
         renderSidebar(store);
         expect(screen.queryByTestId('dt_sidebar_positions')).not.toBeInTheDocument();
         expect(screen.queryByTestId('dt_sidebar_reports')).not.toBeInTheDocument();
+    });
+
+    it('should render Help button for all users', () => {
+        renderSidebar();
+        expect(screen.getByTestId('dt_sidebar_help')).toBeInTheDocument();
+    });
+
+    it('should render Help button even when user is not logged in', () => {
+        const store = mockStore({
+            ...defaultStoreConfig,
+            client: {
+                is_logged_in: false,
+            },
+        });
+        renderSidebar(store);
+        expect(screen.getByTestId('dt_sidebar_help')).toBeInTheDocument();
+    });
+
+    it('should open help centre in new tab when Help button is clicked', () => {
+        const mockWindowOpen = jest.fn();
+        window.open = mockWindowOpen;
+
+        const store = mockStore(defaultStoreConfig);
+        renderSidebar(store);
+        const helpButton = screen.getByTestId('dt_sidebar_help');
+        fireEvent.click(helpButton);
+
+        expect(mockWindowOpen).toHaveBeenCalledWith(
+            'https://trade.deriv.com/help-centre',
+            '_blank',
+            'noopener,noreferrer'
+        );
+        expect(store.ui.closeSidebarFlyout).toHaveBeenCalled();
     });
 
     it('should render utility items (language, theme, and account) when logged in', () => {

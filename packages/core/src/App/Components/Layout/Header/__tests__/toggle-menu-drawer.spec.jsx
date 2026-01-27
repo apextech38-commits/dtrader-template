@@ -38,6 +38,7 @@ jest.mock('@deriv/components', () => {
 });
 
 jest.mock('@deriv/quill-icons', () => ({
+    LabelPairedLifeRingMdRegularIcon: () => <div data-testid='life-ring-icon'>LifeRing</div>,
     LegacyChartsIcon: () => <div data-testid='charts-icon'>Charts</div>,
     LegacyChevronRight1pxIcon: () => <div data-testid='chevron-right-icon'>ChevronRight</div>,
     LegacyHelpCentreIcon: () => <div data-testid='help-centre-icon'>HelpCentre</div>,
@@ -64,6 +65,7 @@ jest.mock('@deriv/shared', () => ({
     },
     getBrandUrl: jest.fn(() => 'https://deriv.com'),
     getApiCoreBaseUrl: jest.fn(() => 'https://api.deriv.com'),
+    getHelpCentreUrl: jest.fn(() => 'https://trade.deriv.com/help-centre'),
     useWS: jest.fn(() => ({})),
     getAccountType: jest.fn(() => 'demo'),
     toGMTFormat: jest.fn(() => 'GMT Time'),
@@ -523,6 +525,74 @@ describe('<ToggleMenuDrawer />', () => {
 
             // Home button should be present when bridge is not available
             expect(homeItem).toBeInTheDocument();
+        });
+    });
+
+    describe('Help centre button', () => {
+        it('should render Help centre button with correct icon and text', async () => {
+            const user = userEvent.setup({ delay: null });
+            render(mockToggleMenuDrawer());
+            const hamburgerButton = screen.getByTestId('dt_mobile_drawer_toggle');
+            await user.click(hamburgerButton);
+
+            const helpCentreItems = screen.getAllByTestId('drawer-item');
+            const helpCentreItem = helpCentreItems.find(item => item.textContent?.includes('Help centre'));
+            expect(helpCentreItem).toBeInTheDocument();
+
+            // Verify icon is present
+            expect(screen.getByTestId('life-ring-icon')).toBeInTheDocument();
+        });
+
+        it('should open help centre in new tab when clicked', async () => {
+            const user = userEvent.setup({ delay: null });
+            const mockWindowOpen = jest.fn();
+            window.open = mockWindowOpen;
+
+            render(mockToggleMenuDrawer());
+            const hamburgerButton = screen.getByTestId('dt_mobile_drawer_toggle');
+            await user.click(hamburgerButton);
+
+            const helpCentreItems = screen.getAllByTestId('drawer-item');
+            const helpCentreItem = helpCentreItems.find(item => item.textContent?.includes('Help centre'));
+            await user.click(helpCentreItem);
+
+            expect(mockWindowOpen).toHaveBeenCalledWith(
+                'https://trade.deriv.com/help-centre',
+                '_blank',
+                'noopener,noreferrer'
+            );
+        });
+
+        it('should show Help centre button when bridge is available', async () => {
+            const user = userEvent.setup({ delay: null });
+            useMobileBridge.mockReturnValue({
+                sendBridgeEvent: mockSendBridgeEvent,
+                isBridgeAvailable: true,
+            });
+
+            render(mockToggleMenuDrawer());
+            const hamburgerButton = screen.getByTestId('dt_mobile_drawer_toggle');
+            await user.click(hamburgerButton);
+
+            const helpCentreItems = screen.getAllByTestId('drawer-item');
+            const helpCentreItem = helpCentreItems.find(item => item.textContent?.includes('Help centre'));
+            expect(helpCentreItem).toBeInTheDocument();
+        });
+
+        it('should show Help centre button when bridge is not available', async () => {
+            const user = userEvent.setup({ delay: null });
+            useMobileBridge.mockReturnValue({
+                sendBridgeEvent: mockSendBridgeEvent,
+                isBridgeAvailable: false,
+            });
+
+            render(mockToggleMenuDrawer());
+            const hamburgerButton = screen.getByTestId('dt_mobile_drawer_toggle');
+            await user.click(hamburgerButton);
+
+            const helpCentreItems = screen.getAllByTestId('drawer-item');
+            const helpCentreItem = helpCentreItems.find(item => item.textContent?.includes('Help centre'));
+            expect(helpCentreItem).toBeInTheDocument();
         });
     });
 });

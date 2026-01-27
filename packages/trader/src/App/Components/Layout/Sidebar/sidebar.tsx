@@ -6,6 +6,7 @@ import { useMobileBridge } from '@deriv/api';
 import { Button, Flyout, Text } from '@deriv/components';
 import {
     DerivProductBrandLightDerivTraderLogoIcon,
+    LabelPairedLifeRingSmRegularIcon,
     LegacyHomeNewIcon,
     StandaloneCircleUserFillIcon,
     StandaloneCircleUserRegularIcon,
@@ -17,7 +18,7 @@ import {
     StandaloneMoonRegularIcon,
     StandaloneSunBrightRegularIcon,
 } from '@deriv/quill-icons';
-import { getBrandUrl, routes } from '@deriv/shared';
+import { getBrandUrl, getHelpCentreUrl, routes } from '@deriv/shared';
 import { observer, useStore } from '@deriv/stores';
 import { Localize, localize, useTranslations } from '@deriv-com/translations';
 
@@ -81,6 +82,11 @@ const Sidebar = observer(() => {
         history.push(routes.reports);
     };
 
+    const handleHelpCentreClick = () => {
+        closeSidebarFlyout();
+        window.open(getHelpCentreUrl(), '_blank', 'noopener,noreferrer');
+    };
+
     const handleHomeClick = () => {
         closeSidebarFlyout();
         sendBridgeEvent('trading:home', () => {
@@ -136,6 +142,14 @@ const Sidebar = observer(() => {
     const isAccountActive = active_sidebar_flyout === 'account';
 
     const utilityItems = [
+        {
+            id: 'help',
+            icon: <LabelPairedLifeRingSmRegularIcon fill='var(--color-text-primary)' />,
+            label: localize('Help'),
+            onClick: handleHelpCentreClick,
+            isActive: false,
+            dataTestId: 'dt_sidebar_help',
+        },
         {
             id: 'language',
             icon: isLanguageActive ? (

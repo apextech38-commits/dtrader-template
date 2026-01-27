@@ -18,13 +18,14 @@
             "production": "api-core.deriv.com/options/v1/ws"
         },
         "whoami_endpoint": {
-          "staging": "https://staging-auth.deriv.com/sessions/whoami",
-          "production": "https://auth.deriv.com/sessions/whoami"
+            "staging": "https://staging-auth.deriv.com/sessions/whoami",
+            "production": "https://auth.deriv.com/sessions/whoami"
         },
         "logout_endpoint": {
-          "staging": "https://staging-auth.deriv.com/self-service/logout/browser",
-          "production": "https://auth.deriv.com/self-service/logout/browser"
-        }
+            "staging": "https://staging-auth.deriv.com/self-service/logout/browser",
+            "production": "https://auth.deriv.com/self-service/logout/browser"
+        },
+        "help_centre_url": "https://trade.deriv.com/help-centre"
     },
     "api_core": {
         "staging": "staging-api-core.deriv.com",

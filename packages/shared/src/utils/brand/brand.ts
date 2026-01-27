@@ -155,3 +155,11 @@ export const getApiCoreUrl = (): string => {
 export const getApiCoreBaseUrl = (): string => {
     return `https://${getApiCoreUrl()}`;
 };
+
+/**
+ * Gets the Help Centre URL
+ * @returns Help Centre URL (e.g., "https://trade.deriv.com/help-centre")
+ */
+export const getHelpCentreUrl = (): string => {
+    return config_data.platform.help_centre_url;
+};
