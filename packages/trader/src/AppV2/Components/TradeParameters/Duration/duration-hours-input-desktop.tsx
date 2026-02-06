@@ -2,7 +2,7 @@ import React, { useCallback, useReducer } from 'react';
 import { observer } from 'mobx-react-lite';
 
 import { Button, TextField } from '@deriv-com/quill-ui';
-import { Localize } from '@deriv-com/translations';
+import { Localize, localize } from '@deriv-com/translations';
 
 import { useTraderStore } from 'Stores/useTraderStores';
 
@@ -16,6 +16,7 @@ type ValidationState = {
     hoursError: string;
     minutesError: string;
     isValid: boolean;
+    isMinutesDisabled: boolean;
 };
 
 type ValidationAction =
@@ -29,23 +30,47 @@ const MIN_MINUTES = 0;
 const MAX_MINUTES = 59;
 const MIN_TOTAL_MINUTES = 60; // Minimum 1 hour
 
+const getHoursRangeError = () => localize('Range: {{min}} - {{max}} hours', { min: MIN_HOURS, max: MAX_HOURS });
+const getMinutesRangeError = () => localize('Range: {{min}} - {{max}} minutes', { min: MIN_MINUTES, max: MAX_MINUTES });
+const getHoursRequiredError = () => localize('Hours is required');
+const getMinDurationError = () => localize('Minimum duration is 1 hour');
+
 const validationReducer = (state: ValidationState, action: ValidationAction): ValidationState => {
     switch (action.type) {
         case 'SET_HOURS': {
             const hoursValue = action.payload;
+            const hours = parseInt(hoursValue) || 0;
+            const isMaxHours = hours === MAX_HOURS;
+
+            // Immediate validation for hours
+            let hoursError = '';
+            if (hoursValue !== '' && hours > MAX_HOURS) {
+                hoursError = getHoursRangeError();
+            }
+
             return {
                 ...state,
                 hoursValue,
-                hoursError: '',
+                hoursError,
                 isValid: false,
+                isMinutesDisabled: isMaxHours,
+                minutesValue: isMaxHours ? '0' : state.minutesValue,
             };
         }
         case 'SET_MINUTES': {
             const minutesValue = action.payload;
+            const minutes = parseInt(minutesValue) || 0;
+
+            // Immediate validation for minutes
+            let minutesError = '';
+            if (minutesValue !== '' && minutes > MAX_MINUTES) {
+                minutesError = getMinutesRangeError();
+            }
+
             return {
                 ...state,
                 minutesValue,
-                minutesError: '',
+                minutesError,
                 isValid: false,
             };
         }
@@ -60,22 +85,22 @@ const validationReducer = (state: ValidationState, action: ValidationAction): Va
 
             // Validate hours
             if (state.hoursValue === '') {
-                hoursError = 'Hours is required';
+                hoursError = getHoursRequiredError();
                 isValid = false;
             } else if (hours < MIN_HOURS || hours > MAX_HOURS) {
-                hoursError = `Range: ${MIN_HOURS} - ${MAX_HOURS} hours`;
+                hoursError = getHoursRangeError();
                 isValid = false;
             }
 
             // Validate minutes
             if (state.minutesValue !== '' && (minutes < MIN_MINUTES || minutes > MAX_MINUTES)) {
-                minutesError = `Range: ${MIN_MINUTES} - ${MAX_MINUTES} minutes`;
+                minutesError = getMinutesRangeError();
                 isValid = false;
             }
 
             // Validate total duration (minimum 1 hour)
             if (totalMinutes < MIN_TOTAL_MINUTES) {
-                hoursError = 'Minimum duration is 1 hour';
+                hoursError = getMinDurationError();
                 isValid = false;
             }
 
@@ -90,6 +115,7 @@ const validationReducer = (state: ValidationState, action: ValidationAction): Va
             return state;
     }
 };
+// [/AI]
 
 const DurationHoursInputDesktop: React.FC<DurationHoursInputDesktopProps> = observer(({ onClose }) => {
     const { duration, duration_unit, onChangeMultiple } = useTraderStore();
@@ -104,6 +130,7 @@ const DurationHoursInputDesktop: React.FC<DurationHoursInputDesktopProps> = obse
         hoursError: '',
         minutesError: '',
         isValid: false,
+        isMinutesDisabled: initialHours === MAX_HOURS,
     });
 
     const handleHoursChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -164,7 +191,7 @@ const DurationHoursInputDesktop: React.FC<DurationHoursInputDesktopProps> = obse
         if (state.minutesError) {
             return state.minutesError;
         }
-        return `Range: ${MIN_HOURS} - ${MAX_HOURS} hours`;
+        return localize('Range: {{min}} - {{max}} hours', { min: MIN_HOURS, max: MAX_HOURS });
     }, [state.hoursError, state.minutesError]);
 
     return (
@@ -173,7 +200,7 @@ const DurationHoursInputDesktop: React.FC<DurationHoursInputDesktopProps> = obse
                 <div className='duration-input-desktop__field-group'>
                     <TextField
                         variant='fill'
-                        label='Hours'
+                        label={localize('Hours')}
                         value={state.hoursValue}
                         onChange={handleHoursChange}
                         onKeyDown={handleKeyDown}
@@ -186,7 +213,7 @@ const DurationHoursInputDesktop: React.FC<DurationHoursInputDesktopProps> = obse
                 <div className='duration-input-desktop__field-group'>
                     <TextField
                         variant='fill'
-                        label='Minutes'
+                        label={localize('Minutes')}
                         value={state.minutesValue}
                         onChange={handleMinutesChange}
                         onKeyDown={handleKeyDown}
@@ -194,6 +221,7 @@ const DurationHoursInputDesktop: React.FC<DurationHoursInputDesktopProps> = obse
                         maxLength={2}
                         status={state.minutesError ? 'error' : 'neutral'}
                         message={state.minutesError}
+                        disabled={state.isMinutesDisabled}
                     />
                 </div>
             </div>
@@ -208,7 +236,11 @@ const DurationHoursInputDesktop: React.FC<DurationHoursInputDesktopProps> = obse
                     fullWidth
                     onClick={handleSave}
                     color='black-white'
-                    disabled={state.hoursValue === '' && state.minutesValue === ''}
+                    disabled={
+                        (state.hoursValue === '' && state.minutesValue === '') ||
+                        !!state.hoursError ||
+                        !!state.minutesError
+                    }
                 >
                     <Localize i18n_default_text='Save' />
                 </Button>
