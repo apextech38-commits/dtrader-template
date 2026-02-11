@@ -1,8 +1,8 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useLayoutEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import moment from 'moment';
 
-import { trackAnalyticsEvent } from '@deriv/shared';
+import { hasIntradayDurationUnit, trackAnalyticsEvent } from '@deriv/shared';
 import { Text } from '@deriv-com/quill-ui';
 import { Localize, localize } from '@deriv-com/translations';
 
@@ -278,6 +278,22 @@ const DurationDesktop: React.FC<DurationDesktopProps> = observer(({ is_minimized
         symbol,
         active_symbols,
     } = useTraderStore();
+
+    // Normalize stale daily duration: when duration_unit is 'd' and no explicit end time has
+    // been saved, convert to endtime expiry with the correct default date.
+    // useLayoutEffect runs synchronously before browser paint, preventing visible flicker.
+    useLayoutEffect(() => {
+        if (duration_unit === 'd' && expiry_type !== 'endtime' && duration_units_list.length > 0) {
+            const has_intraday = hasIntradayDurationUnit(duration_units_list);
+            const default_date = has_intraday ? moment() : moment().add(1, 'days');
+            onChangeMultiple({
+                expiry_type: 'endtime',
+                expiry_date: default_date.format('YYYY-MM-DD'),
+                expiry_time: '23:59:00',
+            });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [duration_units_list]);
 
     // Get market category for duration preset filtering
     const marketCategory = React.useMemo(() => {
@@ -556,9 +572,11 @@ const DurationDesktop: React.FC<DurationDesktopProps> = observer(({ is_minimized
             return formatMinutesValue(duration);
         }
         if (duration_unit === 'd') {
-            // Default display for daily duration: tomorrow at 23:59
-            // The 'd' unit always means at least 1 day, so tomorrow is the correct default
-            const expiryDate = moment().add(1, 'days');
+            // Display the correct default: today for intraday contracts, tomorrow for daily-only.
+            // When duration_units_list hasn't loaded yet, default to today (most 'd' contracts
+            // have intraday units) to avoid a visible tomorrow→today flicker.
+            const has_intraday = duration_units_list.length === 0 || hasIntradayDurationUnit(duration_units_list);
+            const expiryDate = has_intraday ? moment() : moment().add(1, 'days');
             expiryDate.set({ hour: 23, minute: 59 });
             const formattedDate = expiryDate.format('D MMM');
             const formattedTime = expiryDate.format('HH:mm');
@@ -568,6 +586,7 @@ const DurationDesktop: React.FC<DurationDesktopProps> = observer(({ is_minimized
     }, [
         duration,
         duration_unit,
+        duration_units_list,
         expiry_type,
         expiry_time,
         expiry_date,
