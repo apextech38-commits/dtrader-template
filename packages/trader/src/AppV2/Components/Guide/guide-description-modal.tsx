@@ -57,7 +57,7 @@ const GuideDescriptionModal = ({
     show_all_trade_types_in_guide,
 }: TGuideDescriptionModal) => {
     const [is_video_player_opened, setIsVideoPlayerOpened] = React.useState(false);
-    const { isDesktop } = useDevice();
+    const { isMobile } = useDevice();
 
     const video_src = getDescriptionVideoIds(selected_contract_type, is_dark_mode_on);
 
@@ -80,7 +80,7 @@ const GuideDescriptionModal = ({
     return (
         <React.Fragment>
             {show_description_in_a_modal ? (
-                isDesktop ? (
+                !isMobile ? (
                     <Modal
                         isOpened={is_open}
                         showHandleBar={false}
@@ -141,7 +141,7 @@ const GuideDescriptionModal = ({
                     <GuideContent {...guide_content_props} />
                 </div>
             )}
-            {!isDesktop && (
+            {isMobile && (
                 <PortalModal isOpen={is_video_player_opened}>
                     <VideoPlayer
                         className='modal-player__wrapper'
