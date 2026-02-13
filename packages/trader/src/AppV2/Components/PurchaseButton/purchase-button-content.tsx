@@ -14,11 +14,12 @@ type TPurchaseButtonContent = {
     is_reverse?: boolean;
 } & Pick<
     ReturnType<typeof useTraderStore>,
-    'currency' | 'has_open_accu_contract' | 'is_multiplier' | 'is_vanilla' | 'is_turbos'
+    'currency' | 'has_cancellation' | 'has_open_accu_contract' | 'is_multiplier' | 'is_vanilla' | 'is_turbos'
 >;
 
 const PurchaseButtonContent = ({
     currency,
+    has_cancellation,
     has_open_accu_contract,
     has_no_button_content,
     info,
@@ -30,7 +31,7 @@ const PurchaseButtonContent = ({
     const { localize } = useTranslations();
     const { payout } = getLocalizedBasis();
 
-    if (has_no_button_content) return null;
+    if (has_no_button_content || (is_multiplier && !has_cancellation)) return null;
 
     const getAmount = () => {
         const { stake, obj_contract_basis } = info;
@@ -46,7 +47,7 @@ const PurchaseButtonContent = ({
 
     const getTextBasis = () => {
         if (is_multiplier) {
-            return localize('Total cost');
+            return has_cancellation ? localize('Total cost') : undefined;
         }
         return payout;
     };

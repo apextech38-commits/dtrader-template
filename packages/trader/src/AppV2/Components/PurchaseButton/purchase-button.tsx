@@ -55,6 +55,7 @@ const PurchaseButton = observer(({ onPurchaseSuccess }: TPurchaseButtonProps = {
         basis_list,
         contract_type,
         currency,
+        has_cancellation,
         is_accumulator,
         is_multiplier,
         is_purchase_enabled,
@@ -87,6 +88,7 @@ const PurchaseButton = observer(({ onPurchaseSuccess }: TPurchaseButtonProps = {
     const is_high_low = /^high_low$/.test(contract_type.toLowerCase());
     const purchase_button_content_props = {
         currency,
+        has_cancellation,
         has_open_accu_contract,
         is_multiplier,
         is_turbos,
