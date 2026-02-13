@@ -47,6 +47,12 @@ $TABS_HEIGHT: var(--core-size-2400);
 .positions-page-container {
     height: 100%;
 
+    &__filter {
+        &__wrapper {
+            padding: var(--core-spacing-400);
+        }
+    }
+
     &__tabs {
         height: 100%;
 
