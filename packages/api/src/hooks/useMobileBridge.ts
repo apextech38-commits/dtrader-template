@@ -140,5 +140,6 @@ export const useMobileBridge = () => {
     return {
         sendBridgeEvent,
         isBridgeAvailable,
+        isMobileApp,
     };
 };

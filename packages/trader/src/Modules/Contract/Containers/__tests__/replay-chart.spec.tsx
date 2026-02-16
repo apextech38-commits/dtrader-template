@@ -32,6 +32,7 @@ jest.mock('Modules/SmartChart/Hooks/useSmartChartsAdapter', () => ({
         subscribeQuotes: jest.fn(),
         unsubscribeQuotes: jest.fn(),
         retryFetchChartData: jest.fn(),
+        shouldUseCandlesOverride: false,
     }),
 }));
 

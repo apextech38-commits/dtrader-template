@@ -215,10 +215,7 @@ type StatementRequest = BaseStatementRequest;
 type StatementResponse = Omit<BaseStatementResponse, 'statement'> & {
     statement?: Omit<NonNullable<BaseStatementResponse['statement']>, 'transactions'> & {
         transactions?: Array<
-            Omit<
-                NonNullable<NonNullable<BaseStatementResponse['statement']>['transactions']>[0],
-                'app_id' | 'withdrawal_details'
-            >
+            Omit<NonNullable<NonNullable<BaseStatementResponse['statement']>['transactions']>[0], 'withdrawal_details'>
         >;
     };
 };

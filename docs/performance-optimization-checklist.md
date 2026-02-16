@@ -371,7 +371,7 @@
           "eslint": "^8.57.1",
           "react-dom": "^17.0.2",
           "nth-check": "2.0.1",
-          "@deriv-com/analytics": "1.31.3",
+          "@deriv-com/analytics": "1.38.6",
           "typescript": "^5.0.0"
         }
         ```

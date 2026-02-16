@@ -57,16 +57,29 @@ const ReplayChart = observer(
         const all_ticks = audit_details ? audit_details.all_ticks : [];
 
         // Use centralized SmartCharts adapter hook
-        const { chartData, isLoading, error, getQuotes, subscribeQuotes, unsubscribeQuotes, retryFetchChartData } =
-            useSmartChartsAdapter({
-                debug: false,
-                activeSymbols: [], // Replay chart doesn't need active symbols
-                granularity: granularity || 0,
-                is_accumulator: !!is_accumulator_contract,
-                updateAccumulatorBarriersData: () => {}, // No-op for replay chart
-                setTickData: () => {}, // No-op for replay chart
-                current_language,
-            });
+        const {
+            chartData,
+            isLoading,
+            error,
+            getQuotes,
+            subscribeQuotes,
+            unsubscribeQuotes,
+            retryFetchChartData,
+            shouldUseCandlesOverride,
+        } = useSmartChartsAdapter({
+            debug: false,
+            activeSymbols: [], // Replay chart doesn't need active symbols
+            granularity: granularity || 0,
+            is_accumulator: !!is_accumulator_contract,
+            updateAccumulatorBarriersData: () => {}, // No-op for replay chart
+            setTickData: () => {}, // No-op for replay chart
+            current_language,
+            minStartEpoch: start_epoch, // Switch to candles if tick data doesn't cover this
+        });
+
+        // Override chart type and granularity if tick data doesn't cover start_epoch
+        const effective_chart_type = shouldUseCandlesOverride ? 'candles' : chart_type;
+        const effective_granularity = shouldUseCandlesOverride ? 60 : granularity;
 
         const isBottomWidgetVisible = () => {
             return !isMobile && is_digit_contract;
@@ -124,17 +137,18 @@ const ReplayChart = observer(
 
         return (
             <SmartChart
+                key={shouldUseCandlesOverride ? 'candles' : 'ticks'}
                 id='replay'
                 barriers={barriers_array}
                 bottomWidgets={isBottomWidgetVisible() ? ChartBottomWidgets : undefined}
                 chartControlsWidgets={null}
-                chartType={chart_type}
+                chartType={effective_chart_type}
                 endEpoch={end_epoch}
                 margin={margin}
                 isMobile={isMobile}
                 enabledNavigationWidget={!isMobile}
                 enabledChartFooter={false}
-                granularity={granularity}
+                granularity={effective_granularity}
                 getQuotes={getQuotes}
                 chartData={chartData}
                 subscribeQuotes={subscribeQuotes}

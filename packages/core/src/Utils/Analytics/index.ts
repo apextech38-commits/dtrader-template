@@ -54,19 +54,32 @@ export const AnalyticsInitializer = async () => {
     const hasRudderStack = !!(process.env.RUDDERSTACK_KEY && flags.tracking_rudderstack);
     const hasPostHog = !!(process.env.POSTHOG_KEY && flags.tracking_posthog);
 
-    // RudderStack key is required by the Analytics package
-    if (hasRudderStack) {
+    // Initialize Analytics if at least one service is enabled
+    if (hasRudderStack || hasPostHog) {
         const config: {
-            rudderstackKey: string;
-            posthogKey?: string;
-            posthogHost?: string;
-        } = {
-            rudderstackKey: process.env.RUDDERSTACK_KEY!,
-        };
+            rudderstackKey?: string;
+            posthogOptions?: {
+                apiKey: string;
+                allowedDomains?: string[];
+                config?: {
+                    api_host?: string;
+                };
+            };
+        } = {};
+
+        if (hasRudderStack) {
+            config.rudderstackKey = process.env.RUDDERSTACK_KEY!;
+        }
 
         if (hasPostHog) {
-            config.posthogKey = process.env.POSTHOG_KEY;
-            config.posthogHost = process.env.POSTHOG_HOST;
+            config.posthogOptions = {
+                apiKey: process.env.POSTHOG_KEY!,
+                ...(process.env.POSTHOG_HOST && {
+                    config: {
+                        api_host: process.env.POSTHOG_HOST,
+                    },
+                }),
+            };
         }
 
         await Analytics?.initialise(config);

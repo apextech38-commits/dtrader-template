@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import clsx from 'clsx';
 
 import { useMobileBridge } from '@deriv/api';
+import { Skeleton } from '@deriv/components';
 import { LabelPairedPresentationScreenSmRegularIcon } from '@deriv/quill-icons';
 import { trackAnalyticsEvent } from '@deriv/shared';
 import { safeParse } from '@deriv/utils';
@@ -82,27 +83,77 @@ const TradeTypes = ({ contract_type, onTradeTypeSelect, trade_types, is_dark_mod
         return result;
     };
 
-    const saved_pinned_trade_types_string: string = localStorage.getItem('pinned_trade_types') ?? '[]';
-    const saved_pinned_trade_types: TResultItem[] = useMemo(
-        () => safeParse(saved_pinned_trade_types_string) ?? [],
-        [saved_pinned_trade_types_string]
-    );
-
-    const [other_trade_types, setOtherTradeTypes] = useState<TResultItem[]>([]);
-    const [pinned_trade_types, setPinnedTradeTypes] = useState<TResultItem[]>(saved_pinned_trade_types);
-
     const trade_types_array = useMemo(() => {
         return createArrayFromCategories(trade_types);
     }, [trade_types]);
 
-    const getPinnedItems = useCallback(() => {
-        const pinned_items = filterItems(getItems(saved_pinned_trade_types), trade_types_array);
+    const trade_types_ids = useMemo(() => {
+        return trade_types_array.map(type => type.id);
+    }, [trade_types_array]);
 
-        if (pinned_items.length === 0) {
+    const saved_pinned_trade_types_string: string = localStorage.getItem('pinned_trade_types') ?? '[]';
+
+    // Keep raw saved types for localStorage update
+    const raw_saved_pinned_trade_types: TResultItem[] = useMemo(
+        () => safeParse(saved_pinned_trade_types_string) ?? [],
+        [saved_pinned_trade_types_string]
+    );
+
+    // Filter localStorage data immediately to prevent stale types from rendering in native mobile app
+    const saved_pinned_trade_types: TResultItem[] = useMemo(() => {
+        // Return empty array if trade_types_ids is not available to prevent showing stale types
+        if (trade_types_ids.length === 0) return [];
+
+        // Filter out unavailable trade types before component renders
+        return raw_saved_pinned_trade_types.map((category: TResultItem) => ({
+            ...category,
+            items: category.items.filter((item: TItem) => trade_types_ids.includes(item.id)),
+        }));
+    }, [raw_saved_pinned_trade_types, trade_types_ids]);
+
+    const [other_trade_types, setOtherTradeTypes] = useState<TResultItem[]>([]);
+    const [pinned_trade_types, setPinnedTradeTypes] = useState<TResultItem[]>(saved_pinned_trade_types);
+
+    // Sync localStorage with current available trade types to persist cleanup
+    useEffect(() => {
+        if (trade_types_array.length > 0 && raw_saved_pinned_trade_types.length > 0) {
+            const filtered_pinned = raw_saved_pinned_trade_types.map((category: TResultItem) => ({
+                ...category,
+                items: category.items.filter((item: TItem) => trade_types_ids.includes(item.id)),
+            }));
+
+            // Only update localStorage if something changed to avoid unnecessary writes
+            const current_items = raw_saved_pinned_trade_types.flatMap(type => type.items);
+            const filtered_items = filtered_pinned.flatMap(type => type.items);
+
+            const currentIds = new Set(current_items.map((item: TItem) => item.id));
+            const filteredIds = new Set(filtered_items.map((item: TItem) => item.id));
+
+            const hasChanged =
+                currentIds.size !== filteredIds.size || ![...currentIds].every(id => filteredIds.has(id));
+
+            if (hasChanged) {
+                localStorage.setItem('pinned_trade_types', JSON.stringify(filtered_pinned));
+            }
+        }
+    }, [trade_types_ids, trade_types_array.length, raw_saved_pinned_trade_types]);
+
+    const getItems = (trade_types: TResultItem[]) => trade_types.flatMap(type => type.items);
+
+    const filterItems = (items: TItem[], validTradeTypeIds: string[]): TItem[] => {
+        return items.filter(item => validTradeTypeIds.includes(item.id));
+    };
+
+    const getPinnedItems = useCallback(() => {
+        const pinned_items = filterItems(getItems(saved_pinned_trade_types), trade_types_ids);
+
+        // Only use all trade types as fallback if we have valid trade_types_array
+        // and trade_types_ids is populated (not during initial load)
+        if (pinned_items.length === 0 && trade_types_ids.length > 0) {
             pinned_items.push(...trade_types_array.slice(0, trade_types_array.length));
         }
         return pinned_items;
-    }, [saved_pinned_trade_types, trade_types_array]);
+    }, [saved_pinned_trade_types, trade_types_ids, trade_types_array]);
 
     const setTradeTypes = useCallback(() => {
         const pinned_items = getPinnedItems();
@@ -235,27 +286,28 @@ const TradeTypes = ({ contract_type, onTradeTypeSelect, trade_types, is_dark_mod
     const isTradeTypeSelected = (value: string) =>
         checkContractTypePrefix([contract_type, value]) || contract_type === value;
 
-    const getItems = (trade_types: TResultItem[]) => trade_types.flatMap(type => type.items);
+    // Memoize trade type chips to ensure they only update when dependencies change
+    // and prevent rendering stale data from state
+    const trade_type_chips = useMemo(() => {
+        // Guard: Return empty array if no valid trade types to prevent showing stale data
+        if (trade_types_ids.length === 0) return [];
 
-    const filterItems = (items: TItem[], tradeTypes: TItem[]): TItem[] => {
-        const trade_types_ids = tradeTypes.map(type => type.id);
-        return items.filter(item => trade_types_ids.includes(item.id));
-    };
-
-    const getTradeTypeChips = () => {
         const pinned_items = getPinnedItems();
         const is_contract_type_in_pinned = pinned_items.some(item => item.id === contract_type);
 
+        // Get other items, but filter them against trade_types_ids to prevent stale state data
+        const filtered_other_items = getItems(other_trade_types).filter(item => trade_types_ids.includes(item.id));
+
         const other_item = !is_contract_type_in_pinned
-            ? getItems(other_trade_types).find(
+            ? filtered_other_items.find(
                   item => item && (item.id === contract_type || checkContractTypePrefix([item.id, contract_type]))
               )
             : null;
 
-        return [...pinned_items, other_item].filter(Boolean) as TItem[];
-    };
+        // Final filter to only include items that exist in current trade_types
+        return [...pinned_items, other_item].filter(item => item && trade_types_ids.includes(item.id)) as TItem[];
+    }, [trade_types_ids, getPinnedItems, other_trade_types, contract_type]);
 
-    const trade_type_chips = getTradeTypeChips();
     const should_show_view_all =
         (trade_type_chips.length >= 2 || getItems(other_trade_types).length > 0) && !isBridgeAvailable && isMobile;
     const show_trade_type_list_divider = !!other_trade_types[0]?.items?.length;
@@ -286,6 +338,14 @@ const TradeTypes = ({ contract_type, onTradeTypeSelect, trade_types, is_dark_mod
             component: <Guide show_trigger_button={false} is_open_by_default show_description_in_a_modal={false} />,
         },
     ];
+
+    if (trade_types_ids.length === 0) {
+        return (
+            <div className='trade__trade-types'>
+                <Skeleton width={88} height={32} />
+            </div>
+        );
+    }
 
     return (
         <div className='trade-container-v2__trade-types' ref={trade_types_ref}>

@@ -5,6 +5,7 @@ import { trackAnalyticsEvent } from '@deriv/shared';
 import { Button, useSnackbar } from '@deriv-com/quill-ui';
 import { Localize } from '@deriv-com/translations';
 
+import useIsVirtualKeyboardOpen from 'AppV2/Hooks/useIsVirtualKeyboardOpen';
 import { getSnackBarText } from 'AppV2/Utils/trade-params-utils';
 import { useTraderStore } from 'Stores/useTraderStores';
 
@@ -35,6 +36,75 @@ const TakeProfitAndStopLossContainer = observer(({ closeActionSheet }: TTakeProf
     const [sl_error_text, setSLErrorText] = React.useState<React.ReactNode>(validation_errors?.stop_loss?.[0] ?? '');
     const sl_ref = React.useRef({ has_stop_loss, stop_loss, sl_error_text: validation_errors?.stop_loss?.[0] });
     const is_api_response_sl_received_ref = React.useRef(false);
+
+    // Detect keyboard visibility for both inputs
+    const { is_key_board_visible: is_tp_keyboard_visible } = useIsVirtualKeyboardOpen('take_profit');
+    const { is_key_board_visible: is_sl_keyboard_visible } = useIsVirtualKeyboardOpen('stop_loss');
+    const is_keyboard_visible = is_tp_keyboard_visible || is_sl_keyboard_visible;
+
+    const wrapper_ref = React.useRef<HTMLDivElement>(null);
+
+    // Scroll container to bottom when Stop Loss keyboard opens
+    React.useEffect(() => {
+        if (!is_sl_keyboard_visible || !wrapper_ref.current) return;
+
+        let rafId: number;
+        const initialHeight = window.visualViewport?.height || 0;
+        let lastHeight = initialHeight;
+        let stableFrameCount = 0;
+        let hasHeightChanged = false;
+        const STABLE_FRAMES_NEEDED = 3;
+
+        const scrollToBottom = () => {
+            if (wrapper_ref.current) {
+                wrapper_ref.current.scrollTo({
+                    top: wrapper_ref.current.scrollHeight,
+                    behavior: 'smooth',
+                });
+            }
+        };
+
+        const checkViewportStability = () => {
+            const currentHeight = window.visualViewport?.height || 0;
+
+            // Track if viewport has changed at all
+            if (currentHeight !== initialHeight) {
+                hasHeightChanged = true;
+            }
+
+            if (currentHeight === lastHeight) {
+                stableFrameCount++;
+                if (stableFrameCount >= STABLE_FRAMES_NEEDED) {
+                    // Viewport is stable
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(scrollToBottom);
+                    });
+                    return;
+                }
+            } else {
+                // Viewport still changing
+                stableFrameCount = 0;
+                lastHeight = currentHeight;
+            }
+
+            rafId = requestAnimationFrame(checkViewportStability);
+        };
+
+        // If viewport hasn't changed after first few frames, scroll immediately without waiting
+        const timeoutId = setTimeout(() => {
+            if (!hasHeightChanged) {
+                scrollToBottom();
+                cancelAnimationFrame(rafId);
+            }
+        }, 100);
+
+        rafId = requestAnimationFrame(checkViewportStability);
+
+        return () => {
+            cancelAnimationFrame(rafId);
+            clearTimeout(timeoutId);
+        };
+    }, [is_sl_keyboard_visible]);
 
     const onSave = () => {
         // Prevent from saving if user clicks before we got response from API
@@ -92,8 +162,18 @@ const TakeProfitAndStopLossContainer = observer(({ closeActionSheet }: TTakeProf
         closeActionSheet();
     };
 
+    // Dynamically adjust wrapper height and enable scrolling only when keyboard is visible
+    const wrapper_style = is_keyboard_visible
+        ? {
+              height: 'auto',
+              maxHeight: 'calc(100dvh - 192px)', // Leave space for keyboard
+              overflowY: 'auto' as const,
+              minHeight: '240px', // Ensure there's some height when keyboard is open
+          }
+        : undefined;
+
     return (
-        <div className='risk-management__tp-sl__wrapper'>
+        <div ref={wrapper_ref} className='risk-management__tp-sl__wrapper' style={wrapper_style}>
             <TakeProfitAndStopLossInput
                 classname='risk-management__tp-sl'
                 has_save_button={false}

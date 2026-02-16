@@ -15,6 +15,9 @@ jest.mock('@deriv/api', () => ({
         error: null,
         isLoading: false,
     })),
+    useMobileBridge: jest.fn(() => ({
+        isMobileApp: false,
+    })),
 }));
 
 jest.mock('@deriv/shared', () => ({

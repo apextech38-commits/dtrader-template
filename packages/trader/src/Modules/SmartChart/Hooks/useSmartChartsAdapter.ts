@@ -36,6 +36,7 @@ interface UseSmartChartsAdapterConfig {
     updateAccumulatorBarriersData?: (data: AccumulatorBarriersData) => void;
     setTickData?: (data: TickData) => void;
     current_language?: string;
+    minStartEpoch?: number; // If tick data doesn't cover this epoch, switch to candles
 }
 
 interface ChartData {
@@ -53,6 +54,7 @@ interface UseSmartChartsAdapterReturn {
     unsubscribeQuotes: TUnsubscribeQuotes;
     retryFetchChartData: () => Promise<void>;
     isValidGranularity: (g: number) => g is TGranularity;
+    shouldUseCandlesOverride: boolean; // True when tick data doesn't cover minStartEpoch
 }
 
 /**
@@ -68,6 +70,7 @@ export const useSmartChartsAdapter = (config: UseSmartChartsAdapterConfig = {}):
         updateAccumulatorBarriersData,
         setTickData,
         current_language,
+        minStartEpoch,
     } = config;
 
     // Store raw data for re-enrichment on language change
@@ -92,6 +95,7 @@ export const useSmartChartsAdapter = (config: UseSmartChartsAdapterConfig = {}):
     });
     const [isLoading, setIsLoading] = React.useState(true);
     const [error, setError] = React.useState<Error | null>(null);
+    const [shouldUseCandlesOverride, setShouldUseCandlesOverride] = React.useState(false);
 
     // Type guard for granularity validation
     const isValidGranularity = React.useCallback((g: number): g is TGranularity => {
@@ -179,15 +183,34 @@ export const useSmartChartsAdapter = (config: UseSmartChartsAdapterConfig = {}):
             }
 
             // Validate granularity with type guard
-            const validatedGranularity = isValidGranularity(params.granularity) ? params.granularity : 0;
+            let validatedGranularity = isValidGranularity(params.granularity) ? params.granularity : 0;
 
-            const result = await smartChartsAdapter.getQuotes({
+            let result = await smartChartsAdapter.getQuotes({
                 symbol: params.symbol,
                 granularity: validatedGranularity,
                 count: params.count,
                 start: params.start,
                 end: params.end,
             });
+
+            // If requesting ticks and minStartEpoch is set, check if data covers it
+            // If not, re-fetch with candles instead
+            if (minStartEpoch && validatedGranularity === 0 && result.quotes.length > 0) {
+                const earliestTimestamp = parseInt(result.quotes[0].Date);
+
+                if (earliestTimestamp > minStartEpoch) {
+                    // Tick data doesn't cover minStartEpoch, switch to candles (2-minute granularity)
+                    validatedGranularity = 60;
+                    setShouldUseCandlesOverride(true);
+                    result = await smartChartsAdapter.getQuotes({
+                        symbol: params.symbol,
+                        granularity: validatedGranularity,
+                        count: params.count,
+                        start: params.start,
+                        end: params.end,
+                    });
+                }
+            }
 
             // Transform adapter result to SmartCharts Champion format
             if (validatedGranularity === 0) {
@@ -210,7 +233,7 @@ export const useSmartChartsAdapter = (config: UseSmartChartsAdapterConfig = {}):
                 })),
             };
         },
-        [smartChartsAdapter, isValidGranularity]
+        [smartChartsAdapter, isValidGranularity, minStartEpoch]
     );
 
     // Use refs to avoid stale closure issues in subscription callbacks
@@ -328,6 +351,7 @@ export const useSmartChartsAdapter = (config: UseSmartChartsAdapterConfig = {}):
         unsubscribeQuotes,
         retryFetchChartData,
         isValidGranularity,
+        shouldUseCandlesOverride,
     };
 };
 

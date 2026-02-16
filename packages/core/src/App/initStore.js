@@ -34,7 +34,7 @@ const setStorageEvents = root_store => {
     });
 };
 
-const initStore = async (notification_messages, accounts) => {
+const initStore = async notification_messages => {
     // Check Endpoint from URL need to be done before initializing store to avoid
     // race condition with setting up user session from URL
     const url_query_string = window.location.search;
@@ -85,6 +85,7 @@ const initStore = async (notification_messages, accounts) => {
     }
 
     // Check whoami BEFORE initializing NetworkMonitor to prevent connecting with stale credentials
+    let external_id;
     const account_id = getAccountId();
     if (account_id) {
         const whoami_result = await checkWhoAmI();
@@ -97,6 +98,8 @@ const initStore = async (notification_messages, accounts) => {
             localStorage.removeItem('active_loginid');
             sessionStorage.removeItem('active_loginid');
             localStorage.removeItem('current_account');
+        } else if (whoami_result.data?.identity?.external_id) {
+            external_id = whoami_result.data.identity.external_id;
         }
     }
 
@@ -111,7 +114,7 @@ const initStore = async (notification_messages, accounts) => {
 
     // Now safe to initialize NetworkMonitor - credentials are validated
     NetworkMonitor.init(root_store);
-    root_store.client.init(accounts);
+    root_store.client.init(external_id);
     root_store.common.init();
     root_store.ui.init(notification_messages);
 

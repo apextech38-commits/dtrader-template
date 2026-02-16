@@ -6,7 +6,6 @@ import { getCurrencyDisplayCode, getDecimalPlaces, mapErrorMessage, trackAnalyti
 import { ActionSheet, CaptionText, Text, TextFieldWithSteppers, ToggleSwitch } from '@deriv-com/quill-ui';
 import { Localize, useTranslations } from '@deriv-com/translations';
 
-import useIsVirtualKeyboardOpen from 'AppV2/Hooks/useIsVirtualKeyboardOpen';
 import { useProposal } from 'AppV2/Hooks/useProposal';
 import useTradeError from 'AppV2/Hooks/useTradeError';
 import { focusAndOpenKeyboard } from 'AppV2/Utils/trade-params-utils';
@@ -232,14 +231,6 @@ const TakeProfitAndStopLossInput = ({
             }
         }
     };
-
-    // scroll the page when a virtual keyboard pop up
-    const { is_key_board_visible: should_scroll } = useIsVirtualKeyboardOpen(type);
-
-    React.useEffect(() => {
-        if (should_scroll) window?.scrollTo({ top: 225, behavior: 'smooth' });
-    }, [should_scroll]);
-
     React.useEffect(() => {
         setFEErrorText(initial_error_text ?? '');
         // eslint-disable-next-line react-hooks/exhaustive-deps

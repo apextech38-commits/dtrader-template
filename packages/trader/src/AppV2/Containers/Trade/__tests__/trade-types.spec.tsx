@@ -152,4 +152,133 @@ describe('TradeTypes', () => {
 
         expect(screen.queryByText('View all')).not.toBeInTheDocument();
     });
+
+    it('should only display trade types that are available in trade_types prop, filtering out unavailable types', () => {
+        // Simulate localStorage having unavailable trade types saved
+        const unavailableTradeTypes = [
+            {
+                id: 'pinned',
+                title: 'Pinned',
+                items: [
+                    { id: 'accumulator', title: 'Accumulator' },
+                    { id: 'vanilla_call', title: 'Vanilla Call' },
+                    { id: 'high_low', title: 'Higher/Lower' }, // Not in current trade_types
+                ],
+            },
+        ];
+        localStorage.setItem('pinned_trade_types', JSON.stringify(unavailableTradeTypes));
+
+        // Mock getTradeTypesList to return only limited available types (e.g., only Multiplier for Forex)
+        mockGetTradeTypesList.mockReturnValue([
+            { value: 'multiplier', text: 'Multiplier' },
+            { value: 'accumulator', text: 'Accumulator' },
+        ]);
+
+        const limited_mock_store = {
+            modules: {
+                trade: {
+                    contract_type: 'multiplier',
+                    contract_types_list,
+                },
+            },
+        };
+
+        render(
+            <TraderProviders store={mockStore(limited_mock_store)}>
+                <TradeTypes
+                    is_dark_mode_on={false}
+                    onTradeTypeSelect={jest.fn()}
+                    trade_types={[
+                        { value: 'multiplier', text: 'Multiplier' },
+                        { value: 'accumulator', text: 'Accumulator' },
+                    ]}
+                    contract_type='multiplier'
+                />
+            </TraderProviders>
+        );
+
+        // Should show available trade types
+        expect(screen.getByText('Multiplier')).toBeInTheDocument();
+        expect(screen.getByText('Accumulator')).toBeInTheDocument();
+
+        // Should NOT show unavailable trade types even if they were in localStorage
+        expect(screen.queryByText('Higher/Lower')).not.toBeInTheDocument();
+        expect(screen.queryByText('Vanilla Call')).not.toBeInTheDocument();
+
+        // Cleanup
+        localStorage.removeItem('pinned_trade_types');
+    });
+
+    it('should automatically clean up localStorage to remove unavailable trade types', async () => {
+        // Simulate localStorage having stale trade types from a previous symbol
+        const staleTradeTypes = [
+            {
+                id: 'pinned',
+                title: 'Pinned',
+                items: [
+                    { id: 'multiplier', title: 'Multiplier' },
+                    { id: 'rise_fall', title: 'Rise/Fall' }, // Will be removed (not available)
+                    { id: 'high_low', title: 'Higher/Lower' }, // Will be removed (not available)
+                    { id: 'accumulator', title: 'Accumulator' },
+                ],
+            },
+        ];
+        localStorage.setItem('pinned_trade_types', JSON.stringify(staleTradeTypes));
+
+        // Mock getTradeTypesList to return only Multiplier and Accumulator (e.g., Forex symbol)
+        mockGetTradeTypesList.mockReturnValue([
+            { value: 'multiplier', text: 'Multiplier' },
+            { value: 'accumulator', text: 'Accumulator' },
+        ]);
+
+        const limited_mock_store = {
+            modules: {
+                trade: {
+                    contract_type: 'multiplier',
+                    contract_types_list,
+                },
+            },
+        };
+
+        const { rerender } = render(
+            <TraderProviders store={mockStore(limited_mock_store)}>
+                <TradeTypes
+                    is_dark_mode_on={false}
+                    onTradeTypeSelect={jest.fn()}
+                    trade_types={[
+                        { value: 'multiplier', text: 'Multiplier' },
+                        { value: 'accumulator', text: 'Accumulator' },
+                    ]}
+                    contract_type='multiplier'
+                />
+            </TraderProviders>
+        );
+
+        // Wait for useEffect to run and clean up localStorage
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        // Verify only available trade types are displayed
+        expect(screen.getByText('Multiplier')).toBeInTheDocument();
+        expect(screen.getByText('Accumulator')).toBeInTheDocument();
+        expect(screen.queryByText('Rise/Fall')).not.toBeInTheDocument();
+        expect(screen.queryByText('Higher/Lower')).not.toBeInTheDocument();
+
+        // Verify localStorage was automatically cleaned up
+        const updatedLocalStorage = JSON.parse(localStorage.getItem('pinned_trade_types') || '[]');
+        const pinnedItems = updatedLocalStorage.flatMap((category: { items: unknown[] }) => category.items);
+
+        expect(pinnedItems).toHaveLength(2);
+        expect(pinnedItems).toEqual([
+            { id: 'multiplier', title: 'Multiplier' },
+            { id: 'accumulator', title: 'Accumulator' },
+        ]);
+
+        // Verify Rise/Fall and Higher/Lower were removed from localStorage
+        const itemIds = pinnedItems.map((item: { id: string }) => item.id);
+        expect(itemIds).not.toContain('rise_fall');
+        expect(itemIds).not.toContain('high_low');
+
+        // Cleanup
+        localStorage.removeItem('pinned_trade_types');
+    });
 });

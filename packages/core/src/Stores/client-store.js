@@ -38,6 +38,7 @@ export default class ClientStore extends BaseStore {
     preferred_language;
     email;
     user_id;
+    external_id;
 
     current_account = null;
     initialized_broadcast = false;
@@ -309,7 +310,7 @@ export default class ClientStore extends BaseStore {
         );
     };
 
-    async init() {
+    async init(external_id) {
         // Remove any legacy token parameters from URL
         this.removeTokenFromUrl();
 
@@ -364,9 +365,11 @@ export default class ClientStore extends BaseStore {
             }
         }
 
+        this.external_id = external_id;
+
         // Analytics and GTM for logged-in users
         if (this.is_logged_in) {
-            Analytics.identifyEvent(this.user_id);
+            Analytics.identifyEvent(external_id || this.user_id);
 
             await this.root_store.gtm.pushDataLayer({
                 event: 'login',
@@ -509,7 +512,6 @@ export default class ClientStore extends BaseStore {
 
         const residence_country = !isLoggedOut ? this.residence : '';
         const login_status = !isLoggedOut && this.is_logged_in;
-
         return {
             loggedIn: login_status,
             account_type: broker === 'null' ? 'unlogged' : broker,
@@ -525,6 +527,7 @@ export default class ClientStore extends BaseStore {
             utm_content: ppc_campaign_cookies?.utm_content,
             domain: window.location.hostname,
             url: window.location.href,
+            ...(!isLoggedOut && this.external_id && { user_id: this.external_id }),
         };
     }
 
@@ -588,6 +591,7 @@ export default class ClientStore extends BaseStore {
         // Reset state
         this.loginid = null;
         this.user_id = null;
+        this.external_id = null;
         this.current_account = null;
 
         LocalStore.set('marked_notifications', JSON.stringify([]));

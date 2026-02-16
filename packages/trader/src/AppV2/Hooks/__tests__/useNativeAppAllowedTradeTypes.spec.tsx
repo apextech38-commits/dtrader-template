@@ -13,6 +13,7 @@ jest.mock('@deriv/api', () => ({
                 MULTIPLIERS: 'Multipliers',
             },
         },
+        isLoading: false,
     })),
     useMobileBridge: jest.fn(() => ({
         isBridgeAvailable: false,
@@ -37,6 +38,7 @@ describe('useNativeAppAllowedTradeTypes', () => {
                     MULTIPLIERS: 'Multipliers',
                 },
             },
+            isLoading: false,
         });
     });
 
@@ -69,6 +71,7 @@ describe('useNativeAppAllowedTradeTypes', () => {
                         MULTIPLIERS: 'Multipliers',
                     },
                 },
+                isLoading: false,
             });
 
             const { result } = renderHook(() => useNativeAppAllowedTradeTypes());
@@ -90,6 +93,7 @@ describe('useNativeAppAllowedTradeTypes', () => {
                         MULTIPLIERS: 'Multipliers',
                     },
                 },
+                isLoading: false,
             });
 
             const { result } = renderHook(() => useNativeAppAllowedTradeTypes());
@@ -119,6 +123,7 @@ describe('useNativeAppAllowedTradeTypes', () => {
 
             (useRemoteConfig as jest.Mock).mockReturnValue({
                 data: {},
+                isLoading: false,
             });
 
             const { result } = renderHook(() => useNativeAppAllowedTradeTypes());
@@ -138,6 +143,7 @@ describe('useNativeAppAllowedTradeTypes', () => {
 
             (useRemoteConfig as jest.Mock).mockReturnValue({
                 data: null,
+                isLoading: false,
             });
 
             const { result } = renderHook(() => useNativeAppAllowedTradeTypes());
@@ -157,6 +163,7 @@ describe('useNativeAppAllowedTradeTypes', () => {
                 data: {
                     native_app_allowed_trade_types: {},
                 },
+                isLoading: false,
             });
 
             const { result } = renderHook(() => useNativeAppAllowedTradeTypes());
@@ -217,6 +224,7 @@ describe('useNativeAppAllowedTradeTypes', () => {
                         MULTIPLIERS: 'Multipliers',
                     },
                 },
+                isLoading: false,
             });
 
             rerender();

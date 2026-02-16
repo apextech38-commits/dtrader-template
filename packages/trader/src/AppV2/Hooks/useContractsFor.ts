@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 
-import { useQuery } from '@deriv/api';
+import { useMobileBridge, useQuery } from '@deriv/api';
 import { cloneObject, getContractCategoriesConfig, getContractTypesConfig, setTradeURLParams } from '@deriv/shared';
 import { useStore } from '@deriv/stores';
 
@@ -20,6 +20,7 @@ const useContractsFor = () => {
         useTraderStore();
     const { client } = useStore();
     const { loginid } = client;
+    const { isMobileApp } = useMobileBridge();
     const nativeAppAllowedTradeTypes = useNativeAppAllowedTradeTypes();
 
     // Helper function to get underlying_symbol from active_symbols
@@ -124,7 +125,22 @@ const useContractsFor = () => {
         is_fetching_ref.current = true;
     }, [loginid]);
 
+    // Reset trade types when symbol changes to prevent showing stale data during API refetch
     useEffect(() => {
+        setTradeTypes([]);
+    }, [symbol]);
+
+    useEffect(() => {
+        // Skip processing stale response data during loading
+        if (isLoading) {
+            return;
+        }
+        // Wait for native app allowed trade types to be ready before processing
+        // to prevent showing unfiltered trade types during bridge initialization
+        if (isMobileApp && nativeAppAllowedTradeTypes === undefined) {
+            return;
+        }
+
         try {
             const { contracts_for } = response || {};
             const available_contract_types: ReturnType<typeof getContractTypesConfig> = {};
@@ -197,13 +213,6 @@ const useContractsFor = () => {
 
                 const new_contract_type = getNewContractType(trade_types);
                 processNewContractType(new_contract_type);
-            } else if (symbol && !error) {
-                // Fallback: Set basic trade types if API fails but we have a valid symbol
-                const fallbackTradeTypes = [
-                    { text: 'Rise/Fall', value: 'rise_fall' },
-                    { text: 'Higher/Lower', value: 'high_low' },
-                ];
-                setTradeTypes(fallbackTradeTypes);
             } else {
                 setTradeTypes([]);
             }
@@ -212,7 +221,7 @@ const useContractsFor = () => {
             console.error(err);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [response]);
+    }, [response, isLoading, isMobileApp, nativeAppAllowedTradeTypes]);
 
     const resetTradeTypes = () => {
         setTradeTypes([]);

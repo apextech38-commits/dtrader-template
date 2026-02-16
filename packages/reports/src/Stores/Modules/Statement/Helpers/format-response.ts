@@ -6,7 +6,7 @@ export const formatStatementTransaction = (
     transaction: NonNullable<NonNullable<TStatementResponse['statement']>['transactions']>[number],
     currency: string
 ) => {
-    const { action_type, contract_id, longcode, purchase_time } = transaction;
+    const { action_type, contract_id, longcode, purchase_time, app_id } = transaction;
     const payout = transaction.payout ?? NaN;
     const amount = transaction.amount ?? NaN;
     const balance = transaction.balance_after ?? NaN;
@@ -27,5 +27,6 @@ export const formatStatementTransaction = (
         action_type,
         purchase_time,
         transaction_time: transaction.transaction_time,
+        app_id,
     };
 };

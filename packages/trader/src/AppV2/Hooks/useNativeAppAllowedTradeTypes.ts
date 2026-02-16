@@ -1,19 +1,21 @@
 import { useMemo } from 'react';
 
-import { useRemoteConfig, useMobileBridge } from '@deriv/api';
+import { useMobileBridge, useRemoteConfig } from '@deriv/api';
 
 /**
  * Shared hook that provides native app allowed trade types from remote config.
  * Used by useContractsFor, useGuideContractTypes, and useAvailableContracts.
  *
- * @returns {string[] | undefined} Array of allowed trade type names, undefined if not in mobile bridge, or empty array if config is missing/corrupted
+ * @returns {string[] | undefined} Array of allowed trade types for native mobile app, or undefined if not in mobile app
  */
 const useNativeAppAllowedTradeTypes = (): string[] | undefined => {
     const { isBridgeAvailable } = useMobileBridge();
-    const { data: remoteConfigData } = useRemoteConfig(true);
+    const { data: remoteConfigData, isLoading } = useRemoteConfig(true);
 
     const nativeAppAllowedTradeTypes = useMemo(() => {
         if (!isBridgeAvailable) return undefined;
+        // Wait for remote config to load before processing
+        if (isLoading) return undefined;
         // Defensive check for edge cases
         if (!remoteConfigData?.native_app_allowed_trade_types) {
             // eslint-disable-next-line no-console
@@ -22,7 +24,7 @@ const useNativeAppAllowedTradeTypes = (): string[] | undefined => {
             return [];
         }
         return Object.values(remoteConfigData.native_app_allowed_trade_types);
-    }, [remoteConfigData, isBridgeAvailable]);
+    }, [remoteConfigData, isBridgeAvailable, isLoading]);
 
     return nativeAppAllowedTradeTypes;
 };
