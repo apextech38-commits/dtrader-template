@@ -341,6 +341,7 @@ export default class ClientStore extends BaseStore {
 
                 sessionStorage.setItem('active_loginid', active_account.account_id);
                 localStorage.setItem('active_loginid', active_account.account_id);
+                localStorage.setItem('account_type', active_account.account_type);
 
                 const ws_url = await fetchOTP(active_account.account_id);
                 BinarySocket.setWSUrl(ws_url);
@@ -578,6 +579,11 @@ export default class ClientStore extends BaseStore {
         // Track the newly active account for multi-tab sync
         localStorage.setItem('active_loginid', account_id);
         sessionStorage.setItem('active_loginid', account_id);
+
+        // Update account_type so is_virtual computed reflects the switched account immediately.
+        // DEM-prefixed IDs are demo accounts; all others are real.
+        const switched_account_type = account_id.startsWith('DEM') ? 'demo' : 'real';
+        localStorage.setItem('account_type', switched_account_type);
 
         // Update the store's loginid immediately so components don't render stale data
         // while waiting for the balance response to arrive.

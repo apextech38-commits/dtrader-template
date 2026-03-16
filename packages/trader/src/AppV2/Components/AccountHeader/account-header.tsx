@@ -174,8 +174,8 @@ const AccountHeader = observer(
         );
 
         if (!is_logged_in) {
-            const handleLoginClick = () => {
-                redirectToLogin(common.current_language);
+            const handleLoginClick = async () => {
+                await redirectToLogin(common.current_language);
             };
             const signup_url = getSignupUrl();
 
