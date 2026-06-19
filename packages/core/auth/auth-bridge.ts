@@ -1,6 +1,6 @@
 export const initAuthBridge = () => {
   window.addEventListener('message', (event) => {
-    // SECURITY: Ensure you replace with your actual main app domain
+    // SECURITY: Ensure this matches your production domain exactly
     if (event.origin !== 'https://tradexpro.co.ke') return; 
 
     if (event.data.type === 'TRADEX_AUTH') {
@@ -11,10 +11,11 @@ export const initAuthBridge = () => {
         acct2: token2
       }));
       
+      // Force reload to allow the Deriv store to pick up the new localStorage
       window.location.reload();
     }
   });
 
-  // Signal that the DTrader iframe is loaded and ready
+  // Signal the host that the DTrader iframe is ready for the tokens
   window.parent.postMessage({ type: 'TRADEX_READY' }, '*');
 };
