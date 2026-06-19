@@ -1,3 +1,6 @@
+import { initAuthBridge } from "./tradexpro-auth-bridge";
+initAuthBridge();
+
 /* eslint-disable import/no-named-as-default-member */
 /* eslint-disable import/no-named-as-default */
 import React from 'react';
