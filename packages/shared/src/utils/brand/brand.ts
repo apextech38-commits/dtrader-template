@@ -70,10 +70,9 @@ export const getPlatformDescription = (): string => {
     return ((config_data.platform as Record<string, unknown>).description as string) ?? '';
 };
 
-export const getAppId = (): number => {
-    const appId = isProduction() ? config_data.app_id.production : config_data.app_id.staging;
-    // Force return as number to satisfy the build, even if it's your string key
-    return appId as unknown as number;
+// Update the return type to string, as modern Deriv apps use non-numeric IDs
+export const getAppId = (): string => {
+    return String(isProduction() ? config_data.app_id.production : config_data.app_id.staging);
 };
 // [/AI]
 
