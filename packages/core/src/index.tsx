@@ -1,4 +1,4 @@
-import { initAuthBridge } from "./tradexpro-auth-bridge";
+import { initAuthBridge } from "./auth/auth-bridge";
 initAuthBridge();
 
 /* eslint-disable import/no-named-as-default-member */
