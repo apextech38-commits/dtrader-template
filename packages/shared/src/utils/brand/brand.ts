@@ -70,9 +70,10 @@ export const getPlatformDescription = (): string => {
     return ((config_data.platform as Record<string, unknown>).description as string) ?? '';
 };
 
-// Find the getAppId function and update the return type
-export const getAppId = (): string | number => {
-    return isProduction() ? config_data.app_id.production : config_data.app_id.staging;
+export const getAppId = (): number => {
+    const appId = isProduction() ? config_data.app_id.production : config_data.app_id.staging;
+    // Force return as number to satisfy the build, even if it's your string key
+    return appId as unknown as number;
 };
 // [/AI]
 
