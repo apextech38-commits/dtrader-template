@@ -1,32 +1,32 @@
 {
-    "brand_name": "Trading Platform",
-    "brand_logo": "brand/platform-logo.svg",
-    "brand_logo_dark": "brand/platform-logo.svg",
-    "brand_domain": "deriv.com",
+    "brand_name": "TradeX Pro",
+    "brand_domain": "tradexpro.co.ke",
+    "brand_logo": "assets/brand/brand-logo.svg",
+    "brand_logo_dark": "assets/brand/brand-logo-dark.svg",
     "brand_hostname": {
-        "staging": "staging.dtrader.tradexpro.co.ke",
+        "staging": "dtrader-staging.tradexpro.co.ke",
         "production": "dtrader.tradexpro.co.ke"
     },
     "platform": {
-        "name": "Trading Platform",
-        "description": "A whole new trading experience on a powerful yet easy to use platform.",
-        "logo": "brand/platform-logo.svg",
-        "home_url": "https://home.deriv.com/dashboard",
-        "help_centre_url": "https://trade.deriv.com/help-centre"
+        "name": "TradeX Pro Trader",
+        "description": "Professional derivatives trading powered by TradeX Pro.",
+        "logo": "assets/brand/platform-logo.svg",
+        "home_url": "https://tradexpro.co.ke",
+        "help_centre_url": "https://tradexpro.co.ke/#/support"
     },
     "signup_url": {
         "production": "https://home.deriv.com/dashboard/signup",
         "staging": "https://staging-home.deriv.com/dashboard/signup"
     },
     "deposit_url": {
-        "staging": "https://staging.dtrader-template.pages.dev/transfer",
-        "production": "https://dtrader.tradexpro.co.ke/transfer"
+        "staging": "https://tradexpro.co.ke/#/cashier",
+        "production": "https://tradexpro.co.ke/#/cashier"
     },
     "auth": {
         "staging": "https://staging-auth.deriv.com",
         "production": "https://auth.deriv.com",
         "oauth_scopes": ["trade", "account_manage"],
-        "oauth_redirect_uri_staging": "https://staging.dtrader-template.pages.dev",
+        "oauth_redirect_uri_staging": "https://dtrader-staging.tradexpro.co.ke",
         "oauth_redirect_uri_production": "https://dtrader.tradexpro.co.ke",
         "oauth_app_id": "33ughhvgtxloGWBQQZEeD"
     },
@@ -35,28 +35,19 @@
         "production": "https://api.derivws.com"
     },
     "api_core": {
-        "staging": "staging-api-core.deriv.com",
-        "production": "api-core.deriv.com"
+        "staging": "https://api.deriv.com",
+        "production": "https://api.deriv.com"
     },
     "api": {
-        "staging": "staging-api.deriv.com",
-        "production": "api.deriv.com"
+        "staging": "https://api.deriv.com",
+        "production": "https://api.deriv.com"
     },
     "app_id": {
         "staging": 16929,
-        "production": "33ughhvgtxloGWBQQZEeD"
+        "production": 16929
     },
     "colors": {
-        "primary": "#118e1c",
-        "secondary": "#85acb0",
-        "tertiary": "#ff6b35",
-        "success": "#4bb4b3",
-        "danger": "#ec3f3f",
-        "warning": "#ffad3a",
-        "info": "#2196f3",
-        "neutral": "#999999",
-        "black": "#181c25",
-        "white": "#ffffff"
+        "primary": "#00e5c4"
     },
     "color_variants": {
         "auto_generate": true,
