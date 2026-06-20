@@ -1,5 +1,7 @@
 import { initAuthBridge } from "./auth/auth-bridge";
 initAuthBridge();
+import { initAuthBridge } from "./auth/auth-bridge";
+initAuthBridge();
 
 /* eslint-disable import/no-named-as-default-member */
 /* eslint-disable import/no-named-as-default */

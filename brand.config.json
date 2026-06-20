@@ -1,48 +1,61 @@
 {
-  "brand_name": "TradeX Pro",
-  "brand_domain": "tradexpro.co.ke",
-  "brand_logo": "assets/brand/brand-logo.svg",
-  "brand_logo_dark": "assets/brand/brand-logo-dark.svg",
-  "brand_hostname": {
-    "staging": "dtrader-staging.tradexpro.co.ke",
-    "production": "dtrader.tradexpro.co.ke"
-  },
-  "platform": {
-    "name": "TradeX Pro Trader",
-    "description": "Professional derivatives trading powered by TradeX Pro.",
-    "home_url": "https://tradexpro.co.ke",
-    "help_centre_url": "https://tradexpro.co.ke/#/support",
-    "logo": "assets/brand/platform-logo.svg"
-  },
-  "deposit_url": {
-    "staging": "https://tradexpro.co.ke/#/cashier",
-    "production": "https://tradexpro.co.ke/#/cashier"
-  },
-  "auth": {
-    "staging": "https://staging-auth.deriv.com",
-    "production": "https://auth.deriv.com",
-    "oauth_scopes": ["trade", "account_manage"],
-    "oauth_redirect_uri_staging": "https://dtrader-staging.tradexpro.co.ke",
-    "oauth_redirect_uri_production": "https://dtrader.tradexpro.co.ke",
-    "oauth_app_id": "33ughhvgtxloGWBQQZEeD"
-  },
-  "app_id": {
-    "staging": 16929,
-    "production": 16929
-  },
-  "api_core": {
-    "staging": "https://api.deriv.com",
-    "production": "https://api.deriv.com"
-  },
-  "api": {
-    "staging": "https://api.deriv.com",
-    "production": "https://api.deriv.com"
-  },
-  "colors": {
-    "primary": "#00e5c4"
-  },
-  "features": {
-    "dark_mode": true,
-    "language_switcher": false
-  }
+    "brand_name": "TradeX Pro",
+    "brand_domain": "tradexpro.co.ke",
+    "brand_logo": "assets/brand/brand-logo.svg",
+    "brand_logo_dark": "assets/brand/brand-logo-dark.svg",
+    "brand_hostname": {
+        "staging": "dtrader-staging.tradexpro.co.ke",
+        "production": "dtrader.tradexpro.co.ke"
+    },
+    "platform": {
+        "name": "TradeX Pro Trader",
+        "description": "Professional derivatives trading powered by TradeX Pro.",
+        "logo": "assets/brand/platform-logo.svg",
+        "home_url": "https://tradexpro.co.ke",
+        "help_centre_url": "https://tradexpro.co.ke/#/support"
+    },
+    "signup_url": {
+        "production": "https://home.deriv.com/dashboard/signup",
+        "staging": "https://staging-home.deriv.com/dashboard/signup"
+    },
+    "deposit_url": {
+        "staging": "https://tradexpro.co.ke/#/cashier",
+        "production": "https://tradexpro.co.ke/#/cashier"
+    },
+    "auth": {
+        "staging": "https://staging-auth.deriv.com",
+        "production": "https://auth.deriv.com",
+        "oauth_scopes": ["trade", "account_manage"],
+        "oauth_redirect_uri_staging": "https://dtrader-staging.tradexpro.co.ke",
+        "oauth_redirect_uri_production": "https://dtrader.tradexpro.co.ke",
+        "oauth_app_id": "33ughhvgtxloGWBQQZEeD"
+    },
+    "derivws": {
+        "staging": "https://staging-api.derivws.com",
+        "production": "https://api.derivws.com"
+    },
+    "api_core": {
+        "staging": "https://api.deriv.com",
+        "production": "https://api.deriv.com"
+    },
+    "api": {
+        "staging": "https://api.deriv.com",
+        "production": "https://api.deriv.com"
+    },
+    "app_id": {
+        "staging": 16929,
+        "production": 16929
+    },
+    "colors": {
+        "primary": "#00e5c4"
+    },
+    "color_variants": {
+        "auto_generate": true,
+        "lighten_percentage": 10,
+        "darken_percentage": 10
+    },
+    "features": {
+        "dark_mode": true,
+        "language_switcher": false
+    }
 }
