@@ -107,6 +107,7 @@
         "node-abort-controller": "^3.1.1",
         "postcss": "^8.4.24",
         "prettier": "^3.0.0",
+        "sass-resources-loader": "^2.2.5",
         "stylelint": "^16.23.1",
         "stylelint-formatter-pretty": "^2.1.1",
         "stylelint-no-unsupported-browser-features": "^4.0.0",

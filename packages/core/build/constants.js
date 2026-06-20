@@ -66,7 +66,6 @@ const ALIASES = {
 
 const rules = (is_test_env = false) => [
     {
-        // https://github.com/webpack/webpack/issues/11467
         test: /\.m?js/,
         include: /node_modules/,
         resolve: {
@@ -103,11 +102,19 @@ const rules = (is_test_env = false) => [
     is_test_env
         ? {
               test: /\.(sc|sa|c)ss$/,
-              loaders: 'null-loader',
+              loader: 'null-loader', // FIXED: Changed 'loaders' to 'loader'
           }
         : {
               test: /\.(sc|sa|c)ss$/,
-              use: css_loaders,
+              use: [
+                  ...css_loaders,
+                  {
+                      loader: 'sass-resources-loader',
+                      options: {
+                          resources: [path.resolve(__dirname, '../../shared/src/styles/constants/colors.scss')],
+                      },
+                  },
+              ],
           },
 ];
 
@@ -126,8 +133,8 @@ const plugins = ({ base, is_test_env }) => {
     return [
         new Dotenv({
             path: path.resolve(__dirname, '../../../.env'),
-            systemvars: true, // also read from actual environment (CI secrets, shell exports)
-            silent: true, // don't error if .env file is missing (CI won't have one)
+            systemvars: true,
+            silent: true,
         }),
         new DefinePlugin({
             'process.env.REF_NAME': JSON.stringify(process.env.REF_NAME),
