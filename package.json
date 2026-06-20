@@ -131,7 +131,7 @@
         "test:ci": "npm run test:stylelint && npm run test:eslint-all && npm run test:jest",
         "stylelint:fix": "stylelint \"./packages/*/src/**/*.s(a|c)ss\" --fix",
         "prettify": "prettier --config ./.prettierrc --write \"./packages/*/{stories,script,src,build}/**/*.{js,jsx,ts,tsx,scss}\"",
-        "prepare": "husky install"
+        "prepare": "husky install",
         "cloudflare_trigger": "v1"
     },
     "dependencies": {
