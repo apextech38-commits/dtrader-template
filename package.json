@@ -132,6 +132,7 @@
         "stylelint:fix": "stylelint \"./packages/*/src/**/*.s(a|c)ss\" --fix",
         "prettify": "prettier --config ./.prettierrc --write \"./packages/*/{stories,script,src,build}/**/*.{js,jsx,ts,tsx,scss}\"",
         "prepare": "husky install"
+        "cloudflare_trigger": "v1"
     },
     "dependencies": {
         "@babel/plugin-proposal-export-namespace-from": "^7.18.9",
