@@ -1,6 +1,6 @@
 export const initAuthBridge = () => {
-    // Signal to parent that we're ready for auth
-    window.parent.postMessage({ type: 'DTRADER_AUTH_READY' }, 'https://tradexpro.co.ke');
+    // Signal parent we're ready — use '*' since we don't know parent's exact origin at this point
+    window.parent.postMessage({ type: 'DTRADER_AUTH_READY' }, '*');
 
     window.addEventListener('message', event => {
         if (event.origin !== 'https://tradexpro.co.ke') return;
@@ -9,7 +9,6 @@ export const initAuthBridge = () => {
         const { token, loginid } = event.data;
         if (!token) return;
 
-        // Write into the exact key dtrader's getStoredToken() reads
         sessionStorage.setItem(
             'auth_info',
             JSON.stringify({
