@@ -658,8 +658,8 @@ describe('AccountHeader', () => {
                 await userEvent.click(transferButton);
 
                 // Since mockSendBridgeEvent executes the fallback, window.location should be set
+                // to the brand-configured deposit_url (no currency query param).
                 expect(window.location.href).toContain('/transfer');
-                expect(window.location.href).toContain('curr=USD');
             });
 
             it('should not call sendBridgeEvent for Try real button (should open modal instead)', async () => {
