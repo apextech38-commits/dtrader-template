@@ -1,5 +1,4 @@
-import { initAuthBridge } from "./auth/auth-bridge";
-initAuthBridge();
+import { initAuthBridge } from './auth/auth-bridge';
 
 /* eslint-disable import/no-named-as-default-member */
 /* eslint-disable import/no-named-as-default */
@@ -21,9 +20,6 @@ if (
 }
 
 const initApp = async () => {
-    // For simplified authentication, we don't need to pass accounts to initStore
-    // The authentication will be handled by temp-auth.js and client-store.js
-    // initStore is now async to perform whoami check before WebSocket connection
     const root_store = await initStore(AppNotificationMessages);
 
     const wrapper = document.getElementById('derivatives_trader');
@@ -33,4 +29,17 @@ const initApp = async () => {
     }
 };
 
-initApp();
+// Wait for auth bridge to receive token before initialising the app,
+// but fall back after 3 seconds so the app still loads unauthenticated.
+const authTimeout = setTimeout(() => initApp(), 3000);
+
+window.addEventListener(
+    'TRADEXPRO_AUTH_RECEIVED',
+    () => {
+        clearTimeout(authTimeout);
+        initApp();
+    },
+    { once: true }
+);
+
+initAuthBridge();

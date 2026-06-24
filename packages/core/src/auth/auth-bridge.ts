@@ -33,6 +33,7 @@ export const initAuthBridge = () => {
             localStorage.setItem('tradex-deriv-accounts', JSON.stringify(accounts));
         }
 
-        window.location.reload();
+        // Notify index.tsx that auth is ready
+        window.dispatchEvent(new Event('TRADEXPRO_AUTH_RECEIVED'));
     });
 };
