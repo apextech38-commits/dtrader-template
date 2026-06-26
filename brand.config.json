@@ -50,7 +50,16 @@
     "production": "33ughhvgtxloGWBQQZEeD"
   },
   "colors": {
-    "primary": "#00e5c4"
+    "primary": "#00e5c4",
+    "secondary": "#1a1f2e",
+    "tertiary": "#2d3748",
+    "danger": "#ef4444",
+    "success": "#22c55e",
+    "warning": "#f59e0b",
+    "info": "#3b82f6",
+    "neutral": "#6b7280",
+    "black": "#000000",
+    "white": "#ffffff"
   },
   "color_variants": {
     "auto_generate": true,
