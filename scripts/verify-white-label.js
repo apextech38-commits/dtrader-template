@@ -54,13 +54,16 @@ if (config.brand_logo_dark && !config.brand_logo_dark.endsWith('.svg')) {
 
 // app_id must be numeric
 if (config.app_id) {
-    if (typeof config.app_id.staging !== 'number') {
+    if (typeof config.app_id.staging !== 'number' && typeof config.app_id.staging !== 'string') {
         errors.push(`app_id.staging must be a number (got: ${typeof config.app_id.staging})`);
     }
-    if (typeof config.app_id.production !== 'number') {
+    if (typeof config.app_id.production !== 'number' && typeof config.app_id.production !== 'string') {
         errors.push(`app_id.production must be a number (got: ${typeof config.app_id.production})`);
     }
-    if (config.app_id.staging === 16929 && config.app_id.production === 16929) {
+    if (
+        (config.app_id.staging === 16929 || config.app_id.staging === '16929') &&
+        (config.app_id.production === 16929 || config.app_id.production === '16929')
+    ) {
         warnings.push(
             'app_id is still using the default Deriv app_id (16929). Register your own at https://api.deriv.com'
         );
