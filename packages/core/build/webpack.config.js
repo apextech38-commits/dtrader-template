@@ -3,7 +3,7 @@ const { ALIASES, IS_RELEASE, MINIMIZERS, plugins, rules } = require('./constants
 const { openChromeBasedOnPlatform } = require('./helpers');
 
 module.exports = function (env) {
-    const base = env && env.base && env.base !== true ? `/${env.base}/` : '/';
+    const base = '/';
     const sub_path = env && env.open && env.open !== true ? env.open : '';
 
     return {
