@@ -1,6 +1,3 @@
-// Add this line at the very top of packages/shared/src/styles/tokens/semantic.scss
-@import '../constants/colors';
-// Adjust path if necessary to point to your main variables file
 /**
  * Semantic Color Tokens (Auto-Generated)
  * 
@@ -10,9 +7,7 @@
  * These variables provide semantic meaning to colors and reference the brand tokens.
  * SCSS functions use actual color constants, not CSS variables.
  */
-$color-white: #ffffff;
-$color-black: #000000;
-// Add these before the :root block
+
 :root {
     .theme--light {
         // Surface Colors

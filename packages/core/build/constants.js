@@ -68,6 +68,7 @@ const rules = (is_test_env = false) => [
     {
         test: /\.m?js/,
         include: /node_modules/,
+        exclude: /src\/_common\/utility\.js/,
         resolve: {
             fullySpecified: false,
         },
