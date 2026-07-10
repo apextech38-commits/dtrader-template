@@ -41,5 +41,10 @@ export const requestRestLogout = async () => {
         .filter(key => key !== 'trade_store')
         .forEach(key => sessionStorage.removeItem(key));
 
+    // Tell the TradeXpro parent so it can log itself out too (bidirectional sync)
+    if (window.parent !== window) {
+        window.parent.postMessage({ type: 'DTRADER_LOGOUT' }, 'https://tradexpro.co.ke');
+    }
+
     return { logout: 1 };
 };
