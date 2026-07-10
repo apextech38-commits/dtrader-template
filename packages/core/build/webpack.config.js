@@ -32,8 +32,7 @@ module.exports = function (env) {
         entry: './index.tsx',
         mode: IS_RELEASE ? 'production' : 'development',
         module: {
-            // We pass the loader path to your existing rules function
-            rules: rules(path.resolve(__dirname, '../../shared/src/styles/constants/colors.scss')),
+            rules: rules(),
         },
         resolve: {
             alias: ALIASES,

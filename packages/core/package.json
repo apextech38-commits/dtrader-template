@@ -1,7 +1,7 @@
 {
     "name": "@deriv/core",
     "version": "0.1.0",
-    "description": "Deriv Core",
+    "description": "TradeX Pro Core",
     "main": "index.js",
     "private": true,
     "scripts": {
@@ -12,15 +12,15 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/deriv-com/derivatives-trader.git"
+        "url": "https://github.com/apextech38-commits/dtrader-template.git"
     },
     "keywords": [
         "deriv"
     ],
-    "author": "Deriv",
+    "author": "TradeX Pro",
     "license": "Apache-2.0",
     "bugs": {
-        "url": "https://github.com/deriv-com/derivatives-trader/issues"
+        "url": "https://github.com/apextech38-commits/dtrader-template/issues"
     },
     "engines": {
         "node": "20.x"
