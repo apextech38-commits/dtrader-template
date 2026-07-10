@@ -14,7 +14,7 @@ import { getAllowedLanguages, getInitialLanguage } from '@deriv-com/translations
 import BaseStore from './base-store';
 
 import ServerTime from '_common/base/server_time';
-import * as SocketCache from '_common/base/socket_cache';
+import SocketCache from '_common/base/socket_cache';
 
 export default class CommonStore extends BaseStore {
     constructor(root_store) {

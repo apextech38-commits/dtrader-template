@@ -1,6 +1,7 @@
+import SocketCache from './socket_cache';
+
 const DerivAPIBasic = require('@deriv/deriv-api/dist/DerivAPIBasic');
 const { getAccountType, cloneObject, State, getApiV4BaseUrl } = require('@deriv/shared');
-const SocketCache = require('./socket_cache');
 const APIMiddleware = require('./api_middleware');
 
 /*
@@ -573,4 +574,4 @@ const proxyForAuthorize = obj =>
 
 BinarySocketBase.authorized = proxyForAuthorize(proxied_socket_base);
 
-module.exports = proxied_socket_base;
+export default proxied_socket_base;

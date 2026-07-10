@@ -177,4 +177,4 @@ const SocketCache = (() => {
     };
 })();
 
-module.exports = SocketCache;
+export default SocketCache;
