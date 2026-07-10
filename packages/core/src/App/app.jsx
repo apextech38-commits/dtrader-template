@@ -31,6 +31,13 @@ const App = ({ root_store }) => {
     const language = preferred_language ?? getInitialLanguage();
     const { isBridgeAvailable, sendBridgeEvent } = useMobileBridge();
 
+    // Hide duplicate nav/header when this app is embedded in an iframe
+    React.useEffect(() => {
+        if (window.self !== window.top) {
+            document.body.classList.add('in-iframe');
+        }
+    }, []);
+
     // Handle OAuth2 callback — the auth server redirects back to / with ?code=...&state=...
     // No separate /callback route needed; we handle it inline here on every mount.
     React.useEffect(() => {
