@@ -32,33 +32,35 @@ function applyAuth(data: { token: string; expiresAt?: string | null; loginid?: s
     window.dispatchEvent(new Event('TRADEXPRO_AUTH_RECEIVED'));
 }
 
-// ── Inbound listener — only trust messages from the main site ─────────
-window.addEventListener('message', (event: MessageEvent) => {
-    // Reject anything not from the exact parent origin
-    if (event.origin !== ALLOWED_PARENT_ORIGIN) return;
+export function initAuthBridge(): void {
+    // ── Inbound listener — only trust messages from the main site ─────────
+    window.addEventListener('message', (event: MessageEvent) => {
+        // Reject anything not from the exact parent origin
+        if (event.origin !== ALLOWED_PARENT_ORIGIN) return;
 
-    const data = event.data as { type?: string } & Parameters<typeof applyAuth>[0];
-    if (data?.type !== 'TRADEXPRO_AUTH') return;
+        const data = event.data as { type?: string } & Parameters<typeof applyAuth>[0];
+        if (data?.type !== 'TRADEXPRO_AUTH') return;
 
-    applyAuth(data);
-});
+        applyAuth(data);
+    });
 
-// ── Signal parent that we are ready to receive tokens ─────────────────
-// targetOrigin is '*' here because we do not yet know the parent origin.
-// The inbound listener above is what enforces security.
-if (window.parent !== window) {
-    window.parent.postMessage({ type: 'DTRADER_AUTH_READY' }, '*');
+    // ── Signal parent that we are ready to receive tokens ─────────────────
+    // targetOrigin is '*' here because we do not yet know the parent origin.
+    // The inbound listener above is what enforces security.
+    if (window.parent !== window) {
+        window.parent.postMessage({ type: 'DTRADER_AUTH_READY' }, '*');
+    }
+
+    // ── Handle logout signal ───────────────────────────────────────────────
+    window.addEventListener('message', (event: MessageEvent) => {
+        if (event.origin !== ALLOWED_PARENT_ORIGIN) return;
+
+        const data = event.data as { type?: string };
+        if (data?.type !== 'AUTH_LOGOUT') return;
+
+        sessionStorage.removeItem(TOKEN_KEY);
+        sessionStorage.removeItem(LOGINID_KEY);
+        sessionStorage.removeItem('token_expires_at');
+        window.location.reload();
+    });
 }
-
-// ── Handle logout signal ───────────────────────────────────────────────
-window.addEventListener('message', (event: MessageEvent) => {
-    if (event.origin !== ALLOWED_PARENT_ORIGIN) return;
-
-    const data = event.data as { type?: string };
-    if (data?.type !== 'AUTH_LOGOUT') return;
-
-    sessionStorage.removeItem(TOKEN_KEY);
-    sessionStorage.removeItem(LOGINID_KEY);
-    sessionStorage.removeItem('token_expires_at');
-    window.location.reload();
-});
