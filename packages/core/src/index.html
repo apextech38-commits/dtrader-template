@@ -78,6 +78,13 @@
                 display: none !important;
             }
         </style>
+        <!-- Hide chrome that duplicates the TradeXpro parent site's own nav
+             (account balance / Cashier / Deposit) when legitimately embedded. -->
+        <style id="tradexproEmbedChrome">
+            html.tradexpro-embed .account-header {
+                display: none !important;
+            }
+        </style>
         <script type="text/javascript">
             var isTrustedParentFrame = false;
             if (self !== top) {
@@ -89,6 +96,10 @@
                 } catch (e) {
                     isTrustedParentFrame = false;
                 }
+            }
+
+            if (isTrustedParentFrame) {
+                document.documentElement.classList.add('tradexpro-embed');
             }
 
             if (self === top || isTrustedParentFrame) {
