@@ -79,7 +79,19 @@
             }
         </style>
         <script type="text/javascript">
-            if (self === top) {
+            var isTrustedParentFrame = false;
+            if (self !== top) {
+                try {
+                    // document.referrer is set by the browser to the embedding page's URL
+                    // and cannot be spoofed by the framed page itself.
+                    var referrerHost = new URL(document.referrer).hostname;
+                    isTrustedParentFrame = referrerHost === 'tradexpro.co.ke';
+                } catch (e) {
+                    isTrustedParentFrame = false;
+                }
+            }
+
+            if (self === top || isTrustedParentFrame) {
                 var antiClickjack = document.getElementById('antiClickjack');
                 antiClickjack.parentNode.removeChild(antiClickjack);
             } else {
