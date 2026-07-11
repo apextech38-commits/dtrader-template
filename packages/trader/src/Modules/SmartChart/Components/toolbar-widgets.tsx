@@ -17,7 +17,9 @@ const ToolbarWidgets = ({ position, updateChartType, updateGranularity }: TToolb
 
     return (
         <ToolbarWidget position={position || (isMobile ? 'bottom' : null)}>
-            <ChartMode portalNodeId='modal_root' onChartType={updateChartType} onGranularity={updateGranularity} />
+            {!isMobile && (
+                <ChartMode portalNodeId='modal_root' onChartType={updateChartType} onGranularity={updateGranularity} />
+            )}
             {is_real_desktop_device && !isMobile && (
                 <StudyLegend portalNodeId='modal_root' searchInputClassName='data-hj-whitelist' />
             )}
@@ -29,7 +31,7 @@ const ToolbarWidgets = ({ position, updateChartType, updateGranularity }: TToolb
                     onGranularity={updateGranularity}
                 />
             )}
-            <DrawTools portalNodeId='modal_root' />
+            {!isMobile && <DrawTools portalNodeId='modal_root' />}
             {is_real_desktop_device && !isMobile && <Share portalNodeId='modal_root' />}
         </ToolbarWidget>
     );
