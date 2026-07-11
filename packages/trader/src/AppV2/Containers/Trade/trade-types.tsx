@@ -12,7 +12,6 @@ import { useDevice } from '@deriv-com/ui';
 import Carousel from 'AppV2/Components/Carousel';
 import CarouselHeader from 'AppV2/Components/Carousel/carousel-header';
 import FireIcon from 'AppV2/Components/FireIcon';
-import TradeTypesSelectionGuide from 'AppV2/Components/OnboardingGuide/TradeTypesSelectionGuide';
 import TradeTypesSelector from 'AppV2/Components/TradeTypesSelector';
 import { checkContractTypePrefix } from 'AppV2/Utils/contract-type';
 import {
@@ -423,8 +422,11 @@ const TradeTypes = ({ contract_type, onTradeTypeSelect, trade_types, is_dark_mod
                     )}
                 </ActionSheet.Portal>
             </ActionSheet.Root>
-            {/* TradeTypesSelectionGuide now only shows for mobile users */}
-            {is_open && <TradeTypesSelectionGuide is_dark_mode_on={is_dark_mode_on} />}
+            {/* TradeTypesSelectionGuide removed: its video loads via a nested
+    iframe (Cloudflare Stream inside the already-iframed dtrader
+    app), which can silently fail to fire onLoad. When that
+    happens the modal renders empty but its backdrop still sits
+    on top of the trade-type selector, blocking clicks. */}
             {is_guide_open && (
                 <Guide
                     key={guide_key}
